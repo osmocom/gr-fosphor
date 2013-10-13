@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<block>
+  <name>fosphor sink</name>
+  <key>fosphor_glfw_sink_c</key>
+  <category>Instrumentation</category>
+  <import>from gnuradio import fosphor</import>
+  <make>fosphor.glfw_sink_c()</make>
+  <sink>
+    <name>in</name>
+    <type>complex</type>
+  </sink>
+</block>
