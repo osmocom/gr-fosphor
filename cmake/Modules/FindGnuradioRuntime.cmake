@@ -13,19 +13,26 @@ if(NOT GNURADIO_RUNTIME_FOUND)
           /usr/include
     )
 
-  # look for libs
-  FIND_LIBRARY(
-    GNURADIO_RUNTIME_LIBRARIES
-    NAMES gnuradio-runtime
-    HINTS $ENV{GNURADIO_RUNTIME_DIR}/lib
-          ${PC_GNURADIO_RUNTIME_LIBDIR}
-          ${CMAKE_INSTALL_PREFIX}/lib/
-          ${CMAKE_INSTALL_PREFIX}/lib64/
-    PATHS /usr/local/lib
-          /usr/local/lib64
-          /usr/lib
-          /usr/lib64
-    )
+  if(NOT PC_GNURADIO_RUNTIME_FOUND)
+   set(PC_GNURADIO_RUNTIME_LIBRARIES gnuradio-runtime)
+  endif(NOT PC_GNURADIO_RUNTIME_FOUND)
+
+  foreach(libname ${PC_GNURADIO_RUNTIME_LIBRARIES})
+    # look for libs
+    FIND_LIBRARY(
+      GNURADIO_RUNTIME_LIBRARIES_${libname}
+      NAMES ${libname}
+      HINTS $ENV{GNURADIO_RUNTIME_DIR}/lib
+            ${PC_GNURADIO_RUNTIME_LIBDIR}
+            ${CMAKE_INSTALL_PREFIX}/lib/
+            ${CMAKE_INSTALL_PREFIX}/lib64/
+      PATHS /usr/local/lib
+            /usr/local/lib64
+            /usr/lib
+            /usr/lib64
+      )
+    list(APPEND GNURADIO_RUNTIME_LIBRARIES ${GNURADIO_RUNTIME_LIBRARIES_${libname}})
+  endforeach(libname)
 
   if (GNURADIO_RUNTIME_INCLUDE_DIRS AND GNURADIO_RUNTIME_LIBRARIES)
     set(GNURADIO_RUNTIME_FOUND TRUE CACHE INTERNAL "gnuradio-runtime found")
