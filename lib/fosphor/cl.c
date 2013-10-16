@@ -174,6 +174,24 @@ cl_device_query(cl_device_id dev_id, struct fosphor_cl_features *feat)
 		if ((nv_maj == 1) && (nv_min == 1))
 			feat->flags |= FLG_CL_NVIDIA_SM11;
 	}
+#ifdef __APPLE__
+	else if (!(feat->flags & FLG_CL_OPENCL_11))
+	{
+		/*
+		 * OSX doesn't allow query of NV attributes even on NVidia
+		 * cards so we just assume any non-opencl 1.1 nvidia card
+		 * that does OpenCL is a SM1.1 one
+		 */
+		err = clGetDeviceInfo(dev_id, CL_DEVICE_VENDOR, sizeof(txt)-1, txt, NULL);
+		if (err != CL_SUCCESS)
+			return -1;
+
+		txt[sizeof(txt)-1] = 0;
+
+		if (!!strstr(txt, "NVIDIA"))
+			feat->flags |= FLG_CL_NVIDIA_SM11;
+	}
+#endif
 
 	return 0;
 }
