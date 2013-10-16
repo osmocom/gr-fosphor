@@ -32,10 +32,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <CL/cl.h>
-#include <CL/cl_ext.h>
-#include <CL/cl_gl.h>
-
 #include "cl_platform.h"
 
 #if defined(__APPLE__) || defined(MAXOSX)
