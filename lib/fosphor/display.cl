@@ -27,6 +27,14 @@
 /* Enable or not use of NV SM11 histogram algo (set automatically) */
 /* #define USE_NV_SM11_ATOMICS */
 
+/* Enable or not the use of cl_khr_local_int32_base_atomics to
+ * implement atomic add (set automatically) */
+/* #define USE_EXT_ATOMICS */
+
+#ifdef USE_EXT_ATOMICS
+#pragma OPENCL EXTENSION cl_khr_local_int32_base_atomics : enable
+#endif
+
 #define CLAMP
 
 //#define MAX_HOLD_LIVE
@@ -160,8 +168,10 @@ __kernel void display(
 #endif
 
 		/* Atomic Bin increment */
-#ifdef USE_NV_SM11_ATOMICS
+#if defined(USE_NV_SM11_ATOMICS)
 		nv_sm11_atomic_inc(&histo_buf[(bin << 4) + get_local_id(1)], tag);
+#elif defined(USE_EXT_ATOMICS)
+		atom_inc(&histo_buf[(bin << 4) + get_local_id(0)]);
 #else
 		atomic_inc(&histo_buf[(bin << 4) + get_local_id(0)]);
 #endif

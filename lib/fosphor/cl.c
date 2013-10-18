@@ -55,6 +55,7 @@ struct fosphor_cl_features
 #define FLG_CL_GL_SHARING	(1<<0)
 #define FLG_CL_NVIDIA_SM11	(1<<1)
 #define FLG_CL_OPENCL_11	(1<<2)
+#define FLG_CL_LOCAL_ATOMIC_EXT	(1<<3)
 
 	cl_device_type type;
 	int local_mem;
@@ -147,6 +148,10 @@ cl_device_query(cl_device_id dev_id, struct fosphor_cl_features *feat)
 	/* Check for NV attributes */
 	has_nv_attr = !!strstr(txt, "cl_nv_device_attribute_query");
 
+	/* Check for cl_khr_local_int32_base_atomics extension */
+	if (strstr(txt, "cl_khr_local_int32_base_atomics"))
+		feat->flags |= FLG_CL_LOCAL_ATOMIC_EXT;
+
 	/* Check OpenCL 1.1 compat */
 	err = clGetDeviceInfo(dev_id, CL_DEVICE_VERSION, sizeof(txt)-1, txt, NULL);
 	if (err != CL_SUCCESS)
@@ -175,11 +180,12 @@ cl_device_query(cl_device_id dev_id, struct fosphor_cl_features *feat)
 			feat->flags |= FLG_CL_NVIDIA_SM11;
 	}
 #ifdef __APPLE__
-	else if (!(feat->flags & FLG_CL_OPENCL_11))
+	else if (!(feat->flags & (FLG_CL_OPENCL_11 | FLG_CL_LOCAL_ATOMIC_EXT)))
 	{
 		/*
 		 * OSX doesn't allow query of NV attributes even on NVidia
 		 * cards so we just assume any non-opencl 1.1 nvidia card
+		 * without cl_khr_local_int32_base_atomics extension
 		 * that does OpenCL is a SM1.1 one
 		 */
 		err = clGetDeviceInfo(dev_id, CL_DEVICE_VENDOR, sizeof(txt)-1, txt, NULL);
@@ -210,7 +216,7 @@ cl_device_score(cl_device_id dev_id, struct fosphor_cl_features *feat)
 	if (!(feat->flags & FLG_CL_GL_SHARING))
 		return -1;
 
-	if (!(feat->flags & (FLG_CL_NVIDIA_SM11 | FLG_CL_OPENCL_11)))
+	if (!(feat->flags & (FLG_CL_NVIDIA_SM11 | FLG_CL_OPENCL_11 | FLG_CL_LOCAL_ATOMIC_EXT)))
 		return -1;
 
 	/* Prefer GPU */
@@ -421,7 +427,13 @@ cl_do_init(struct fosphor_cl_state *cl, struct fosphor_gl_state *gl)
 	CL_ERR_CHECK(err, "Unable to share spectrum VBO into OpenCL context");
 
 	/* Display program/kernel */
-	disp_opts = (cl->feat.flags & FLG_CL_NVIDIA_SM11) ? "-DUSE_NV_SM11_ATOMICS" : NULL;
+	if (cl->feat.flags & FLG_CL_NVIDIA_SM11)
+		disp_opts = "-DUSE_NV_SM11_ATOMICS";
+	else if (!(cl->feat.flags & FLG_CL_OPENCL_11))
+		disp_opts = "-DUSE_EXT_ATOMICS";
+	else
+		disp_opts = NULL;
+
 	cl->prog_display = cl_load_program(cl->dev_id, cl->ctx, "display.cl", disp_opts);
 	if (!cl->prog_display)
 		goto error;
