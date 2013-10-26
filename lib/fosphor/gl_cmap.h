@@ -35,7 +35,7 @@
 #include "gl_platform.h"
 
 
-enum gl_cmap_mode {
+enum fosphor_gl_cmap_mode {
 	GL_CMAP_MODE_NEAREST,
 	GL_CMAP_MODE_BILINEAR,
 	GL_CMAP_MODE_BICUBIC,
@@ -47,7 +47,7 @@ void fosphor_gl_cmap_release(void);
 
 void fosphor_gl_cmap_enable(GLuint tex_id, GLuint cmap_id,
                             float scale, float offset,
-                            enum gl_cmap_mode mode);
+                            enum fosphor_gl_cmap_mode mode);
 void fosphor_gl_cmap_disable(void);
 
 typedef void (*gl_cmap_gen_func_t)(uint32_t *rgba, int N);

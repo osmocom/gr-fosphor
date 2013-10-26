@@ -217,7 +217,7 @@ fosphor_gl_cmap_release(void)
 void
 fosphor_gl_cmap_enable(GLuint tex_id, GLuint cmap_id,
                        float scale, float offset,
-                       enum gl_cmap_mode mode)
+                       enum fosphor_gl_cmap_mode mode)
 {
 	struct gl_cmap_shader *shader;
 	float range[2];
