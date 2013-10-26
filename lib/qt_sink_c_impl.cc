@@ -18,7 +18,9 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include <Python.h>
+#ifdef ENABLE_PYTHON
+# include <Python.h>
+#endif
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -85,6 +87,7 @@ qt_sink_c_impl::glctx_fini()
 }
 
 
+#ifdef ENABLE_PYTHON
 PyObject*
 qt_sink_c_impl::pyqwidget()
 {
@@ -92,6 +95,13 @@ qt_sink_c_impl::pyqwidget()
 	PyObject *retarg = Py_BuildValue("N", w);
 	return retarg;
 }
+#else
+void*
+qt_sink_c_impl::pyqwidget()
+{
+	return NULL;
+}
+#endif
 
   } /* namespace fosphor */
 } /* namespace gr */

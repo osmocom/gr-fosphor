@@ -23,7 +23,6 @@
 include(GrPlatform) #define LIB_SUFFIX
 include(GrMiscUtils)
 
-find_package(PythonLibs 2)
 find_package(PythonInterp 2)
 
 add_custom_command(
@@ -36,22 +35,31 @@ add_custom_command(
 
 include_directories(
 	${OPENGL_INCLUDE_DIRS}
-	${GLFW3_INCLUDE_DIRS}
 	${OPENCL_INCLUDE_DIRS}
 	${FREETYPE2_INCLUDE_DIRS}
 	${Boost_INCLUDE_DIR}
-	${PYTHON_INCLUDE_DIRS}
-	${QT_INCLUDE_DIRS}
 )
 link_directories(
 	${OPENGL_LIBRARY_DIRS}
-	${GLFW3_LIBRARY_DIRS}
 	${OPENCL_LIBRARY_DIRS}
 	${FREETYPE2_LIBRARY_DIRS}
 	${Boost_LIBRARY_DIRS}
 )
 
-set(CMAKE_AUTOMOC ON)
+if(ENABLE_PYTHON)
+    add_definitions(-DENABLE_PYTHON)
+    include_directories(${PYTHON_INCLUDE_DIRS})
+endif(ENABLE_PYTHON)
+
+if(ENABLE_GLFW)
+    include_directories(${GLFW3_INCLUDE_DIRS})
+    link_directories(${GLFW3_LIBRARY_DIRS})
+endif(ENABLE_GLFW)
+
+if(ENABLE_QT)
+    set(CMAKE_AUTOMOC ON)
+    include_directories(${QT_INCLUDE_DIRS})
+endif(ENABLE_QT)
 
 list(APPEND fosphor_sources
 	fosphor/cl.c
@@ -63,23 +71,26 @@ list(APPEND fosphor_sources
 	fosphor/resource.c
 	fosphor/resource_data.c
 	fifo.cc
-	QGLSurface.cc
 	base_sink_c_impl.cc
-	glfw_sink_c_impl.cc
-	qt_sink_c_impl.cc
-	wx_core_sink_c_impl.cc
 )
 
-add_library(gnuradio-fosphor SHARED ${fosphor_sources})
-target_link_libraries(gnuradio-fosphor
+list_cond_append(ENABLE_GLFW fosphor_sources glfw_sink_c_impl.cc)
+list_cond_append(ENABLE_QT   fosphor_sources QGLSurface.cc qt_sink_c_impl.cc)
+list_cond_append(ENABLE_WX   fosphor_sources wx_core_sink_c_impl.cc)
+
+list(APPEND fosphor_libraries 
 	${OPENGL_LIBRARIES}
-	${GLFW3_LIBRARIES}
 	${OPENCL_LIBRARIES}
 	${FREETYPE2_LIBRARIES}
 	${Boost_LIBRARIES}
 	${GNURADIO_RUNTIME_LIBRARIES}
-	${QT_LIBRARIES}
 )
+
+list_cond_append(ENABLE_GLFW fosphor_libraries ${GLFW3_LIBRARIES})
+list_cond_append(ENABLE_QT   fosphor_libraries ${QT_LIBRARIES})
+
+add_library(gnuradio-fosphor SHARED ${fosphor_sources})
+target_link_libraries(gnuradio-fosphor ${fosphor_libraries})
 set_target_properties(gnuradio-fosphor PROPERTIES DEFINE_SYMBOL "gnuradio_fosphor_EXPORTS")
 
 GR_LIBRARY_FOO(gnuradio-fosphor)

@@ -45,7 +45,11 @@ if _RTLD_GLOBAL != 0:
 from fosphor_swig import *
 
 # import any pure python here
-from wx_sink_c import wx_sink_c
+try:
+    from wx_sink_c import wx_sink_c
+except ImportError:
+    # No WX support most likely
+    pass
 #
 
 # ----------------------------------------------------------------

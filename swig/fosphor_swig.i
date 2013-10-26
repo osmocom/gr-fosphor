@@ -16,12 +16,18 @@
 
 %include "gnuradio/fosphor/base_sink_c.h"
 
+#ifdef ENABLE_GLFW
 %nodefaultctor gr::fosphor::glfw_sink_c;        // bug workaround
 %include "gnuradio/fosphor/glfw_sink_c.h"
 GR_SWIG_BLOCK_MAGIC2(fosphor, glfw_sink_c);
+#endif
 
+#ifdef ENABLE_QT
 %include "gnuradio/fosphor/qt_sink_c.h"
 GR_SWIG_BLOCK_MAGIC2(fosphor, qt_sink_c);
+#endif
 
+#ifdef ENABLE_WX
 %include "gnuradio/fosphor/wx_core_sink_c.h"
 GR_SWIG_BLOCK_MAGIC2(fosphor, wx_core_sink_c);
+#endif

@@ -16,9 +16,12 @@
 # along with GNU Radio; see the file COPYING.  If not, write to
 # the Free Software Foundation, Inc., 51 Franklin Street,
 # Boston, MA 02110-1301, USA.
+
+list_cond_append(ENABLE_GLFW fosphor_grc fosphor_glfw_sink_c.xml)
+list_cond_append(ENABLE_QT   fosphor_grc fosphor_qt_sink_c.xml)
+list_cond_append(ENABLE_WX   fosphor_grc fosphor_wx_sink_c.xml)
+
 install(FILES
-    fosphor_glfw_sink_c.xml
-    fosphor_qt_sink_c.xml
-    fosphor_wx_sink_c.xml
+    ${fosphor_grc}
     DESTINATION share/gnuradio/grc/blocks
 )

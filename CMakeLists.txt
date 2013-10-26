@@ -92,14 +92,11 @@ set(GRC_BLOCKS_DIR      ${GR_PKG_DATA_DIR}/grc/blocks)
 ########################################################################
 # Find gr-fosphor build dependencies
 ########################################################################
+
+# Required
 find_package(OpenGL)
 if(NOT OPENGL_FOUND)
 	message(FATAL_ERROR "OpenGL required to compile gr-fosphor")
-endif()
-
-find_package(GLFW3)
-if (NOT GLFW3_FOUND)
-	message(FATAL_ERROR "GLFW3 required to compile gr-fosphor")
 endif()
 
 find_package(OpenCL)
@@ -112,9 +109,13 @@ if(NOT FREETYPE2_FOUND)
 	message(FATAL_ERROR "freetype2 required to compile gr-fosphor")
 endif()
 
-find_package(Qt4 4.2.0 COMPONENTS QtCore QtGui QtOpenGL)
-include(GrSetupQt4)
+# Optional
+find_package(GLFW3)
 
+find_package(Qt4 4.2.0 COMPONENTS QtCore QtGui QtOpenGL)
+if (QT_FOUND)
+    include(GrSetupQt4)
+endif (QT_FOUND)
 
 ########################################################################
 # Find gnuradio build dependencies
@@ -130,6 +131,38 @@ if(NOT CPPUNIT_FOUND)
 endif()
 
 find_package(Doxygen)
+
+find_package(PythonLibs 2)
+
+find_package(SWIG)
+
+########################################################################
+# Setup the components
+########################################################################
+
+include(GrComponent)
+
+GR_REGISTER_COMPONENT("Python" ENABLE_PYTHON
+    PYTHONLIBS_FOUND SWIG_FOUND
+)
+
+GR_REGISTER_COMPONENT("GLFW" ENABLE_GLFW
+    GLFW3_FOUND
+)
+
+GR_REGISTER_COMPONENT("QT" ENABLE_QT
+    QT_FOUND
+)
+
+GR_REGISTER_COMPONENT("WX" ENABLE_WX
+    PYTHONLIBS_FOUND SWIG_FOUND ENABLE_PYTHON
+)
+
+macro(list_cond_append cond list_name)
+    if(${cond})
+        list(APPEND ${list_name} ${ARGN})
+    endif(${cond})
+endmacro(list_cond_append)
 
 ########################################################################
 # Setup the include and linker paths
@@ -168,10 +201,14 @@ add_custom_target(uninstall
 ########################################################################
 add_subdirectory(include/gnuradio/fosphor)
 add_subdirectory(lib)
-add_subdirectory(swig)
-add_subdirectory(python)
-add_subdirectory(grc)
-add_subdirectory(apps)
+
+if(ENABLE_PYTHON)
+    add_subdirectory(swig)
+    add_subdirectory(python)
+    add_subdirectory(grc)
+    add_subdirectory(apps)
+endif(ENABLE_PYTHON)
+
 add_subdirectory(docs)
 
 ########################################################################
@@ -191,3 +228,8 @@ install(
 	FILES ${CMAKE_CURRENT_BINARY_DIR}/gnuradio-fosphor.pc
 	DESTINATION ${GR_LIBRARY_DIR}/pkgconfig
 )
+
+########################################################################
+# Print Summary
+########################################################################
+GR_PRINT_COMPONENT_SUMMARY()

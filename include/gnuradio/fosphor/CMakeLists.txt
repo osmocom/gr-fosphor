@@ -20,11 +20,16 @@
 ########################################################################
 # Install public header files
 ########################################################################
-install(FILES
+list(APPEND fosphor_headers
     api.h
     base_sink_c.h
-    glfw_sink_c.h
-    qt_sink_c.h
-    wx_core_sink_c.h
+)
+
+list_cond_append(ENABLE_GLFW fosphor_headers glfw_sink_c.h)
+list_cond_append(ENABLE_QT   fosphor_headers qt_sink_c.h)
+list_cond_append(ENABLE_WX   fosphor_headers wx_core_sink_c.h)
+
+install(FILES
+    ${fosphor_headers}
     DESTINATION include/gnuradio/fosphor
 )
