@@ -19,8 +19,8 @@
  */
 
 
-#ifndef INCLUDED_GR_FOSPHOR_SINK_C_H
-#define INCLUDED_GR_FOSPHOR_SINK_C_H
+#ifndef INCLUDED_GR_FOSPHOR_GLFW_SINK_C_H
+#define INCLUDED_GR_FOSPHOR_GLFW_SINK_C_H
 
 #include <gnuradio/fosphor/api.h>
 
@@ -89,5 +89,5 @@ namespace gr {
   } // namespace fosphor
 } // namespace gr
 
-#endif /* INCLUDED_GR_FOSPHOR_SINK_C_H */
+#endif /* INCLUDED_GR_FOSPHOR_GLFW_SINK_C_H */
 
