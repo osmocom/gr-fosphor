@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <block>
-  <name>fosphor sink</name>
+  <name>fosphor sink (GLFW)</name>
   <key>fosphor_glfw_sink_c</key>
   <category>Instrumentation</category>
   <import>from gnuradio import fosphor</import>

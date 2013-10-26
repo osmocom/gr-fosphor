@@ -23,6 +23,7 @@
 #define INCLUDED_GR_FOSPHOR_GLFW_SINK_C_H
 
 #include <gnuradio/fosphor/api.h>
+#include <gnuradio/fosphor/base_sink_c.h>
 
 #include <gnuradio/sync_block.h>
 
@@ -30,10 +31,10 @@ namespace gr {
   namespace fosphor {
 
     /*!
-     * \brief Main fosphor sink for GL spectrum display (GLFW version)
+     * \brief GLFW version of fosphor sink
      * \ingroup fosphor
      */
-    class GR_FOSPHOR_API glfw_sink_c : virtual public gr::sync_block
+    class GR_FOSPHOR_API glfw_sink_c : virtual public base_sink_c
     {
      public:
       typedef boost::shared_ptr<glfw_sink_c> sptr;

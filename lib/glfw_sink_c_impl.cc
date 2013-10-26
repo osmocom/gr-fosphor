@@ -23,20 +23,9 @@
 #include "config.h"
 #endif
 
-#include <string.h>
-#include <stdio.h>
-
-#include <gnuradio/io_signature.h>
-#include <gnuradio/thread/thread.h>
-
 #include <GLFW/glfw3.h>
 
-#include "fifo.h"
 #include "glfw_sink_c_impl.h"
-
-extern "C" {
-#include "fosphor/fosphor.h"
-}
 
 
 namespace gr {
@@ -48,64 +37,69 @@ glfw_sink_c::make()
 	return gnuradio::get_initial_sptr(new glfw_sink_c_impl());
 }
 
-const int glfw_sink_c_impl::k_db_per_div[] = {1, 2, 5, 10, 20};
-
 glfw_sink_c_impl::glfw_sink_c_impl()
-  : gr::sync_block("glfw_sink_c",
-                   gr::io_signature::make(1, 1, sizeof(gr_complex)),
-                   gr::io_signature::make(0, 0, 0)),
-    d_db_ref(0), d_db_per_div_idx(3)
+  : base_sink_c("glfw_sink_c")
 {
-	/* Init FIFO */
-	this->d_fifo = new fifo(1024 * 1024);
-
-	/* Start worker */
-	this->d_active = true;
-	this->d_worker = gr::thread::thread(_worker, this);
-}
-
-glfw_sink_c_impl::~glfw_sink_c_impl()
-{
-	this->d_active = false;
-	this->d_worker.join();
-
-	delete this->d_fifo;
-}
-
-int
-glfw_sink_c_impl::work(
-	int noutput_items,
-	gr_vector_const_void_star &input_items,
-	gr_vector_void_star &output_items)
-{
-	const gr_complex *in = (const gr_complex *) input_items[0];
-	gr_complex *dst;
-	int l, mw;
-
-	/* How much can we hope to write */
-	l = noutput_items;
-	mw = this->d_fifo->write_max_size();
-
-	if (l > mw)
-		l = mw;
-	if (!l)
-		return 0;
-
-	/* Get a pointer */
-	dst = this->d_fifo->write_prepare(l, true);
-	if (!dst)
-		return 0;
-
-	/* Do the copy */
-	memcpy(dst, in, sizeof(gr_complex) * l);
-	this->d_fifo->write_commit(l);
-
-	/* Report what we took */
-	return l;
+	/* Nothing to do but super call */
 }
 
 
-void glfw_sink_c_impl::worker()
+void
+glfw_sink_c_impl::glfw_cb_reshape(int w, int h)
+{
+	if (w < 0 || h < 0)
+		glfwGetFramebufferSize(this->d_window, &w, &h);
+
+	this->cb_reshape(w, h);
+}
+
+void
+glfw_sink_c_impl::glfw_cb_key(int key, int scancode, int action, int mods)
+{
+	if (action != GLFW_PRESS)
+		return;
+
+	switch (key)
+	{
+	case GLFW_KEY_ESCAPE:
+		exit(0);
+		break;
+
+	case GLFW_KEY_UP:
+		this->base_sink_c_impl::execute_ui_action(REF_DOWN);
+		break;
+
+	case GLFW_KEY_DOWN:
+		this->base_sink_c_impl::execute_ui_action(REF_UP);
+		break;
+
+	case GLFW_KEY_LEFT:
+		this->base_sink_c_impl::execute_ui_action(DB_PER_DIV_DOWN);
+		break;
+
+	case GLFW_KEY_RIGHT:
+		this->base_sink_c_impl::execute_ui_action(DB_PER_DIV_UP);
+		break;
+	}
+}
+
+void
+glfw_sink_c_impl::_glfw_cb_reshape(GLFWwindow *wnd, int w, int h)
+{
+	glfw_sink_c_impl *sink = (glfw_sink_c_impl *) glfwGetWindowUserPointer(wnd);
+	sink->glfw_cb_reshape(w, h);
+}
+
+void
+glfw_sink_c_impl::_glfw_cb_key(GLFWwindow *wnd, int key, int scancode, int action, int mods)
+{
+	glfw_sink_c_impl *sink = (glfw_sink_c_impl *) glfwGetWindowUserPointer(wnd);
+	sink->glfw_cb_key(key, scancode, action, mods);
+}
+
+
+void
+glfw_sink_c_impl::glctx_init()
 {
 	GLFWwindow *wnd;
 
@@ -128,128 +122,27 @@ void glfw_sink_c_impl::worker()
 
 	/* Force first reshape */
 	this->glfw_cb_reshape(-1, -1);
-
-	/* Init fosphor */
-	this->d_fosphor = fosphor_init();
-	if (!this->d_fosphor)
-		return;
-
-	fosphor_set_range(this->d_fosphor,
-		this->d_db_ref,
-		this->k_db_per_div[this->d_db_per_div_idx]
-	);
-
-	/* Main loop */
-	while (!glfwWindowShouldClose(wnd) && this->d_active)
-	{
-		this->glfw_render();
-		glfwPollEvents();
-	}
-
-	/* Cleanup fosphor */
-	fosphor_release(this->d_fosphor);
-
-	/* And GLFW */
-	glfwDestroyWindow(wnd);
-	glfwTerminate();
 }
-
-void glfw_sink_c_impl::_worker(glfw_sink_c_impl *obj)
-{
-        obj->worker();
-}
-
 
 void
-glfw_sink_c_impl::glfw_render(void)
+glfw_sink_c_impl::glctx_swap()
 {
-	/* Clear everything */
-	glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	/* Flush fifo */
-	while (this->d_fifo->used() > 128*1024) {
-		gr_complex *data = this->d_fifo->read_peek(128*1024, false);
-		fosphor_process(this->d_fosphor, data, 128*1024);
-		this->d_fifo->read_discard(128*1024);
-	}
-
-	/* Draw */
-	fosphor_draw(this->d_fosphor, this->d_width, this->d_height);
-
-	/* Done, swap buffer */
 	glfwSwapBuffers(this->d_window);
 }
 
 void
-glfw_sink_c_impl::glfw_cb_reshape(int w, int h)
+glfw_sink_c_impl::glctx_poll()
 {
-	if (w < 0 || h < 0)
-		glfwGetFramebufferSize(this->d_window, &w, &h);
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0.0, (double)w, 0.0, (double)h, -1.0, 1.0);
-
-	glViewport(0, 0, w, h);
-
-	this->d_width = w;
-	this->d_height = h;
+	glfwPollEvents();
 }
 
 void
-glfw_sink_c_impl::glfw_cb_key(int key, int scancode, int action, int mods)
+glfw_sink_c_impl::glctx_fini()
 {
-	if (action != GLFW_PRESS)
-		return;
-
-	switch (key)
-	{
-	case GLFW_KEY_ESCAPE:
-		exit(0);
-		break;
-
-	case GLFW_KEY_UP:
-		this->d_db_ref -= k_db_per_div[this->d_db_per_div_idx];
-		break;
-
-	case GLFW_KEY_DOWN:
-		this->d_db_ref += k_db_per_div[this->d_db_per_div_idx];
-		break;
-
-	case GLFW_KEY_LEFT:
-		if (this->d_db_per_div_idx > 0)
-			this->d_db_per_div_idx--;
-		break;
-
-	case GLFW_KEY_RIGHT:
-		if (this->d_db_per_div_idx < 4)
-			this->d_db_per_div_idx++;
-		break;
-	}
-
-	fosphor_set_range(this->d_fosphor,
-		this->d_db_ref,
-		this->k_db_per_div[this->d_db_per_div_idx]
-	);
+	glfwDestroyWindow(this->d_window);
+	glfwTerminate();
 }
 
-void
-glfw_sink_c_impl::_glfw_cb_reshape(GLFWwindow *wnd, int w, int h)
-{
-	glfw_sink_c_impl *sink = (glfw_sink_c_impl *) glfwGetWindowUserPointer(wnd);
-	sink->glfw_cb_reshape(w, h);
-}
-
-void
-glfw_sink_c_impl::_glfw_cb_key(GLFWwindow *wnd, int key, int scancode, int action, int mods)
-{
-	glfw_sink_c_impl *sink = (glfw_sink_c_impl *) glfwGetWindowUserPointer(wnd);
-	sink->glfw_cb_key(key, scancode, action, mods);
-}
 
   } /* namespace fosphor */
 } /* namespace gr */

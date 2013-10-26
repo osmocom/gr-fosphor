@@ -58,6 +58,7 @@ list(APPEND fosphor_sources
 	fosphor/resource.c
 	fosphor/resource_data.c
 	fifo.cc
+	base_sink_c_impl.cc
 	glfw_sink_c_impl.cc
 )
 

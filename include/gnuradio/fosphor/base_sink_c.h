@@ -19,48 +19,39 @@
  */
 
 
-#ifndef INCLUDED_GR_FOSPHOR_GLFW_SINK_C_IMPL_H
-#define INCLUDED_GR_FOSPHOR_GLFW_SINK_C_IMPL_H
+#ifndef INCLUDED_GR_FOSPHOR_BASE_SINK_C_H
+#define INCLUDED_GR_FOSPHOR_BASE_SINK_C_H
 
-#include <gnuradio/fosphor/glfw_sink_c.h>
+#include <gnuradio/fosphor/api.h>
 
-#include "base_sink_c_impl.h"
-
-struct GLFWwindow;
+#include <gnuradio/sync_block.h>
 
 namespace gr {
   namespace fosphor {
 
     /*!
-     * \brief GLFW version of fosphor sink (implementation)
+     * \brief Base fosphor sink API interface
      * \ingroup fosphor
      */
-    class glfw_sink_c_impl : public glfw_sink_c, public base_sink_c_impl
+    class GR_FOSPHOR_API base_sink_c : public gr::sync_block
     {
-     private:
-      /* GLFW stuff */
-      GLFWwindow *d_window;
-
-      void glfw_render(void);
-      void glfw_cb_reshape(int w, int h);
-      void glfw_cb_key(int key, int scancode, int action, int mods);
-
-      static void _glfw_cb_reshape(GLFWwindow *wnd, int w, int h);
-      static void _glfw_cb_key(GLFWwindow *wnd, int key, int scancode, int action, int mods);
-
      protected:
-      /* Delegated implementation of GL context management */
-      void glctx_init();
-      void glctx_swap();
-      void glctx_poll();
-      void glctx_fini();
+      base_sink_c(const char *name = NULL);
 
      public:
-      glfw_sink_c_impl();
+
+      enum ui_action_t {
+        DB_PER_DIV_UP,
+        DB_PER_DIV_DOWN,
+        REF_UP,
+        REF_DOWN,
+      };
+
+      virtual void execute_ui_action(enum ui_action_t action) = 0;
     };
 
   } // namespace fosphor
 } // namespace gr
 
-#endif /* INCLUDED_GR_FOSPHOR_GLFW_SINK_C_IMPL_H */
+#endif /* INCLUDED_GR_FOSPHOR_BASE_SINK_C_H */
 

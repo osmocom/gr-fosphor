@@ -12,5 +12,8 @@
 %}
 
 
+%include "gnuradio/fosphor/base_sink_c.h"
+
+%nodefaultctor gr::fosphor::glfw_sink_c;        // bug workaround
 %include "gnuradio/fosphor/glfw_sink_c.h"
 GR_SWIG_BLOCK_MAGIC2(fosphor, glfw_sink_c);
