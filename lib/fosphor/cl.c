@@ -313,6 +313,30 @@ cl_load_program(cl_device_id dev_id, cl_context ctx,
 
 	CL_ERR_CHECK(err, "Failed to build program");
 
+#ifdef DEBUG_CL
+	{
+		size_t bin_len;
+		char name_buf[256];
+		char *bin_buf;
+
+		snprintf(name_buf, 256, "prog_%s.bin", resource_name);
+
+		clGetProgramInfo(prog, CL_PROGRAM_BINARY_SIZES, sizeof(size_t), &bin_len, NULL);
+		fprintf(stderr, "Binary length for '%s': %d\n\n", resource_name, (int)bin_len);
+
+		bin_buf = malloc(bin_len);
+
+		clGetProgramInfo(prog, CL_PROGRAM_BINARIES, bin_len, &bin_buf, NULL );
+
+		FILE *fh = fopen(name_buf, "wb");
+		if (fwrite(bin_buf, bin_len, 1, fh) != 1)
+			fprintf(stderr, "[w] Binary write failed\n");
+		fclose(fh);
+
+		free(bin_buf);
+	}
+#endif
+
 	/* All good */
 	return prog;
 
