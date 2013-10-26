@@ -6,6 +6,7 @@ includedir=@includedir@
 Name: gnuradio-fosphor
 Description: gnuradio fosphor block (GPU spectrum display)
 URL: http://git.osmocom.org/gr-fosphor/
+Version: 0
 Requires: gnuradio-runtime
 Libs: -L${libdir} -lgnuradio-fosphor
 Cflags: -I${includedir}
