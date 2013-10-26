@@ -24,6 +24,7 @@ install(FILES
     api.h
     base_sink_c.h
     glfw_sink_c.h
+    qt_sink_c.h
     wx_core_sink_c.h
     DESTINATION include/gnuradio/fosphor
 )

@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<block>
+  <name>QT fosphor sink</name>
+  <key>fosphor_qt_sink_c</key>
+  <category>Instrumentation/QT</category>
+  <import>from PyQt4 import Qt</import>
+  <import>import sip</import>
+  <import>from gnuradio import fosphor</import>
+  <make>#set $win = 'self._%s_win'%$id
+fosphor.qt_sink_c()
+self._$(id)_win = sip.wrapinstance(self.$(id).pyqwidget(), Qt.QWidget)
+$(gui_hint()($win))</make>
+  <param>
+    <name>GUI Hint</name>
+    <key>gui_hint</key>
+    <value></value>
+    <type>gui_hint</type>
+    <hide>part</hide>
+  </param>
+  <sink>
+    <name>in</name>
+    <type>complex</type>
+  </sink>
+  <doc>
+The GUI hint can be used to position the widget within the application. \
+The hint is of the form [tab_id@tab_index]: [row, col, row_span, col_span]. \
+Both the tab specification and the grid position are optional.
+  </doc>
+</block>

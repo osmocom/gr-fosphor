@@ -9,6 +9,7 @@
 
 %{
 #include "gnuradio/fosphor/glfw_sink_c.h"
+#include "gnuradio/fosphor/qt_sink_c.h"
 #include "gnuradio/fosphor/wx_core_sink_c.h"
 %}
 
@@ -18,6 +19,9 @@
 %nodefaultctor gr::fosphor::glfw_sink_c;        // bug workaround
 %include "gnuradio/fosphor/glfw_sink_c.h"
 GR_SWIG_BLOCK_MAGIC2(fosphor, glfw_sink_c);
+
+%include "gnuradio/fosphor/qt_sink_c.h"
+GR_SWIG_BLOCK_MAGIC2(fosphor, qt_sink_c);
 
 %include "gnuradio/fosphor/wx_core_sink_c.h"
 GR_SWIG_BLOCK_MAGIC2(fosphor, wx_core_sink_c);

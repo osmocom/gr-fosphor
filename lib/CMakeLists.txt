@@ -41,6 +41,7 @@ include_directories(
 	${FREETYPE2_INCLUDE_DIRS}
 	${Boost_INCLUDE_DIR}
 	${PYTHON_INCLUDE_DIRS}
+	${QT_INCLUDE_DIRS}
 )
 link_directories(
 	${OPENGL_LIBRARY_DIRS}
@@ -49,6 +50,8 @@ link_directories(
 	${FREETYPE2_LIBRARY_DIRS}
 	${Boost_LIBRARY_DIRS}
 )
+
+set(CMAKE_AUTOMOC ON)
 
 list(APPEND fosphor_sources
 	fosphor/cl.c
@@ -60,8 +63,10 @@ list(APPEND fosphor_sources
 	fosphor/resource.c
 	fosphor/resource_data.c
 	fifo.cc
+	QGLSurface.cc
 	base_sink_c_impl.cc
 	glfw_sink_c_impl.cc
+	qt_sink_c_impl.cc
 	wx_core_sink_c_impl.cc
 )
 
@@ -73,6 +78,7 @@ target_link_libraries(gnuradio-fosphor
 	${FREETYPE2_LIBRARIES}
 	${Boost_LIBRARIES}
 	${GNURADIO_RUNTIME_LIBRARIES}
+	${QT_LIBRARIES}
 )
 set_target_properties(gnuradio-fosphor PROPERTIES DEFINE_SYMBOL "gnuradio_fosphor_EXPORTS")
 

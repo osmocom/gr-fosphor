@@ -18,6 +18,7 @@
 # Boston, MA 02110-1301, USA.
 install(FILES
     fosphor_glfw_sink_c.xml
+    fosphor_qt_sink_c.xml
     fosphor_wx_sink_c.xml
     DESTINATION share/gnuradio/grc/blocks
 )

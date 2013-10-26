@@ -112,6 +112,9 @@ if(NOT FREETYPE2_FOUND)
 	message(FATAL_ERROR "freetype2 required to compile gr-fosphor")
 endif()
 
+find_package(Qt4 4.2.0 COMPONENTS QtCore QtGui QtOpenGL)
+include(GrSetupQt4)
+
 
 ########################################################################
 # Find gnuradio build dependencies
