@@ -25,46 +25,16 @@
 #include <gnuradio/fosphor/api.h>
 
 #include <gnuradio/sync_block.h>
-#include <gnuradio/thread/thread.h>
-
-struct fosphor;
-struct GLFWwindow;
 
 namespace gr {
   namespace fosphor {
 
-    class fifo;
-
     /*!
-     * \brief Main fosphor sink for GL spectrum display
+     * \brief Main fosphor sink for GL spectrum display (GLFW version)
      * \ingroup fosphor
      */
-    class GR_FOSPHOR_API glfw_sink_c : public gr::sync_block
+    class GR_FOSPHOR_API glfw_sink_c : virtual public gr::sync_block
     {
-     private:
-      glfw_sink_c();
-
-      void worker();
-      static void _worker(glfw_sink_c *obj);
-
-      void glfw_render(void);
-      void glfw_cb_reshape(int w, int h);
-      void glfw_cb_key(int key, int scancode, int action, int mods);
-
-      static void _glfw_cb_reshape(GLFWwindow *wnd, int w, int h);
-      static void _glfw_cb_key(GLFWwindow *wnd, int key, int scancode, int action, int mods);
-
-      gr::thread::thread d_worker;
-      bool d_active;
-
-      GLFWwindow *d_window;
-
-      fifo *d_fifo;
-      struct fosphor *d_fosphor;
-      int d_width, d_height;
-      int d_db_ref, d_db_per_div_idx;
-      static const int k_db_per_div[];
-
      public:
       typedef boost::shared_ptr<glfw_sink_c> sptr;
 
@@ -77,13 +47,6 @@ namespace gr {
        * creating new instances.
        */
       static sptr make();
-
-      ~glfw_sink_c();
-
-      int work (int noutput_items,
-                gr_vector_const_void_star &input_items,
-                gr_vector_void_star &output_items);
-
     };
 
   } // namespace fosphor

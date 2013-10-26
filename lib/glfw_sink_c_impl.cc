@@ -29,11 +29,10 @@
 #include <gnuradio/io_signature.h>
 #include <gnuradio/thread/thread.h>
 
-#include <gnuradio/fosphor/glfw_sink_c.h>
-
 #include <GLFW/glfw3.h>
 
 #include "fifo.h"
+#include "glfw_sink_c_impl.h"
 
 extern "C" {
 #include "fosphor/fosphor.h"
@@ -46,12 +45,12 @@ namespace gr {
 glfw_sink_c::sptr
 glfw_sink_c::make()
 {
-	return gnuradio::get_initial_sptr(new glfw_sink_c());
+	return gnuradio::get_initial_sptr(new glfw_sink_c_impl());
 }
 
-const int glfw_sink_c::k_db_per_div[] = {1, 2, 5, 10, 20};
+const int glfw_sink_c_impl::k_db_per_div[] = {1, 2, 5, 10, 20};
 
-glfw_sink_c::glfw_sink_c()
+glfw_sink_c_impl::glfw_sink_c_impl()
   : gr::sync_block("glfw_sink_c",
                    gr::io_signature::make(1, 1, sizeof(gr_complex)),
                    gr::io_signature::make(0, 0, 0)),
@@ -65,7 +64,7 @@ glfw_sink_c::glfw_sink_c()
 	this->d_worker = gr::thread::thread(_worker, this);
 }
 
-glfw_sink_c::~glfw_sink_c()
+glfw_sink_c_impl::~glfw_sink_c_impl()
 {
 	this->d_active = false;
 	this->d_worker.join();
@@ -74,7 +73,7 @@ glfw_sink_c::~glfw_sink_c()
 }
 
 int
-glfw_sink_c::work(
+glfw_sink_c_impl::work(
 	int noutput_items,
 	gr_vector_const_void_star &input_items,
 	gr_vector_void_star &output_items)
@@ -106,7 +105,7 @@ glfw_sink_c::work(
 }
 
 
-void glfw_sink_c::worker()
+void glfw_sink_c_impl::worker()
 {
 	GLFWwindow *wnd;
 
@@ -155,14 +154,14 @@ void glfw_sink_c::worker()
 	glfwTerminate();
 }
 
-void glfw_sink_c::_worker(glfw_sink_c *obj)
+void glfw_sink_c_impl::_worker(glfw_sink_c_impl *obj)
 {
         obj->worker();
 }
 
 
 void
-glfw_sink_c::glfw_render(void)
+glfw_sink_c_impl::glfw_render(void)
 {
 	/* Clear everything */
 	glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
@@ -183,7 +182,7 @@ glfw_sink_c::glfw_render(void)
 }
 
 void
-glfw_sink_c::glfw_cb_reshape(int w, int h)
+glfw_sink_c_impl::glfw_cb_reshape(int w, int h)
 {
 	if (w < 0 || h < 0)
 		glfwGetFramebufferSize(this->d_window, &w, &h);
@@ -202,7 +201,7 @@ glfw_sink_c::glfw_cb_reshape(int w, int h)
 }
 
 void
-glfw_sink_c::glfw_cb_key(int key, int scancode, int action, int mods)
+glfw_sink_c_impl::glfw_cb_key(int key, int scancode, int action, int mods)
 {
 	if (action != GLFW_PRESS)
 		return;
@@ -239,16 +238,16 @@ glfw_sink_c::glfw_cb_key(int key, int scancode, int action, int mods)
 }
 
 void
-glfw_sink_c::_glfw_cb_reshape(GLFWwindow *wnd, int w, int h)
+glfw_sink_c_impl::_glfw_cb_reshape(GLFWwindow *wnd, int w, int h)
 {
-	glfw_sink_c *sink = (glfw_sink_c *) glfwGetWindowUserPointer(wnd);
+	glfw_sink_c_impl *sink = (glfw_sink_c_impl *) glfwGetWindowUserPointer(wnd);
 	sink->glfw_cb_reshape(w, h);
 }
 
 void
-glfw_sink_c::_glfw_cb_key(GLFWwindow *wnd, int key, int scancode, int action, int mods)
+glfw_sink_c_impl::_glfw_cb_key(GLFWwindow *wnd, int key, int scancode, int action, int mods)
 {
-	glfw_sink_c *sink = (glfw_sink_c *) glfwGetWindowUserPointer(wnd);
+	glfw_sink_c_impl *sink = (glfw_sink_c_impl *) glfwGetWindowUserPointer(wnd);
 	sink->glfw_cb_key(key, scancode, action, mods);
 }
 

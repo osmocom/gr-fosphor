@@ -58,7 +58,7 @@ list(APPEND fosphor_sources
 	fosphor/resource.c
 	fosphor/resource_data.c
 	fifo.cc
-	glfw_sink_c.cc
+	glfw_sink_c_impl.cc
 )
 
 add_library(gnuradio-fosphor SHARED ${fosphor_sources})
