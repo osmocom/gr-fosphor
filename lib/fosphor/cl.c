@@ -466,7 +466,7 @@ cl_do_init(struct fosphor_cl_state *cl, struct fosphor_gl_state *gl)
 	CL_ERR_CHECK(err, "Unable to create display kernel");
 
 	/* Configure static display kernel args */
-	cl_uint fft_log2_len = 10;
+	cl_uint fft_log2_len = FOSPHOR_FFT_LEN_LOG;
 	cl_uint fft_batch    = FOSPHOR_FFT_MAX_BATCH;
 	cl_float histo_t0r   = 16.0f;
 	cl_float histo_t0d   = 1024.0f;
