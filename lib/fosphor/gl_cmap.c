@@ -31,6 +31,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "gl_platform.h"
@@ -62,8 +63,9 @@ enum gl_cmap_shader_type
 	_GL_CMAP_SHADER_NUM
 };
 
-static int g_gl_cmap_init = 0;
-static struct gl_cmap_shader g_gl_cmap_shaders[_GL_CMAP_SHADER_NUM];
+struct fosphor_gl_cmap_ctx {
+	struct gl_cmap_shader shaders[_GL_CMAP_SHADER_NUM];
+};
 
 
 /* -------------------------------------------------------------------------- */
@@ -147,19 +149,23 @@ gl_cmap_release_shader(struct gl_cmap_shader *shader)
 /* Exposed API                                                                */
 /* -------------------------------------------------------------------------- */
 
-int
+struct fosphor_gl_cmap_ctx *
 fosphor_gl_cmap_init(void)
 {
+	struct fosphor_gl_cmap_ctx *cmap_ctx;
 	int rv;
 	int need_fallback = 0;
 
-	/* Safety */
-	if (g_gl_cmap_init++)
-		return 0;
+	/* Allocate structure */
+	cmap_ctx = malloc(sizeof(struct fosphor_gl_cmap_ctx));
+	if (!cmap_ctx)
+		return NULL;
+
+	memset(cmap_ctx, 0, sizeof(struct fosphor_gl_cmap_ctx));
 
 	/* Init shaders */
 	rv = gl_cmap_init_shader(
-		&g_gl_cmap_shaders[GL_CMAP_SHADER_SIMPLE],
+		&cmap_ctx->shaders[GL_CMAP_SHADER_SIMPLE],
 		"cmap_simple.glsl"
 	);
 	if (rv) {
@@ -168,7 +174,7 @@ fosphor_gl_cmap_init(void)
 	}
 
 	rv = gl_cmap_init_shader(
-		&g_gl_cmap_shaders[GL_CMAP_SHADER_BICUBIC],
+		&cmap_ctx->shaders[GL_CMAP_SHADER_BICUBIC],
 		"cmap_bicubic.glsl"
 	);
 	if (rv) {
@@ -178,7 +184,7 @@ fosphor_gl_cmap_init(void)
 
 	if (need_fallback) {
 		rv = gl_cmap_init_shader(
-			&g_gl_cmap_shaders[GL_CMAP_SHADER_FALLBACK],
+			&cmap_ctx->shaders[GL_CMAP_SHADER_FALLBACK],
 			"cmap_fallback.glsl"
 		);
 		if (rv) {
@@ -188,34 +194,35 @@ fosphor_gl_cmap_init(void)
 	}
 
 	/* All done */
-	return 0;
+	return cmap_ctx;
 
 	/* Error path */
 error:
-	fosphor_gl_cmap_release();
+	fosphor_gl_cmap_release(cmap_ctx);
 
-	return rv;
+	return NULL;
 }
 
 void
-fosphor_gl_cmap_release(void)
+fosphor_gl_cmap_release(struct fosphor_gl_cmap_ctx *cmap_ctx)
 {
-	/* Check if last user */
-	if (--g_gl_cmap_init)
-		return
+	/* Safety */
+	if (!cmap_ctx)
+		return;
 
 	/* Disable program */
 	glUseProgram(0);
 
 	/* Release shaders */
-	gl_cmap_release_shader(&g_gl_cmap_shaders[GL_CMAP_SHADER_SIMPLE]);
-	gl_cmap_release_shader(&g_gl_cmap_shaders[GL_CMAP_SHADER_BICUBIC]);
-	gl_cmap_release_shader(&g_gl_cmap_shaders[GL_CMAP_SHADER_FALLBACK]);
+	gl_cmap_release_shader(&cmap_ctx->shaders[GL_CMAP_SHADER_SIMPLE]);
+	gl_cmap_release_shader(&cmap_ctx->shaders[GL_CMAP_SHADER_BICUBIC]);
+	gl_cmap_release_shader(&cmap_ctx->shaders[GL_CMAP_SHADER_FALLBACK]);
 }
 
 
 void
-fosphor_gl_cmap_enable(GLuint tex_id, GLuint cmap_id,
+fosphor_gl_cmap_enable(struct fosphor_gl_cmap_ctx *cmap_ctx,
+                       GLuint tex_id, GLuint cmap_id,
                        float scale, float offset,
                        enum fosphor_gl_cmap_mode mode)
 {
@@ -223,14 +230,14 @@ fosphor_gl_cmap_enable(GLuint tex_id, GLuint cmap_id,
 	float range[2];
 	int fmode;
 
-	shader = &g_gl_cmap_shaders[
+	shader = &cmap_ctx->shaders[
 		mode == GL_CMAP_MODE_BICUBIC ?
 			GL_CMAP_SHADER_BICUBIC :
 			GL_CMAP_SHADER_SIMPLE
 	];
 
 	if (!shader->loaded)
-		shader = &g_gl_cmap_shaders[GL_CMAP_SHADER_FALLBACK];
+		shader = &cmap_ctx->shaders[GL_CMAP_SHADER_FALLBACK];
 
 	/* Enable program */
 	glUseProgram(shader->prog);

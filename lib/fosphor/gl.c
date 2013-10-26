@@ -47,6 +47,7 @@ struct fosphor_gl_state
 
 	struct gl_font *font;
 
+	struct fosphor_gl_cmap_ctx *cmap_ctx;
 	GLuint cmap_waterfall;
 	GLuint cmap_histogram;
 
@@ -203,7 +204,9 @@ fosphor_gl_init(void)
 		goto error;
 
 	/* Color mapping */
-	rv = fosphor_gl_cmap_init();
+	gl->cmap_ctx = fosphor_gl_cmap_init();
+
+	rv  = (gl->cmap_ctx == NULL);
 
 	rv |= fosphor_gl_cmap_generate(&gl->cmap_waterfall,
 	                               fosphor_gl_cmap_waterfall, 256);
@@ -236,7 +239,7 @@ fosphor_gl_release(struct fosphor_gl_state *gl)
 
 	glDeleteTextures(1, &gl->cmap_histogram);
 	glDeleteTextures(1, &gl->cmap_waterfall);
-	fosphor_gl_cmap_release();
+	fosphor_gl_cmap_release(gl->cmap_ctx);
 
 	glf_free(gl->font);
 
@@ -290,7 +293,8 @@ fosphor_gl_draw(struct fosphor_gl_state *gl, int w, int h, int wf_pos)
         /* Draw waterfall */
         float v = (float)wf_pos / 1024.0f;
 
-	fosphor_gl_cmap_enable(gl->tex_waterfall, gl->cmap_waterfall,
+	fosphor_gl_cmap_enable(gl->cmap_ctx,
+	                       gl->tex_waterfall, gl->cmap_waterfall,
 	                       gl->scale, gl->offset, GL_CMAP_MODE_BILINEAR);
 
         glBegin( GL_QUADS );
@@ -303,7 +307,8 @@ fosphor_gl_draw(struct fosphor_gl_state *gl, int w, int h, int wf_pos)
 	fosphor_gl_cmap_disable();
 
         /* Draw histogram */
-	fosphor_gl_cmap_enable(gl->tex_histogram, gl->cmap_histogram,
+	fosphor_gl_cmap_enable(gl->cmap_ctx,
+	                       gl->tex_histogram, gl->cmap_histogram,
 	                       1.1f, 0.0f, GL_CMAP_MODE_BILINEAR);
 
         glBegin( GL_QUADS );

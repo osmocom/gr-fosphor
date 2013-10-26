@@ -35,6 +35,8 @@
 #include "gl_platform.h"
 
 
+struct fosphor_gl_cmap_ctx;
+
 enum fosphor_gl_cmap_mode {
 	GL_CMAP_MODE_NEAREST,
 	GL_CMAP_MODE_BILINEAR,
@@ -42,10 +44,11 @@ enum fosphor_gl_cmap_mode {
 };
 
 
-int  fosphor_gl_cmap_init(void);
-void fosphor_gl_cmap_release(void);
+struct fosphor_gl_cmap_ctx *fosphor_gl_cmap_init(void);
+void fosphor_gl_cmap_release(struct fosphor_gl_cmap_ctx *cmap_ctx);
 
-void fosphor_gl_cmap_enable(GLuint tex_id, GLuint cmap_id,
+void fosphor_gl_cmap_enable(struct fosphor_gl_cmap_ctx *cmap_ctx,
+                            GLuint tex_id, GLuint cmap_id,
                             float scale, float offset,
                             enum fosphor_gl_cmap_mode mode);
 void fosphor_gl_cmap_disable(void);
