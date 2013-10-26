@@ -141,7 +141,7 @@ __kernel void display(
 		/* Write to Waterfall texture */
 		int2 coord;
 		coord.x = get_global_id(0);
-		coord.y = get_local_id(1) + wf_offset + gidx;
+		coord.y = (get_local_id(1) + wf_offset + gidx) & (get_image_height(wf_tex) - 1);
 
 		write_imagef(wf_tex, coord, (float4)(pwr, 0.0f, 0.0f, 0.0f));
 

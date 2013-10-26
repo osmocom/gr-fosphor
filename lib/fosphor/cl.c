@@ -467,14 +467,12 @@ cl_do_init(struct fosphor_cl_state *cl, struct fosphor_gl_state *gl)
 
 	/* Configure static display kernel args */
 	cl_uint fft_log2_len = FOSPHOR_FFT_LEN_LOG;
-	cl_uint fft_batch    = FOSPHOR_FFT_MAX_BATCH;
 	cl_float histo_t0r   = 16.0f;
 	cl_float histo_t0d   = 1024.0f;
 	cl_float live_alpha  = 0.002f;
 
 	err  = clSetKernelArg(cl->kern_display,  0, sizeof(cl_mem),   &cl->mem_fft_out);
 	err |= clSetKernelArg(cl->kern_display,  1, sizeof(cl_int),   &fft_log2_len);
-	err |= clSetKernelArg(cl->kern_display,  2, sizeof(cl_int),   &fft_batch);
 
 	err |= clSetKernelArg(cl->kern_display,  3, sizeof(cl_mem),   &cl->mem_waterfall);
 
@@ -601,8 +599,11 @@ fosphor_cl_process(struct fosphor_cl_state *cl,
 	int n_spectra = len / FOSPHOR_FFT_LEN;
 	cl_mem objs[3];
 
-	/* Check length is multiple of FFT length */
-	if (len & (FOSPHOR_FFT_LEN-1))
+	/* Validate batch size */
+	if (len & ((FOSPHOR_FFT_MULT_BATCH*FOSPHOR_FFT_LEN)-1))
+		return -EINVAL;
+
+	if (len > (FOSPHOR_FFT_LEN * FOSPHOR_FFT_MAX_BATCH))
 		return -EINVAL;
 
 	/* Copy samples data */
@@ -635,7 +636,9 @@ fosphor_cl_process(struct fosphor_cl_state *cl,
 	CL_ERR_CHECK(err, "Unable to acquire GL objects");
 
 	/* Configure display kernel */
-	err  = clSetKernelArg(cl->kern_display,  4, sizeof(cl_int),   &cl->waterfall_pos);
+	err  = 0;
+	err |= clSetKernelArg(cl->kern_display,  2, sizeof(cl_int),   &n_spectra);
+	err |= clSetKernelArg(cl->kern_display,  4, sizeof(cl_int),   &cl->waterfall_pos);
 	err |= clSetKernelArg(cl->kern_display,  9, sizeof(cl_float), &cl->histo_scale);
 	err |= clSetKernelArg(cl->kern_display, 10, sizeof(cl_float), &cl->histo_offset);
 	CL_ERR_CHECK(err, "Unable to configure display kernel");
