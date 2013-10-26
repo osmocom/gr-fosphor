@@ -17,5 +17,7 @@
 # the Free Software Foundation, Inc., 51 Franklin Street,
 # Boston, MA 02110-1301, USA.
 install(FILES
-    fosphor_glfw_sink_c.xml DESTINATION share/gnuradio/grc/blocks
+    fosphor_glfw_sink_c.xml
+    fosphor_wx_sink_c.xml
+    DESTINATION share/gnuradio/grc/blocks
 )

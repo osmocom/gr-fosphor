@@ -23,6 +23,7 @@
 include(GrPlatform) #define LIB_SUFFIX
 include(GrMiscUtils)
 
+find_package(PythonLibs 2)
 find_package(PythonInterp 2)
 
 add_custom_command(
@@ -39,6 +40,7 @@ include_directories(
 	${OPENCL_INCLUDE_DIRS}
 	${FREETYPE2_INCLUDE_DIRS}
 	${Boost_INCLUDE_DIR}
+	${PYTHON_INCLUDE_DIRS}
 )
 link_directories(
 	${OPENGL_LIBRARY_DIRS}
@@ -60,6 +62,7 @@ list(APPEND fosphor_sources
 	fifo.cc
 	base_sink_c_impl.cc
 	glfw_sink_c_impl.cc
+	wx_core_sink_c_impl.cc
 )
 
 add_library(gnuradio-fosphor SHARED ${fosphor_sources})
