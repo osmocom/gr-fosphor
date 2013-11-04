@@ -56,7 +56,7 @@ base_sink_c_impl::base_sink_c_impl()
   : d_db_ref(0), d_db_per_div_idx(3), d_active(false)
 {
 	/* Init FIFO */
-	this->d_fifo = new fifo(1024 * 1024);
+	this->d_fifo = new fifo(2 * 1024 * 1024);
 }
 
 base_sink_c_impl::~base_sink_c_impl()
@@ -103,6 +103,13 @@ void base_sink_c_impl::_worker(base_sink_c_impl *obj)
 void
 base_sink_c_impl::render(void)
 {
+	const int fft_len    = 1024;
+	const int batch_mult = 16;
+	const int batch_max  = 1024;
+	const int max_iter   = 8;
+
+	int i, tot_len;
+
 	/* Handle pending reshape */
 	if (this->d_reshaped)
 	{
@@ -122,11 +129,36 @@ base_sink_c_impl::render(void)
 	glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	/* Flush fifo */
-	while (this->d_fifo->used() > 128*1024) {
-		gr_complex *data = this->d_fifo->read_peek(128*1024, false);
-		fosphor_process(this->d_fosphor, data, 128*1024);
-		this->d_fifo->read_discard(128*1024);
+	tot_len = this->d_fifo->used();
+
+	/* Process as much we can */
+	for (i=0; i<max_iter && tot_len; i++)
+	{
+		gr_complex *data;
+		int len;
+
+		/* How much can we get from FIFO in one block */
+		len = tot_len;
+		if (len > this->d_fifo->read_max_size())
+			len = this->d_fifo->read_max_size();
+
+		/* Adapt to valid size for fosphor */
+		len &= ~((batch_mult * fft_len) - 1);
+		if (len > (batch_max * fft_len))
+			len = batch_max * fft_len;
+
+		/* Is it worth it ? */
+		tot_len -= len;
+
+		if (!len)
+			break;
+
+		/* Send to process */
+		data = this->d_fifo->read_peek(len, false);
+		fosphor_process(this->d_fosphor, data, len);
+
+		/* Discard */
+		this->d_fifo->read_discard(len);
 	}
 
 	/* Draw */
