@@ -32,14 +32,14 @@
 # include <OpenCL/cl_ext.h>
 # include <OpenCL/cl_gl.h>
 # include <OpenCL/cl_gl_ext.h>
+# ifdef CL_VERSION_1_2
+#  define clCreateFromGLTexture2D clCreateFromGLTexture
+# endif
 #else
+# define CL_USE_DEPRECATED_OPENCL_1_1_APIS
 # include <CL/cl.h>
 # include <CL/cl_ext.h>
 # include <CL/cl_gl.h>
-#endif
-
-#ifdef CL_VERSION_1_2
-# define clCreateFromGLTexture2D clCreateFromGLTexture
 #endif
 
 #ifndef CL_DEVICE_COMPUTE_CAPABILITY_MAJOR_NV
