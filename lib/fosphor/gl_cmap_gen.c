@@ -113,9 +113,9 @@ _set_rgba_from_hsv(uint32_t *rgba, float h, float s, float v)
 
 		_hsv2rgb(rgb, hsv);
 
-		r = (unsigned char) round(rgb[0] * 255.0f);
-		g = (unsigned char) round(rgb[1] * 255.0f);
-		b = (unsigned char) round(rgb[2] * 255.0f);
+		r = (unsigned char) roundf(rgb[0] * 255.0f);
+		g = (unsigned char) roundf(rgb[1] * 255.0f);
+		b = (unsigned char) roundf(rgb[2] * 255.0f);
 		a = 255;
 
 		*rgba = (a << 24) | (b << 16) | (g << 8) | r;
