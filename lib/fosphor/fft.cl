@@ -419,7 +419,7 @@ __kernel void fft1D_1024(
 	/* Apply window */
 	for (i=0; i<8; i++) {
 		  float fp = i*WG_SIZE + lid;
-		  float ft = (float) N;
+		  float ft = (float)(N - 1);
 		  float w = (0.54f - 0.46f * cos((2.0f * M_PIf * fp) / ft)) * 1.855f;
 		  buf[i*WG_SIZE + lid] *= w;
 	}
