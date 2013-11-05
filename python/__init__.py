@@ -48,8 +48,10 @@ from fosphor_swig import *
 try:
     from wx_sink_c import wx_sink_c
 except ImportError:
-    # No WX support most likely
-    pass
+    # No Python WX or OpenGL support most likely
+    exc_info = sys.exc_info()
+    def wx_sink_c(*args, **kwargs):
+        raise exc_info[0], exc_info[1], exc_info[2]
 #
 
 # ----------------------------------------------------------------
