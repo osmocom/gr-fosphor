@@ -86,6 +86,7 @@ list(APPEND fosphor_libraries
 	${GNURADIO_RUNTIME_LIBRARIES}
 )
 
+list_cond_append(ENABLE_PYTHON fosphor_libraries ${PYTHON_LIBRARY})
 list_cond_append(ENABLE_GLFW fosphor_libraries ${GLFW3_LIBRARIES})
 list_cond_append(ENABLE_QT   fosphor_libraries ${QT_LIBRARIES})
 
