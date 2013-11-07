@@ -27,17 +27,18 @@
  *  \brief OpenGL part of fosphor
  */
 
+#include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "gl_platform.h"
 
-#include "config.h"
 #include "gl.h"
 #include "gl_cmap.h"
 #include "gl_cmap_gen.h"
 #include "gl_font.h"
+#include "private.h"
 #include "resource.h"
 
 
@@ -122,8 +123,9 @@ gl_vbo_read(GLuint vbo_id, int size, void *dst)
 #endif
 
 static void
-gl_deferred_init(struct fosphor_gl_state *gl)
+gl_deferred_init(struct fosphor *self)
 {
+	struct fosphor_gl_state *gl = self->gl;
 	int len;
 
 	/* Prevent double init */
@@ -176,8 +178,8 @@ gl_deferred_init(struct fosphor_gl_state *gl)
 /* Exposed API                                                                */
 /* -------------------------------------------------------------------------- */
 
-struct fosphor_gl_state *
-fosphor_gl_init(void)
+int
+fosphor_gl_init(struct fosphor *self)
 {
 	struct fosphor_gl_state *gl;
 	const void *font_data;
@@ -186,18 +188,24 @@ fosphor_gl_init(void)
 	/* Allocate structure */
 	gl = malloc(sizeof(struct fosphor_gl_state));
 	if (!gl)
-		return NULL;
+		return -ENOMEM;
+
+	self->gl = gl;
 
 	memset(gl, 0, sizeof(struct fosphor_gl_state));
 
 	/* Font */
 	gl->font = glf_alloc(8, GLF_FLG_LCD);
-	if (!gl->font)
+	if (!gl->font) {
+		rv = -ENOMEM;
 		goto error;
+	}
 
 	font_data = resource_get("DroidSansMonoDotted.ttf", &len);
-	if (!font_data)
+	if (!font_data) {
+		rv = -ENOENT;
 		goto error;
+	}
 
 	rv = glf_load_face_mem(gl->font, font_data, len);
 	if (rv)
@@ -217,16 +225,19 @@ fosphor_gl_init(void)
 		goto error;
 
 	/* Done */
-	return gl;
+	return 0;
 
 error:
-	fosphor_gl_release(gl);
-	return NULL;
+	fosphor_gl_release(self);
+
+	return rv;
 }
 
 void
-fosphor_gl_release(struct fosphor_gl_state *gl)
+fosphor_gl_release(struct fosphor *self)
 {
+	struct fosphor_gl_state *gl = self->gl;
+
 	/* Safety */
 	if (!gl)
 		return;
@@ -249,12 +260,14 @@ fosphor_gl_release(struct fosphor_gl_state *gl)
 
 
 GLuint
-fosphor_gl_get_shared_id(struct fosphor_gl_state *gl,
+fosphor_gl_get_shared_id(struct fosphor *self,
                          enum fosphor_gl_id id)
 {
+	struct fosphor_gl_state *gl = self->gl;
+
 	/* CL is not sufficiently booted to complete the GL init
 	 * in a CL context */
-	gl_deferred_init(gl);
+	gl_deferred_init(self);
 
 	/* Select ID to return */
 	switch (id) {
@@ -273,8 +286,9 @@ fosphor_gl_get_shared_id(struct fosphor_gl_state *gl,
 
 
 void
-fosphor_gl_draw(struct fosphor_gl_state *gl, int w, int h, int wf_pos)
+fosphor_gl_draw(struct fosphor *self, int w, int h, int wf_pos)
 {
+	struct fosphor_gl_state *gl = self->gl;
 	float x_div_width, y_div_width;
 	float x[2], y[4];
 	int i;
@@ -406,10 +420,12 @@ fosphor_gl_draw(struct fosphor_gl_state *gl, int w, int h, int wf_pos)
 
 
 void
-fosphor_gl_set_range(struct fosphor_gl_state *gl,
+fosphor_gl_set_range(struct fosphor *self,
                      float scale, float offset,
                      int db_ref, int db_per_div)
 {
+	struct fosphor_gl_state *gl = self->gl;
+
 	gl->scale = scale;
 	gl->offset = offset;
 	gl->db_ref = db_ref;

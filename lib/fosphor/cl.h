@@ -30,17 +30,16 @@
  *  \brief OpenCL base routines
  */
 
-struct fosphor_gl_state;
-struct fosphor_cl_state;
+struct fosphor;
 
-struct fosphor_cl_state *fosphor_cl_init(struct fosphor_gl_state *gl);
-void fosphor_cl_release(struct fosphor_cl_state *cl);
+int  fosphor_cl_init(struct fosphor *self);
+void fosphor_cl_release(struct fosphor *self);
 
-int fosphor_cl_process(struct fosphor_cl_state *cl,
+int fosphor_cl_process(struct fosphor *self,
                        void *samples, int len);
 
-int  fosphor_cl_get_waterfall_position(struct fosphor_cl_state *cl);
-void fosphor_cl_set_histogram_range(struct fosphor_cl_state *cl,
+int  fosphor_cl_get_waterfall_position(struct fosphor *self);
+void fosphor_cl_set_histogram_range(struct fosphor *self,
                                     float scale, float offset);
 
 /*! @} */

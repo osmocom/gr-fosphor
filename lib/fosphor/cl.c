@@ -44,9 +44,9 @@
 # include <GL/glx.h>
 #endif
 
-#include "config.h"
 #include "cl.h"
 #include "gl.h"
+#include "private.h"
 #include "resource.h"
 
 
@@ -349,8 +349,9 @@ error:
 }
 
 static int
-cl_do_init(struct fosphor_cl_state *cl, struct fosphor_gl_state *gl)
+cl_do_init(struct fosphor *self)
 {
+	struct fosphor_cl_state *cl = self->cl;
 	cl_context_properties ctx_props[7];
 	const char *disp_opts;
 	cl_int err;
@@ -429,7 +430,7 @@ cl_do_init(struct fosphor_cl_state *cl, struct fosphor_gl_state *gl)
 		/* Waterfall texture */
 	cl->mem_waterfall = clCreateFromGLTexture2D(cl->ctx,
 		CL_MEM_READ_WRITE, GL_TEXTURE_2D, 0,
-		fosphor_gl_get_shared_id(gl, GL_ID_TEX_WATERFALL),
+		fosphor_gl_get_shared_id(self, GL_ID_TEX_WATERFALL),
 		&err
 	);
 	CL_ERR_CHECK(err, "Unable to share waterfall texture into OpenCL context");
@@ -437,7 +438,7 @@ cl_do_init(struct fosphor_cl_state *cl, struct fosphor_gl_state *gl)
 		/* Histogram texture */
 	cl->mem_histogram = clCreateFromGLTexture2D(cl->ctx,
 		CL_MEM_READ_WRITE, GL_TEXTURE_2D, 0,
-		fosphor_gl_get_shared_id(gl, GL_ID_TEX_HISTOGRAM),
+		fosphor_gl_get_shared_id(self, GL_ID_TEX_HISTOGRAM),
 		&err
 	);
 	CL_ERR_CHECK(err, "Unable to share histogram texture into OpenCL context");
@@ -445,7 +446,7 @@ cl_do_init(struct fosphor_cl_state *cl, struct fosphor_gl_state *gl)
 		/* Spectrum VBO */
 	cl->mem_spectrum = clCreateFromGLBuffer(cl->ctx,
 		CL_MEM_WRITE_ONLY,
-		fosphor_gl_get_shared_id(gl, GL_ID_VBO_SPECTRUM),
+		fosphor_gl_get_shared_id(self, GL_ID_VBO_SPECTRUM),
 		&err
 	);
 	CL_ERR_CHECK(err, "Unable to share spectrum VBO into OpenCL context");
@@ -535,8 +536,8 @@ cl_do_release(struct fosphor_cl_state *cl)
 /* Exposed API                                                                */
 /* -------------------------------------------------------------------------- */
 
-struct fosphor_cl_state *
-fosphor_cl_init(struct fosphor_gl_state *gl)
+int
+fosphor_cl_init(struct fosphor *self)
 {
 	struct fosphor_cl_state *cl;
 	char dev_name[128];
@@ -545,7 +546,9 @@ fosphor_cl_init(struct fosphor_gl_state *gl)
 	/* Allocate structure */
 	cl = malloc(sizeof(struct fosphor_cl_state));
 	if (!cl)
-		return NULL;
+		return -ENOMEM;
+
+	self->cl = cl;
 
 	memset(cl, 0, sizeof(struct fosphor_cl_state));
 
@@ -562,23 +565,25 @@ fosphor_cl_init(struct fosphor_gl_state *gl)
 	fprintf(stderr, "[+] Selected device: %s\n", dev_name);
 
 	/* Initialize selected platform / device */
-	err = cl_do_init(cl, gl);
+	err = cl_do_init(self);
 	if (err)
 		goto error;
 
 	/* Done */
-	return cl;
+	return 0;
 
 	/* Error path */
 error:
-	fosphor_cl_release(cl);
+	fosphor_cl_release(self);
 
-	return NULL;
+	return -EIO;
 }
 
 void
-fosphor_cl_release(struct fosphor_cl_state *cl)
+fosphor_cl_release(struct fosphor *self)
 {
+	struct fosphor_cl_state *cl = self->cl;
+
 	/* Safety */
 	if (!cl)
 		return;
@@ -591,9 +596,11 @@ fosphor_cl_release(struct fosphor_cl_state *cl)
 }
 
 int
-fosphor_cl_process(struct fosphor_cl_state *cl,
+fosphor_cl_process(struct fosphor *self,
                    void *samples, int len)
 {
+	struct fosphor_cl_state *cl = self->cl;
+
 	cl_int err;
 	size_t local[2], global[2];
 	int n_spectra = len / FOSPHOR_FFT_LEN;
@@ -669,15 +676,19 @@ error:
 }
 
 int
-fosphor_cl_get_waterfall_position(struct fosphor_cl_state *cl)
+fosphor_cl_get_waterfall_position(struct fosphor *self)
 {
+	struct fosphor_cl_state *cl = self->cl;
+
 	return cl->waterfall_pos;
 }
 
 void
-fosphor_cl_set_histogram_range(struct fosphor_cl_state *cl,
+fosphor_cl_set_histogram_range(struct fosphor *self,
                                float scale, float offset)
 {
+	struct fosphor_cl_state *cl = self->cl;
+
 	cl->histo_scale  = scale * 128.0f;
 	cl->histo_offset = offset;
 }

@@ -1,7 +1,7 @@
 /*
- * config.h
+ * private.h
  *
- * Global fosphor configuration constants
+ * Private fosphor definitions
  *
  * Copyright (C) 2013 Sylvain Munaut
  *
@@ -19,15 +19,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __FOSPHOR_CONFIG_H__
-#define __FOSPHOR_CONFIG_H__
+#ifndef __FOSPHOR_PRIVATE_H__
+#define __FOSPHOR_PRIVATE_H__
 
-/*! \defgroup config
+/*! \defgroup private
  *  @{
  */
 
-/*! \file config.h
- *  \brief Global fosphor configuration constants
+/*! \file private.h
+ *  \brief Private fosphor definitions
  */
 
 
@@ -37,7 +37,16 @@
 #define FOSPHOR_FFT_MULT_BATCH	16
 #define FOSPHOR_FFT_MAX_BATCH	1024
 
+struct fosphor_cl_state;
+struct fosphor_gl_state;
+
+struct fosphor
+{
+	struct fosphor_cl_state *cl;
+	struct fosphor_gl_state *gl;
+};
+
 
 /*! @} */
 
-#endif /* __FOSPHOR_CONFIG_H__ */
+#endif /* __FOSPHOR_PRIVATE_H__ */

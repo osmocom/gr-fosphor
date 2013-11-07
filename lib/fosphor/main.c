@@ -16,8 +16,8 @@
 #endif
 #include <GLFW/glfw3.h>
 
-#include "config.h"
 #include "fosphor.h"
+#include "private.h"
 
 struct app_state
 {

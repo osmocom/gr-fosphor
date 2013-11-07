@@ -32,10 +32,10 @@
 
 #include "gl_platform.h"
 
-struct fosphor_gl_state;
+struct fosphor;
 
-struct fosphor_gl_state *fosphor_gl_init(void);
-void fosphor_gl_release(struct fosphor_gl_state *gl);
+int  fosphor_gl_init(struct fosphor *self);
+void fosphor_gl_release(struct fosphor *self);
 
 
 enum fosphor_gl_id {
@@ -44,12 +44,12 @@ enum fosphor_gl_id {
 	GL_ID_VBO_SPECTRUM,
 };
 
-GLuint fosphor_gl_get_shared_id(struct fosphor_gl_state *gl,
+GLuint fosphor_gl_get_shared_id(struct fosphor *self,
                                 enum fosphor_gl_id id);
 
-void fosphor_gl_draw(struct fosphor_gl_state *gl, int w, int h, int wf_pos);
+void fosphor_gl_draw(struct fosphor *self, int w, int h, int wf_pos);
 
-void fosphor_gl_set_range(struct fosphor_gl_state *gl,
+void fosphor_gl_set_range(struct fosphor *self,
                           float scale, float offset,
                           int db_ref, int db_per_div);
 

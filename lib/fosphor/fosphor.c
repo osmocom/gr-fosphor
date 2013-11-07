@@ -32,21 +32,17 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "config.h"
 #include "cl.h"
 #include "gl.h"
 #include "fosphor.h"
+#include "private.h"
 
-struct fosphor
-{
-	struct fosphor_cl_state *cl;
-	struct fosphor_gl_state *gl;
-};
 
 struct fosphor *
 fosphor_init(void)
 {
 	struct fosphor *self;
+	int rv;
 
 	/* Allocate structure */
 	self = malloc(sizeof(struct fosphor));
@@ -56,12 +52,12 @@ fosphor_init(void)
 	memset(self, 0, sizeof(struct fosphor));
 
 	/* Init GL/CL sub-states */
-	self->gl = fosphor_gl_init();
-	if (!self->gl)
+	rv = fosphor_gl_init(self);
+	if (rv)
 		goto error;
 
-	self->cl = fosphor_cl_init(self->gl);
-	if (!self->cl)
+	rv = fosphor_cl_init(self);
+	if (rv)
 		goto error;
 
 	/* Initial state */
@@ -81,8 +77,8 @@ fosphor_release(struct fosphor *self)
 	if (!self)
 		return;
 
-	fosphor_cl_release(self->cl);
-	fosphor_gl_release(self->gl);
+	fosphor_cl_release(self);
+	fosphor_gl_release(self);
 
 	free(self);
 }
@@ -90,14 +86,14 @@ fosphor_release(struct fosphor *self)
 int
 fosphor_process(struct fosphor *self, void *samples, int len)
 {
-	return fosphor_cl_process(self->cl, samples, len);
+	return fosphor_cl_process(self, samples, len);
 }
 
 void
 fosphor_draw(struct fosphor *self, int w, int h)
 {
-	int wf_pos = fosphor_cl_get_waterfall_position(self->cl);
-	fosphor_gl_draw(self->gl, w, h, wf_pos);
+	int wf_pos = fosphor_cl_get_waterfall_position(self);
+	fosphor_gl_draw(self, w, h, wf_pos);
 }
 
 
@@ -116,8 +112,8 @@ fosphor_set_range(struct fosphor *self, int db_ref, int db_per_div)
 	offset = - ( k + ((float)db0 / 20.0f) );
 	scale  = 20.0f / (float)(db1 - db0);
 
-	fosphor_cl_set_histogram_range(self->cl, scale, offset);
-	fosphor_gl_set_range(self->gl, scale, offset, db_ref, db_per_div);
+	fosphor_cl_set_histogram_range(self, scale, offset);
+	fosphor_gl_set_range(self, scale, offset, db_ref, db_per_div);
 }
 
 /*! @} */
