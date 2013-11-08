@@ -369,7 +369,6 @@ fosphor_gl_draw(struct fosphor *self, int w, int h, int wf_pos)
 	for (i=0; i<11; i++)
 	{
 		float fg_color[3] = { 1.00f, 1.00f, 0.33f };
-		char buf[100];
 		float xv, yv;
 
 		xv = x[0] + x_div_width * i;
@@ -393,18 +392,16 @@ fosphor_gl_draw(struct fosphor *self, int w, int h, int wf_pos)
 
 		glf_begin(gl->font, fg_color);
 
-		sprintf(buf, "%d", self->power.db_ref - (10-i) * self->power.db_per_div);
-		glf_draw_str(gl->font,
-		             x[0] - 5.0f, GLF_RIGHT,
-		             yv, GLF_CENTER,
-		             buf
+		glf_printf(gl->font,
+		           x[0] - 5.0f, GLF_RIGHT,
+		           yv, GLF_CENTER,
+		           "%d", self->power.db_ref - (10-i) * self->power.db_per_div
 		);
 
-		sprintf(buf, "%3d", (i - 5));
-		glf_draw_str(gl->font,
-		             xv - 5.0f, GLF_CENTER,
-		             y[2] - 10.0f, GLF_CENTER,
-		             buf
+		glf_printf(gl->font,
+		           xv - 5.0f, GLF_CENTER,
+		           y[2] - 10.0f, GLF_CENTER,
+		           "%3d", (i - 5)
 		);
 
 		glf_end();
