@@ -38,7 +38,7 @@ void fosphor_release(struct fosphor *self);
 int  fosphor_process(struct fosphor *self, void *samples, int len);
 void fosphor_draw(struct fosphor *self, int w, int h);
 
-void fosphor_set_range(struct fosphor *self, int db_ref, int db_per_div);
+void fosphor_set_power_range(struct fosphor *self, int db_ref, int db_per_div);
 
 /*! @} */
 

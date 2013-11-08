@@ -56,11 +56,6 @@ struct fosphor_gl_state
 	GLuint tex_histogram;
 
 	GLuint vbo_spectrum;
-
-	float scale;
-	float offset;
-	int db_ref;
-	int db_per_div;
 };
 
 
@@ -309,7 +304,8 @@ fosphor_gl_draw(struct fosphor *self, int w, int h, int wf_pos)
 
 	fosphor_gl_cmap_enable(gl->cmap_ctx,
 	                       gl->tex_waterfall, gl->cmap_waterfall,
-	                       gl->scale, gl->offset, GL_CMAP_MODE_BILINEAR);
+	                       self->power.scale, self->power.offset,
+	                       GL_CMAP_MODE_BILINEAR);
 
         glBegin( GL_QUADS );
         glTexCoord2f(0.5f, v - 1.0f); glVertex2f(x[0], y[0]);
@@ -340,8 +336,8 @@ fosphor_gl_draw(struct fosphor *self, int w, int h, int wf_pos)
         glTranslatef(x[0], y[2], 0.0f);
 	glScalef((x[1] - x[0]) / 2.0f, y[3] - y[2], 1.0f);
 
-        glScalef(1.0f, gl->scale, 1.0f);
-        glTranslatef(1.0f, gl->offset, 0.0f);
+        glScalef(1.0f, self->power.scale, 1.0f);
+        glTranslatef(1.0f, self->power.offset, 0.0f);
 
         glBindBuffer(GL_ARRAY_BUFFER, gl->vbo_spectrum);
         glVertexPointer(2, GL_FLOAT, 0, 0);
@@ -397,7 +393,7 @@ fosphor_gl_draw(struct fosphor *self, int w, int h, int wf_pos)
 
 		glf_begin(gl->font, fg_color);
 
-		sprintf(buf, "%d", gl->db_ref - (10-i) * gl->db_per_div);
+		sprintf(buf, "%d", self->power.db_ref - (10-i) * self->power.db_per_div);
 		glf_draw_str(gl->font,
 		             x[0] - 5.0f, GLF_RIGHT,
 		             yv, GLF_CENTER,
@@ -416,20 +412,6 @@ fosphor_gl_draw(struct fosphor *self, int w, int h, int wf_pos)
 
 	/* Ensure GL is done */
 	glFinish();
-}
-
-
-void
-fosphor_gl_set_range(struct fosphor *self,
-                     float scale, float offset,
-                     int db_ref, int db_per_div)
-{
-	struct fosphor_gl_state *gl = self->gl;
-
-	gl->scale = scale;
-	gl->offset = offset;
-	gl->db_ref = db_ref;
-	gl->db_per_div = db_per_div;
 }
 
 /*! @} */

@@ -61,7 +61,7 @@ fosphor_init(void)
 		goto error;
 
 	/* Initial state */
-	fosphor_set_range(self, 0, 10);
+	fosphor_set_power_range(self, 0, 10);
 
 	return self;
 
@@ -98,7 +98,7 @@ fosphor_draw(struct fosphor *self, int w, int h)
 
 
 void
-fosphor_set_range(struct fosphor *self, int db_ref, int db_per_div)
+fosphor_set_power_range(struct fosphor *self, int db_ref, int db_per_div)
 {
 	int db0, db1;
 	float k;
@@ -112,8 +112,12 @@ fosphor_set_range(struct fosphor *self, int db_ref, int db_per_div)
 	offset = - ( k + ((float)db0 / 20.0f) );
 	scale  = 20.0f / (float)(db1 - db0);
 
+	self->power.db_ref     = db_ref;
+	self->power.db_per_div = db_per_div;
+	self->power.scale      = scale;
+	self->power.offset     = offset;
+
 	fosphor_cl_set_histogram_range(self, scale, offset);
-	fosphor_gl_set_range(self, scale, offset, db_ref, db_per_div);
 }
 
 /*! @} */

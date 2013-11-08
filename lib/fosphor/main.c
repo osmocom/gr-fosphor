@@ -233,7 +233,7 @@ glfw_cb_key(GLFWwindow *wnd, int key, int scancode, int action, int mods)
 		break;
 	}
 
-	fosphor_set_range(g_as->fosphor, g_as->db_ref, k_db_per_div[g_as->db_per_div_idx]);
+	fosphor_set_power_range(g_as->fosphor, g_as->db_ref, k_db_per_div[g_as->db_per_div_idx]);
 }
 
 static GLFWwindow *
@@ -313,7 +313,7 @@ int main(int argc, char *argv[])
 	if (!g_as->fosphor)
 		return -1;
 
-	fosphor_set_range(g_as->fosphor, g_as->db_ref, k_db_per_div[g_as->db_per_div_idx]);
+	fosphor_set_power_range(g_as->fosphor, g_as->db_ref, k_db_per_div[g_as->db_per_div_idx]);
 
 	/* Run ! */
 	while (!glfwWindowShouldClose(wnd))

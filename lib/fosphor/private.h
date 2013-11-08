@@ -44,6 +44,13 @@ struct fosphor
 {
 	struct fosphor_cl_state *cl;
 	struct fosphor_gl_state *gl;
+
+	struct {
+		int db_ref;
+		int db_per_div;
+		float scale;
+		float offset;
+	} power;
 };
 
 

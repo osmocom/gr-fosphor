@@ -49,10 +49,6 @@ GLuint fosphor_gl_get_shared_id(struct fosphor *self,
 
 void fosphor_gl_draw(struct fosphor *self, int w, int h, int wf_pos);
 
-void fosphor_gl_set_range(struct fosphor *self,
-                          float scale, float offset,
-                          int db_ref, int db_per_div);
-
 /*! @} */
 
 #endif /* __FOSPHOR_GL_H__ */
