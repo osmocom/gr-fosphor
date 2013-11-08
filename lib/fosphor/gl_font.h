@@ -55,6 +55,11 @@ void glf_draw_str(const struct gl_font *glf,
                   float y, enum glf_align y_align,
                   const char *str);
 
+void glf_printf(const struct gl_font *glf,
+                float x, enum glf_align x_align,
+                float y, enum glf_align y_align,
+                const char *fmt, ...) __attribute__((format(printf, 6, 7)));
+
 void glf_begin(const struct gl_font *glf, float fg_color[3]);
 void glf_end(void);
 

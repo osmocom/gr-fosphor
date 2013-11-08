@@ -29,6 +29,7 @@
 
 #include <errno.h>
 #include <math.h>
+#include <stdarg.h>
 #include <stdint.h>
 
 #include <ft2build.h>
@@ -405,6 +406,46 @@ glf_draw_str(const struct gl_font *glf,
 
 	/* Done */
 	free(data);
+}
+
+void
+glf_printf(const struct gl_font *glf,
+           float x, enum glf_align x_align,
+           float y, enum glf_align y_align,
+           const char *fmt, ...)
+{
+	va_list va1, va2;
+	char *buf;
+	char static_buf[128];
+	int l;
+
+	/* Grab 2 copies of the arguments */
+	va_start(va1, fmt);
+	va_copy(va2, va1);
+
+	/* Print to buffer (try a stack, fallback to heap if needed) */
+	l = vsnprintf(static_buf, sizeof(static_buf), fmt, va1);
+
+	if (l >= sizeof(static_buf)) {
+		buf = malloc(l + 1);
+		if (!buf)
+			goto error;
+
+		vsnprintf(buf, l, fmt, va2);
+	} else {
+		buf = static_buf;
+	}
+
+	/* Draw it */
+	glf_draw_str(glf, x, x_align, y, y_align, buf);
+
+	/* Release everything */
+error:
+	va_end(va2);
+	va_end(va1);
+
+	if (buf && buf != static_buf)
+		free(buf);
 }
 
 void
