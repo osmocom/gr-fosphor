@@ -75,7 +75,7 @@ void base_sink_c_impl::worker()
 	if (!this->d_fosphor)
 		return;
 
-	fosphor_set_range(this->d_fosphor,
+	fosphor_set_power_range(this->d_fosphor,
 		this->d_db_ref,
 		this->k_db_per_div[this->d_db_per_div_idx]
 	);
@@ -201,7 +201,7 @@ base_sink_c_impl::execute_ui_action(enum ui_action_t action)
 		break;
 	}
 
-	fosphor_set_range(this->d_fosphor,
+	fosphor_set_power_range(this->d_fosphor,
 		this->d_db_ref,
 		this->k_db_per_div[this->d_db_per_div_idx]
 	);
