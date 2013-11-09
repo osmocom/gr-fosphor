@@ -75,10 +75,7 @@ void base_sink_c_impl::worker()
 	if (!this->d_fosphor)
 		return;
 
-	fosphor_set_power_range(this->d_fosphor,
-		this->d_db_ref,
-		this->k_db_per_div[this->d_db_per_div_idx]
-	);
+	this->settings_apply(~SETTING_DIMENSIONS);
 
 	/* Main loop */
 	while (this->d_active)
@@ -110,20 +107,8 @@ base_sink_c_impl::render(void)
 
 	int i, tot_len;
 
-	/* Handle pending reshape */
-	if (this->d_reshaped)
-	{
-		this->d_reshaped = false;
-
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		glOrtho(0.0, (double)this->d_width, 0.0, (double)this->d_height, -1.0, 1.0);
-
-		glViewport(0, 0, this->d_width, this->d_height);
-	}
+	/* Handle pending settings */
+	this->settings_apply(this->settings_get_and_reset_changed());
 
 	/* Clear everything */
 	glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
@@ -170,11 +155,50 @@ base_sink_c_impl::render(void)
 
 
 void
+base_sink_c_impl::settings_mark_changed(uint32_t setting)
+{
+	gr::thread::scoped_lock lock(this->d_settings_mutex);
+	this->d_settings_changed |= setting;
+}
+
+uint32_t
+base_sink_c_impl::settings_get_and_reset_changed(void)
+{
+	gr::thread::scoped_lock lock(this->d_settings_mutex);
+	uint32_t v = this->d_settings_changed;
+	this->d_settings_changed = 0;
+	return v;
+}
+
+void
+base_sink_c_impl::settings_apply(uint32_t settings)
+{
+	if (settings & SETTING_DIMENSIONS) {
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(0.0, (double)this->d_width, 0.0, (double)this->d_height, -1.0, 1.0);
+
+		glViewport(0, 0, this->d_width, this->d_height);
+	}
+
+	if (settings & SETTING_POWER_RANGE) {
+		fosphor_set_power_range(this->d_fosphor,
+			this->d_db_ref,
+			this->k_db_per_div[this->d_db_per_div_idx]
+		);
+	}
+}
+
+
+void
 base_sink_c_impl::cb_reshape(int width, int height)
 {
 	this->d_width    = width;
 	this->d_height   = height;
-	this->d_reshaped = true;
+	this->settings_mark_changed(SETTING_DIMENSIONS);
 }
 
 
@@ -201,10 +225,7 @@ base_sink_c_impl::execute_ui_action(enum ui_action_t action)
 		break;
 	}
 
-	fosphor_set_power_range(this->d_fosphor,
-		this->d_db_ref,
-		this->k_db_per_div[this->d_db_per_div_idx]
-	);
+	this->settings_mark_changed(SETTING_POWER_RANGE);
 }
 
 

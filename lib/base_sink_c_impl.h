@@ -22,6 +22,8 @@
 #ifndef INCLUDED_GR_FOSPHOR_BASE_SINK_C_IMPL_H
 #define INCLUDED_GR_FOSPHOR_BASE_SINK_C_IMPL_H
 
+#include <stdint.h>
+
 #include <gnuradio/thread/thread.h>
 
 #include <gnuradio/fosphor/base_sink_c.h>
@@ -54,9 +56,22 @@ namespace gr {
 
       void render();
 
+      /* settings refresh logic */
+      enum {
+        SETTING_DIMENSIONS	= (1 << 0),
+        SETTING_POWER_RANGE	= (1 << 1),
+      };
+
+      uint32_t d_settings_changed;
+      thread::mutex d_settings_mutex;
+
+      void     settings_mark_changed(uint32_t setting);
+      uint32_t settings_get_and_reset_changed(void);
+      void     settings_apply(uint32_t settings);
+
+      /* settings values */
       int d_width;
       int d_height;
-      bool d_reshaped;
 
       static const int k_db_per_div[];
       int d_db_ref;
