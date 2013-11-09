@@ -120,4 +120,11 @@ fosphor_set_power_range(struct fosphor *self, int db_ref, int db_per_div)
 	fosphor_cl_set_histogram_range(self, scale, offset);
 }
 
+void
+fosphor_set_frequency_range(struct fosphor *self, double center, double span)
+{
+	self->frequency.center = center;
+	self->frequency.span   = span;
+}
+
 /*! @} */

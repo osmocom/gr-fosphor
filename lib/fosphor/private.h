@@ -51,6 +51,11 @@ struct fosphor
 		float scale;
 		float offset;
 	} power;
+
+	struct {
+		double center;
+		double span;
+	} frequency;
 };
 
 
