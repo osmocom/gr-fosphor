@@ -28,12 +28,14 @@
  */
 
 #include <errno.h>
+#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "gl_platform.h"
 
+#include "axis.h"
 #include "gl.h"
 #include "gl_cmap.h"
 #include "gl_cmap_gen.h"
@@ -284,6 +286,7 @@ void
 fosphor_gl_draw(struct fosphor *self, int w, int h, int wf_pos)
 {
 	struct fosphor_gl_state *gl = self->gl;
+	struct freq_axis freq_axis;
 	float x_div_width, y_div_width;
 	float x[2], y[4];
 	int i;
@@ -365,11 +368,18 @@ fosphor_gl_draw(struct fosphor *self, int w, int h, int wf_pos)
 
         glPopMatrix();
 
+	/* Setup frequency axis */
+	freq_axis_build(&freq_axis,
+	                self->frequency.center,
+	                self->frequency.span
+	);
+
 	/* Draw grid */
 	for (i=0; i<11; i++)
 	{
 		float fg_color[3] = { 1.00f, 1.00f, 0.33f };
-		float xv, yv;
+		float xv, yv, xv_ofs;
+		char buf[32];
 
 		xv = x[0] + x_div_width * i;
 		yv = y[2] + y_div_width * i;
@@ -398,10 +408,14 @@ fosphor_gl_draw(struct fosphor *self, int w, int h, int wf_pos)
 		           "%d", self->power.db_ref - (10-i) * self->power.db_per_div
 		);
 
+		freq_axis_render(&freq_axis, buf, i-5);
+
+		xv_ofs = (i == 0) ? 5.0f : (i == 10 ? -5.0f : 0.0f);
+
 		glf_printf(gl->font,
-		           xv - 5.0f, GLF_CENTER,
-		           y[2] - 10.0f, GLF_CENTER,
-		           "%3d", (i - 5)
+			   xv + xv_ofs, GLF_CENTER,
+			   y[2] - 10.0f, GLF_CENTER,
+			   "%s", buf
 		);
 
 		glf_end();
