@@ -1,5 +1,5 @@
 /*
- * gl_font.h
+ * gl_font.c
  *
  * Basic OpenGL font rendering
  *

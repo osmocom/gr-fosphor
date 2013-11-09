@@ -1,5 +1,5 @@
 /*
- * gl_cmap.c
+ * gl_cmap.h
  *
  * OpenGL float texture -> color mapping
  *

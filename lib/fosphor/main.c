@@ -322,7 +322,6 @@ int main(int argc, char *argv[])
 		glfwPollEvents();
 	}
 
-
 	/* Cleanup */
 	fosphor_release(g_as->fosphor);
 

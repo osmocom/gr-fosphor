@@ -1,5 +1,5 @@
 /*
- * resource_internal.h
+ * resource_internal.c
  *
  * Resource management
  *

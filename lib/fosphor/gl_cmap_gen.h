@@ -1,5 +1,5 @@
 /*
- * gl_cmap_gen.c
+ * gl_cmap_gen.h
  *
  * OpenGL color map generators
  *
