@@ -62,6 +62,7 @@ if(ENABLE_QT)
 endif(ENABLE_QT)
 
 list(APPEND fosphor_sources
+	fosphor/axis.c
 	fosphor/cl.c
 	fosphor/fosphor.c
 	fosphor/gl.c
