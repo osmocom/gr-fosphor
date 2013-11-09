@@ -8,8 +8,22 @@
   <import>from gnuradio import fosphor</import>
   <make>#set $win = 'self._%s_win'%$id
 fosphor.qt_sink_c()
+self.$(id).set_frequency_range($freq_center, $freq_span)
 self._$(id)_win = sip.wrapinstance(self.$(id).pyqwidget(), Qt.QWidget)
 $(gui_hint()($win))</make>
+  <callback>set_frequency_range($freq_center, $freq_span)</callback>
+  <param>
+    <name>Center Frequency (Hz)</name>
+    <key>freq_center</key>
+    <value>0</value>
+    <type>real</type>
+  </param>
+  <param>
+    <name>Span (Hz)</name>
+    <key>freq_span</key>
+    <value>samp_rate</value>
+    <type>real</type>
+  </param>
   <param>
     <name>GUI Hint</name>
     <key>gui_hint</key>

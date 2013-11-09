@@ -91,3 +91,9 @@ class wx_sink_c(gr.hier_block2):
             return gr.hier_block2.__getattr__(self, attr)
         except:
             return getattr(self.sink, attr)
+
+    def set_baseband_freq(self, bb_freq):
+        self.set_frequency_center(bb_freq)
+
+    def set_sample_rate(self, sample_rate):
+        self.set_frequency_span(sample_rate)

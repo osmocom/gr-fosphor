@@ -4,7 +4,22 @@
   <key>fosphor_glfw_sink_c</key>
   <category>Instrumentation</category>
   <import>from gnuradio import fosphor</import>
-  <make>fosphor.glfw_sink_c()</make>
+  <make>fosphor.glfw_sink_c()
+self.$(id).set_frequency_range($freq_center, $freq_span)
+</make>
+  <callback>set_frequency_range($freq_center, $freq_span)</callback>
+  <param>
+    <name>Center Frequency (Hz)</name>
+    <key>freq_center</key>
+    <value>0</value>
+    <type>real</type>
+  </param>
+  <param>
+    <name>Span (Hz)</name>
+    <key>freq_span</key>
+    <value>samp_rate</value>
+    <type>real</type>
+  </param>
   <sink>
     <name>in</name>
     <type>complex</type>

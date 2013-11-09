@@ -48,6 +48,11 @@ namespace gr {
       };
 
       virtual void execute_ui_action(enum ui_action_t action) = 0;
+
+      virtual void set_frequency_range(const double center,
+                                       const double span) = 0;
+      virtual void set_frequency_center(const double center) = 0;
+      virtual void set_frequency_span(const double span) = 0;
     };
 
   } // namespace fosphor

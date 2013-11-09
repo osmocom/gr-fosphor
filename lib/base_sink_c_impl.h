@@ -60,6 +60,7 @@ namespace gr {
       enum {
         SETTING_DIMENSIONS	= (1 << 0),
         SETTING_POWER_RANGE	= (1 << 1),
+        SETTING_FREQUENCY_RANGE	= (1 << 2),
       };
 
       uint32_t d_settings_changed;
@@ -76,6 +77,11 @@ namespace gr {
       static const int k_db_per_div[];
       int d_db_ref;
       int d_db_per_div_idx;
+
+      struct {
+        double center;
+        double span;
+      } d_frequency;
 
      protected:
       base_sink_c_impl();
@@ -94,6 +100,11 @@ namespace gr {
 
       /* gr::fosphor::base_sink_c implementation */
       void execute_ui_action(enum ui_action_t action);
+
+      void set_frequency_range(const double center,
+                               const double span);
+      void set_frequency_center(const double center);
+      void set_frequency_span(const double span);
 
       /* gr::sync_block implementation */
       int work (int noutput_items,

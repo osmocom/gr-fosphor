@@ -53,7 +53,8 @@ const int base_sink_c_impl::k_db_per_div[] = {1, 2, 5, 10, 20};
 
 
 base_sink_c_impl::base_sink_c_impl()
-  : d_db_ref(0), d_db_per_div_idx(3), d_active(false)
+  : d_db_ref(0), d_db_per_div_idx(3), d_active(false),
+    d_frequency()
 {
 	/* Init FIFO */
 	this->d_fifo = new fifo(2 * 1024 * 1024);
@@ -190,6 +191,13 @@ base_sink_c_impl::settings_apply(uint32_t settings)
 			this->k_db_per_div[this->d_db_per_div_idx]
 		);
 	}
+
+	if (settings & SETTING_FREQUENCY_RANGE) {
+		fosphor_set_frequency_range(this->d_fosphor,
+			this->d_frequency.center,
+			this->d_frequency.span
+		);
+	}
 }
 
 
@@ -226,6 +234,28 @@ base_sink_c_impl::execute_ui_action(enum ui_action_t action)
 	}
 
 	this->settings_mark_changed(SETTING_POWER_RANGE);
+}
+
+void
+base_sink_c_impl::set_frequency_range(const double center, const double span)
+{
+	this->d_frequency.center = center;
+	this->d_frequency.span   = span;
+	this->settings_mark_changed(SETTING_FREQUENCY_RANGE);
+}
+
+void
+base_sink_c_impl::set_frequency_center(const double center)
+{
+	this->d_frequency.center = center;
+	this->settings_mark_changed(SETTING_FREQUENCY_RANGE);
+}
+
+void
+base_sink_c_impl::set_frequency_span(const double span)
+{
+	this->d_frequency.span   = span;
+	this->settings_mark_changed(SETTING_FREQUENCY_RANGE);
 }
 
 
