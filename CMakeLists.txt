@@ -230,3 +230,4 @@ install(
 # Print Summary
 ########################################################################
 GR_PRINT_COMPONENT_SUMMARY()
+MESSAGE(STATUS "Using install prefix: ${CMAKE_INSTALL_PREFIX}")
