@@ -84,7 +84,7 @@ list(APPEND fosphor_libraries
 	${OPENCL_LIBRARIES}
 	${FREETYPE2_LIBRARIES}
 	${Boost_LIBRARIES}
-	${GNURADIO_RUNTIME_LIBRARIES}
+	${GNURADIO_ALL_LIBRARIES}
 )
 
 list_cond_append(ENABLE_PYTHON fosphor_libraries ${PYTHON_LIBRARY})

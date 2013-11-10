@@ -120,10 +120,8 @@ endif (QT_FOUND)
 ########################################################################
 # Find gnuradio build dependencies
 ########################################################################
-find_package(GnuradioRuntime)
-if(NOT GNURADIO_RUNTIME_FOUND)
-    message(FATAL_ERROR "GnuRadio Runtime required to compile gr-fosphor")
-endif()
+set(GR_REQUIRED_COMPONENTS RUNTIME)
+find_package(Gnuradio 3.7 REQUIRED)
 
 find_package(CppUnit)
 if(NOT CPPUNIT_FOUND)
@@ -171,13 +169,12 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/include
     ${Boost_INCLUDE_DIRS}
     ${CPPUNIT_INCLUDE_DIRS}
-    ${GNURADIO_RUNTIME_INCLUDE_DIRS}
+    ${GNURADIO_ALL_INCLUDE_DIRS}
 )
 
 link_directories(
     ${Boost_LIBRARY_DIRS}
     ${CPPUNIT_LIBRARY_DIRS}
-    ${GNURADIO_RUNTIME_LIBRARY_DIRS}
 )
 
 # Set component parameters
