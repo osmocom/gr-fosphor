@@ -77,9 +77,13 @@ struct fosphor_cl_state
 	/* FFT */
 	cl_mem		mem_fft_in;
 	cl_mem		mem_fft_out;
+	cl_mem		mem_fft_win;
 
 	cl_program	prog_fft;
 	cl_kernel	kern_fft;
+
+	float		*fft_win;
+	int		fft_win_updated;
 
 	/* Display */
 	cl_mem		mem_waterfall;
@@ -395,7 +399,7 @@ cl_do_init(struct fosphor *self)
 	cl->cq = clCreateCommandQueue(cl->ctx, cl->dev_id, 0, &err);
 	CL_ERR_CHECK(err, "Unable to create command queue");
 
-	/* FFT in/out buffers */
+	/* FFT buffers */
 	cl->mem_fft_in = clCreateBuffer(cl->ctx,
 		CL_MEM_READ_ONLY,
 		2 * sizeof(cl_float) * FOSPHOR_FFT_LEN * FOSPHOR_FFT_MAX_BATCH,
@@ -412,6 +416,14 @@ cl_do_init(struct fosphor *self)
 	);
 	CL_ERR_CHECK(err, "Unable to allocate FFT output buffer");
 
+	cl->mem_fft_win = clCreateBuffer(cl->ctx,
+		CL_MEM_READ_ONLY,
+		2 * sizeof(cl_float) * FOSPHOR_FFT_LEN,
+		NULL,
+		&err
+	);
+	CL_ERR_CHECK(err, "Unable to allocate FFT window buffer");
+
 	/* FFT program/kernels */
 	cl->prog_fft = cl_load_program(cl->dev_id, cl->ctx, "fft.cl", NULL);
 	if (!cl->prog_fft)
@@ -423,6 +435,7 @@ cl_do_init(struct fosphor *self)
 	/* Configure static FFT kernel args */
 	err  = clSetKernelArg(cl->kern_fft, 0, sizeof(cl_mem), &cl->mem_fft_in);
 	err |= clSetKernelArg(cl->kern_fft, 1, sizeof(cl_mem), &cl->mem_fft_out);
+	err |= clSetKernelArg(cl->kern_fft, 2, sizeof(cl_mem), &cl->mem_fft_win);
 
 	CL_ERR_CHECK(err, "Unable to configure FFT kernel");
 
@@ -613,6 +626,20 @@ fosphor_cl_process(struct fosphor *self,
 	if (len > (FOSPHOR_FFT_LEN * FOSPHOR_FFT_MAX_BATCH))
 		return -EINVAL;
 
+	/* Copy new window if needed */
+	if (cl->fft_win_updated) {
+		err = clEnqueueWriteBuffer(
+			cl->cq,
+			cl->mem_fft_win,
+			CL_FALSE,
+			0, sizeof(cl_float) * FOSPHOR_FFT_LEN, cl->fft_win,
+			0, NULL, NULL
+		);
+		CL_ERR_CHECK(err, "Unable to copy data to FFT window buffer");
+
+		cl->fft_win_updated = 0;
+	}
+
 	/* Copy samples data */
 	err = clEnqueueWriteBuffer(
 		cl->cq,
@@ -673,6 +700,16 @@ fosphor_cl_process(struct fosphor *self,
 
 error:
 	return -EIO;
+}
+
+
+void
+fosphor_cl_load_fft_window(struct fosphor *self, float *win)
+{
+	struct fosphor_cl_state *cl = self->cl;
+
+	cl->fft_win = win;
+	cl->fft_win_updated = 1;
 }
 
 int

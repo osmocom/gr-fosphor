@@ -61,6 +61,7 @@ fosphor_init(void)
 		goto error;
 
 	/* Initial state */
+	fosphor_set_fft_window_default(self);
 	fosphor_set_power_range(self, 0, 10);
 
 	return self;
@@ -94,6 +95,29 @@ fosphor_draw(struct fosphor *self, int w, int h)
 {
 	int wf_pos = fosphor_cl_get_waterfall_position(self);
 	fosphor_gl_draw(self, w, h, wf_pos);
+}
+
+
+void
+fosphor_set_fft_window_default(struct fosphor *self)
+{
+	int i;
+
+	/* Default Hamming window (periodic) */
+	for (i=0; i<FOSPHOR_FFT_LEN; i++) {
+		float ft = (float)FOSPHOR_FFT_LEN;
+		float fp = (float)i;
+		self->fft_win[i] = (0.54f - 0.46f * cosf((2.0f * 3.141592f * fp) / ft)) * 1.855f;
+	}
+
+	fosphor_cl_load_fft_window(self, self->fft_win);
+}
+
+void
+fosphor_set_fft_window(struct fosphor *self, float *win)
+{
+	memcpy(self->fft_win, win, sizeof(float) * FOSPHOR_FFT_LEN);
+	fosphor_cl_load_fft_window(self, self->fft_win);
 }
 
 

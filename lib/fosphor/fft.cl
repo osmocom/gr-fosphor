@@ -355,8 +355,9 @@ fft_radix8(
 /* ------------------------------------------------------------------------ */
 
 __kernel void fft1D_512(
-	__global const float2 *input,
-	__global       float2 *output)
+	__global   const float2 *input,
+	__global         float2 *output,
+	__constant const float  *win)
 {
 #define N 512
 #define WG_SIZE (N / 8)
@@ -371,9 +372,9 @@ __kernel void fft1D_512(
 	input  += N * get_global_id(1);
 	output += N * get_global_id(1);
 
-	/* Global load */
-	for (i=0; i<8; i++)
-		buf[i*WG_SIZE + lid] = input[i*WG_SIZE + lid];
+	/* Global load & window apply */
+	for (i=lid; i<N; i+=WG_SIZE)
+		buf[i] = input[i] * win[i];
 
 	/* 1st pass: 1 * Radix-8 */
 	fft_radix8(buf, r,  1, lid, WG_SIZE, 0);
@@ -394,8 +395,9 @@ __kernel void fft1D_512(
 
 
 __kernel void fft1D_1024(
-	__global const float2 *input,
-	__global       float2 *output)
+	__global   const float2 *input,
+	__global         float2 *output,
+	__constant const float  *win)
 {
 #define N 1024
 #define WG_SIZE (N / 8)
@@ -410,20 +412,9 @@ __kernel void fft1D_1024(
 	input  += N * get_global_id(1);
 	output += N * get_global_id(1);
 
-	/* Global load */
-	for (i=0; i<8; i++)
-		buf[i*WG_SIZE + lid] = input[i*WG_SIZE + lid];
-
-/* FIXME: this causes shared mem usage, fix it */
-#if 1
-	/* Apply window */
-	for (i=0; i<8; i++) {
-		  float fp = i*WG_SIZE + lid;
-		  float ft = (float)(N - 1);
-		  float w = (0.54f - 0.46f * cos((2.0f * M_PIf * fp) / ft)) * 1.855f;
-		  buf[i*WG_SIZE + lid] *= w;
-	}
-#endif
+	/* Global load & window apply */
+	for (i=lid; i<N; i+=WG_SIZE)
+		buf[i] = input[i] * win[i];
 
 	/* 1st pass: 1 * Radix-8 */
 	fft_radix8(buf, r,  1, lid, WG_SIZE, 0);

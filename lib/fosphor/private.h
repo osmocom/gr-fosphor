@@ -45,6 +45,8 @@ struct fosphor
 	struct fosphor_cl_state *cl;
 	struct fosphor_gl_state *gl;
 
+	float fft_win[FOSPHOR_FFT_LEN];
+
 	struct {
 		int db_ref;
 		int db_per_div;

@@ -38,6 +38,7 @@ void fosphor_cl_release(struct fosphor *self);
 int fosphor_cl_process(struct fosphor *self,
                        void *samples, int len);
 
+void fosphor_cl_load_fft_window(struct fosphor *self, float *win);
 int  fosphor_cl_get_waterfall_position(struct fosphor *self);
 void fosphor_cl_set_histogram_range(struct fosphor *self,
                                     float scale, float offset);
