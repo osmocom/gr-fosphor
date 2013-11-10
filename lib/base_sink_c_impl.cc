@@ -54,7 +54,7 @@ const int base_sink_c_impl::k_db_per_div[] = {1, 2, 5, 10, 20};
 
 base_sink_c_impl::base_sink_c_impl()
   : d_db_ref(0), d_db_per_div_idx(3), d_active(false),
-    d_frequency()
+    d_frequency(), d_fft_window(gr::fft::window::WIN_BLACKMAN_hARRIS)
 {
 	/* Init FIFO */
 	this->d_fifo = new fifo(2 * 1024 * 1024);
@@ -198,6 +198,12 @@ base_sink_c_impl::settings_apply(uint32_t settings)
 			this->d_frequency.span
 		);
 	}
+
+	if (settings & SETTING_FFT_WINDOW) {
+		std::vector<float> window =
+			gr::fft::window::build(this->d_fft_window, 1024, 6.76);
+		fosphor_set_fft_window(this->d_fosphor, window.data());
+	}
 }
 
 
@@ -256,6 +262,16 @@ base_sink_c_impl::set_frequency_span(const double span)
 {
 	this->d_frequency.span   = span;
 	this->settings_mark_changed(SETTING_FREQUENCY_RANGE);
+}
+
+void
+base_sink_c_impl::set_fft_window(const gr::fft::window::win_type win)
+{
+	if (win == this->d_fft_window)	/* Reloading FFT window takes time */
+		return;			/* avoid doing it if possible */
+
+	this->d_fft_window = win;
+	this->settings_mark_changed(SETTING_FFT_WINDOW);
 }
 
 

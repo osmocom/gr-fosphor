@@ -120,7 +120,7 @@ endif (QT_FOUND)
 ########################################################################
 # Find gnuradio build dependencies
 ########################################################################
-set(GR_REQUIRED_COMPONENTS RUNTIME)
+set(GR_REQUIRED_COMPONENTS RUNTIME FFT)
 find_package(Gnuradio 3.7 REQUIRED)
 
 find_package(CppUnit)

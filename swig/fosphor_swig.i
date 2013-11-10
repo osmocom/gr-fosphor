@@ -13,6 +13,9 @@
 #include "gnuradio/fosphor/wx_core_sink_c.h"
 %}
 
+%typemap(in) gr::fft::window::win_type {
+        $1 = (gr::fft::window::win_type)(PyInt_AsLong($input));
+}
 
 %include "gnuradio/fosphor/base_sink_c.h"
 

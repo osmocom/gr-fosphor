@@ -25,6 +25,7 @@
 #include <gnuradio/fosphor/api.h>
 
 #include <gnuradio/sync_block.h>
+#include <gnuradio/fft/window.h>
 
 namespace gr {
   namespace fosphor {
@@ -53,6 +54,8 @@ namespace gr {
                                        const double span) = 0;
       virtual void set_frequency_center(const double center) = 0;
       virtual void set_frequency_span(const double span) = 0;
+
+      virtual void set_fft_window(const gr::fft::window::win_type win) = 0;
     };
 
   } // namespace fosphor

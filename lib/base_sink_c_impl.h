@@ -61,6 +61,7 @@ namespace gr {
         SETTING_DIMENSIONS	= (1 << 0),
         SETTING_POWER_RANGE	= (1 << 1),
         SETTING_FREQUENCY_RANGE	= (1 << 2),
+        SETTING_FFT_WINDOW	= (1 << 3),
       };
 
       uint32_t d_settings_changed;
@@ -82,6 +83,8 @@ namespace gr {
         double center;
         double span;
       } d_frequency;
+
+      gr::fft::window::win_type d_fft_window;
 
      protected:
       base_sink_c_impl();
@@ -105,6 +108,8 @@ namespace gr {
                                const double span);
       void set_frequency_center(const double center);
       void set_frequency_span(const double span);
+
+      void set_fft_window(const gr::fft::window::win_type win);
 
       /* gr::sync_block implementation */
       int work (int noutput_items,

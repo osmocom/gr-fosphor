@@ -6,12 +6,46 @@
   <import>from PyQt4 import Qt</import>
   <import>import sip</import>
   <import>from gnuradio import fosphor</import>
+  <import>from gnuradio.fft import window</import>
   <make>#set $win = 'self._%s_win'%$id
 fosphor.qt_sink_c()
+self.$(id).set_fft_window($wintype)
 self.$(id).set_frequency_range($freq_center, $freq_span)
 self._$(id)_win = sip.wrapinstance(self.$(id).pyqwidget(), Qt.QWidget)
 $(gui_hint()($win))</make>
+  <callback>set_fft_window($wintype)</callback>
   <callback>set_frequency_range($freq_center, $freq_span)</callback>
+  <param>
+    <name>Window Type</name>
+    <key>wintype</key>
+    <value>window.WIN_BLACKMAN_hARRIS</value>
+    <type>int</type>
+    <hide>part</hide>
+    <option>
+      <name>Blackman-harris</name>
+      <key>window.WIN_BLACKMAN_hARRIS</key>
+    </option>
+    <option>
+      <name>Hamming</name>
+      <key>window.WIN_HAMMING</key>
+    </option>
+    <option>
+      <name>Hann</name>
+      <key>window.WIN_HANN</key>
+    </option>
+    <option>
+      <name>Blackman</name>
+      <key>window.WIN_BLACKMAN</key>
+    </option>
+    <option>
+      <name>Rectangular</name>
+      <key>window.WIN_RECTANGULAR</key>
+    </option>
+    <option>
+      <name>Kaiser</name>
+      <key>window.WIN_KAISER</key>
+    </option>
+  </param>
   <param>
     <name>Center Frequency (Hz)</name>
     <key>freq_center</key>
