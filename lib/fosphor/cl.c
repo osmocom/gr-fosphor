@@ -606,6 +606,9 @@ fosphor_cl_release(struct fosphor *self)
 
 	/* Release structure */
 	free(cl);
+
+	/* Nothing left */
+	self->cl = NULL;
 }
 
 int

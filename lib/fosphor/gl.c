@@ -253,6 +253,9 @@ fosphor_gl_release(struct fosphor *self)
 
 	/* Release structure */
 	free(gl);
+
+	/* Nothing left */
+	self->gl = NULL;
 }
 
 
