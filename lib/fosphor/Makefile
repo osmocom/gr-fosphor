@@ -23,4 +23,4 @@ resource_data.c: $(RESOURCE_FILES) mkresources.py
 main: resource.o resource_data.o axis.o cl.o fosphor.o gl.o gl_cmap.o gl_cmap_gen.o gl_font.o main.o
 
 clean:
-	rm main *.o resource_data.c -f
+	rm -f main *.o resource_data.c
