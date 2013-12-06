@@ -28,6 +28,7 @@ find_package(PythonInterp 2)
 add_custom_command(
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/fosphor
   OUTPUT fosphor/resource_data.c
+  DEPENDS fosphor/fft.cl fosphor/display.cl fosphor/cmap_simple.glsl fosphor/cmap_bicubic.glsl fosphor/cmap_fallback.glsl fosphor/DroidSansMonoDotted.ttf
   COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/fosphor/
   COMMAND cp llist.h resource_internal.h ${CMAKE_CURRENT_BINARY_DIR}/fosphor/
   COMMAND ${PYTHON_EXECUTABLE} -B mkresources.py fft.cl display.cl cmap_simple.glsl cmap_bicubic.glsl cmap_fallback.glsl DroidSansMonoDotted.ttf > ${CMAKE_CURRENT_BINARY_DIR}/fosphor/resource_data.c
