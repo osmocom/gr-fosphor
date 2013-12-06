@@ -2,15 +2,15 @@ if(NOT GLFW3_FOUND)
   INCLUDE(FindPkgConfig)
   pkg_check_modules (GLFW3_PKG glfw3)
   find_path(GLFW3_INCLUDE_DIRS NAMES GLFW/glfw3.h
+    HINTS ${GLFW3_PKG_INCLUDE_DIRS}
     PATHS
-    ${GLFW3_PKG_INCLUDE_DIRS}
     /usr/include
     /usr/local/include
   )
 
   find_library(GLFW3_LIBRARIES NAMES glfw3 glfw
+    HINTS ${GLFW3_PKG_LIBRARY_DIRS}
     PATHS
-    ${GLFW3_PKG_LIBRARY_DIRS}
     /usr/lib
     /usr/local/lib
   )

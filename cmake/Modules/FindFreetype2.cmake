@@ -2,15 +2,15 @@ if(NOT FREETYPE2_FOUND)
   INCLUDE(FindPkgConfig)
   pkg_check_modules (FREETYPE2_PKG freetype2)
   find_path(FREETYPE2_INCLUDE_DIRS NAMES freetype/freetype.h
+    HINTS ${FREETYPE2_PKG_INCLUDE_DIRS}
     PATHS
-    ${FREETYPE2_PKG_INCLUDE_DIRS}
     /usr/include/freetype2
     /usr/local/include/freetype2
   )
 
   find_library(FREETYPE2_LIBRARIES NAMES freetype
+    HINTS ${FREETYPE2_PKG_LIBRARY_DIRS}
     PATHS
-    ${FREETYPE2_PKG_LIBRARY_DIRS}
     /usr/lib
     /usr/local/lib
   )
