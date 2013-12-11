@@ -246,6 +246,8 @@ glfw_init(void)
 
 	/* Window init */
 	wnd = glfwCreateWindow(1024, 1024, "Fosphor test", NULL, NULL);
+	if (!wnd)
+		return NULL;
 
 	glfwMakeContextCurrent(wnd);
 
@@ -281,7 +283,8 @@ glfw_cleanup(GLFWwindow *wnd)
 
 int main(int argc, char *argv[])
 {
-	GLFWwindow *wnd;
+	GLFWwindow *wnd = NULL;
+	int rv;
 
 	/* Open source file */
 	if (argc == 2) {
@@ -298,8 +301,10 @@ int main(int argc, char *argv[])
 	}
 
 	g_as->src_buf = malloc(2 * sizeof(float) * FOSPHOR_FFT_LEN * FOSPHOR_FFT_MAX_BATCH);
-	if (!g_as->src_buf)
-		return -ENOMEM;
+	if (!g_as->src_buf) {
+		rv = -ENOMEM;
+		goto error;
+	}
 
 	/* Init our state */
 	g_as->db_per_div_idx = 3;
@@ -307,11 +312,19 @@ int main(int argc, char *argv[])
 
 	/* Init GLFW */
 	wnd = glfw_init();
+	if (!wnd) {
+		fprintf(stderr, "[!] Failed to initialize GLFW window\n");
+		rv = -EIO;
+		goto error;
+	}
 
 	/* Init fosphor */
 	g_as->fosphor = fosphor_init();
-	if (!g_as->fosphor)
-		return -1;
+	if (!g_as->fosphor) {
+		fprintf(stderr, "[!] Failed to initialize fosphor\n");
+		rv = -EIO;
+		goto error;
+	}
 
 	fosphor_set_power_range(g_as->fosphor, g_as->db_ref, k_db_per_div[g_as->db_per_div_idx]);
 
@@ -322,13 +335,18 @@ int main(int argc, char *argv[])
 		glfwPollEvents();
 	}
 
-	/* Cleanup */
-	fosphor_release(g_as->fosphor);
+	rv = 0;
 
-	glfw_cleanup(wnd);
+	/* Cleanup */
+error:
+	if (g_as->fosphor)
+		fosphor_release(g_as->fosphor);
+
+	if (wnd)
+		glfw_cleanup(wnd);
 
 	free(g_as->src_buf);
 	fclose(g_as->src_fh);
 
-	return 0;
+	return rv;
 }
