@@ -27,6 +27,7 @@
  *  \brief OpenCL base routines
  */
 
+#include <ctype.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -58,6 +59,7 @@ struct fosphor_cl_features
 #define FLG_CL_LOCAL_ATOMIC_EXT	(1<<3)
 
 	cl_device_type type;
+	char vendor[32];
 	int local_mem;
 	int flags;
 	int wg_size;
@@ -128,6 +130,11 @@ cl_device_query(cl_device_id dev_id, struct fosphor_cl_features *feat)
 
 	/* Device type */
 	err = clGetDeviceInfo(dev_id, CL_DEVICE_TYPE, sizeof(cl_device_type), &feat->type, NULL);
+	if (err != CL_SUCCESS)
+		return -1;
+
+	/* Vendor */
+	err = clGetDeviceInfo(dev_id, CL_DEVICE_VENDOR, sizeof(feat->vendor)-1, &feat->vendor, NULL);
 	if (err != CL_SUCCESS)
 		return -1;
 
@@ -223,9 +230,22 @@ cl_device_score(cl_device_id dev_id, struct fosphor_cl_features *feat)
 	if (!(feat->flags & (FLG_CL_NVIDIA_SM11 | FLG_CL_OPENCL_11 | FLG_CL_LOCAL_ATOMIC_EXT)))
 		return -1;
 
-	/* Prefer GPU */
+	/* Prefer GPU (preferrably NVidia / AMD) */
 	if (feat->type == CL_DEVICE_TYPE_GPU)
+	{
+		char vendor[sizeof(feat->vendor)];
+		int i;
+
 		score += 1000;
+
+		for (i=0; i<sizeof(feat->vendor); i++)
+			vendor[i] = tolower(feat->vendor[i]);
+
+		if (strstr(vendor, "nvidia") ||
+		    strstr(vendor, "advanced micro devices") ||
+		    strstr(vendor, "amd"))
+			score += 500;
+	}
 
 	/* Bigger local mem */
 	score += (feat->local_mem >> 10);
