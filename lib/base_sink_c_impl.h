@@ -94,6 +94,7 @@ namespace gr {
       virtual void glctx_poll() = 0;
       virtual void glctx_swap() = 0;
       virtual void glctx_fini() = 0;
+      virtual void glctx_update() = 0;
 
       /* Callbacks from GL window */
       void cb_reshape(int width, int height);

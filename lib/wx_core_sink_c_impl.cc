@@ -31,19 +31,25 @@ namespace gr {
   namespace fosphor {
 
 wx_core_sink_c::sptr
-wx_core_sink_c::make(PyObject *cb_init, PyObject *cb_fini, PyObject *cb_swap)
+wx_core_sink_c::make(PyObject *cb_init, PyObject *cb_fini,
+                     PyObject *cb_swap, PyObject *cb_update)
 {
-	return gnuradio::get_initial_sptr(new wx_core_sink_c_impl(cb_init, cb_fini, cb_swap));
+	return gnuradio::get_initial_sptr(
+		new wx_core_sink_c_impl(cb_init, cb_fini, cb_swap, cb_update)
+	);
 }
 
-wx_core_sink_c_impl::wx_core_sink_c_impl(PyObject *cb_init, PyObject *cb_fini, PyObject *cb_swap)
+wx_core_sink_c_impl::wx_core_sink_c_impl(PyObject *cb_init, PyObject *cb_fini,
+                                         PyObject *cb_swap, PyObject *cb_update)
   : base_sink_c("wx_core_sink_c"),
-    d_cb_init(cb_init), d_cb_fini(cb_fini), d_cb_swap(cb_swap)
+    d_cb_init(cb_init), d_cb_fini(cb_fini),
+    d_cb_swap(cb_swap), d_cb_update(cb_update)
 {
 	/* Make sure we keep reference to callbacks */
 	Py_INCREF(this->d_cb_init);
 	Py_INCREF(this->d_cb_fini);
 	Py_INCREF(this->d_cb_swap);
+	Py_INCREF(this->d_cb_update);
 }
 
 wx_core_sink_c_impl::~wx_core_sink_c_impl()
@@ -52,6 +58,7 @@ wx_core_sink_c_impl::~wx_core_sink_c_impl()
 	Py_DECREF(this->d_cb_init);
 	Py_DECREF(this->d_cb_fini);
 	Py_DECREF(this->d_cb_swap);
+	Py_DECREF(this->d_cb_update);
 }
 
 
@@ -97,6 +104,12 @@ void
 wx_core_sink_c_impl::glctx_fini()
 {
 	this->pycall(this->d_cb_fini);
+}
+
+void
+wx_core_sink_c_impl::glctx_update()
+{
+	this->pycall(this->d_cb_update);
 }
 
 

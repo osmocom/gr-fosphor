@@ -143,6 +143,12 @@ glfw_sink_c_impl::glctx_fini()
 	glfwTerminate();
 }
 
+void
+glfw_sink_c_impl::glctx_update()
+{
+	/* Nothing to do for GLFW */
+}
+
 
   } /* namespace fosphor */
 } /* namespace gr */

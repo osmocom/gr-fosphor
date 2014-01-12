@@ -174,7 +174,10 @@ base_sink_c_impl::settings_get_and_reset_changed(void)
 void
 base_sink_c_impl::settings_apply(uint32_t settings)
 {
-	if (settings & SETTING_DIMENSIONS) {
+	if (settings & SETTING_DIMENSIONS)
+	{
+		this->glctx_update();
+
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 

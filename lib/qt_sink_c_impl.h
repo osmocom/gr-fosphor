@@ -48,6 +48,7 @@ namespace gr {
       void glctx_swap();
       void glctx_poll();
       void glctx_fini();
+      void glctx_update();
 
      public:
       qt_sink_c_impl(QWidget *parent=NULL);

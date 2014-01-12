@@ -56,7 +56,8 @@ class wx_sink_c(gr.hier_block2):
         self._gl_ctx = None
 
         # Create the underlying WX sink core
-        self.sink = wx_core_sink_c(self._glctx_init, self._glctx_fini, self._glctx_swap)
+        self.sink = wx_core_sink_c(self._glctx_init, self._glctx_fini,
+                                   self._glctx_swap, self._glctx_update)
         self.connect(self, self.sink)
 
     def _evt_size(self, evt):
@@ -85,6 +86,9 @@ class wx_sink_c(gr.hier_block2):
 
     def _glctx_swap(self):
         self.win.SwapBuffers()
+
+    def _glctx_update(self):
+        self.win.SetCurrent(self._gl_ctx)
 
     def __getattr__(self, attr):
         try:

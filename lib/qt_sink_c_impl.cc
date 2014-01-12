@@ -86,6 +86,12 @@ qt_sink_c_impl::glctx_fini()
 	this->d_gui->doneCurrent();
 }
 
+void
+qt_sink_c_impl::glctx_update()
+{
+	this->d_gui->makeCurrent();
+}
+
 
 #ifdef ENABLE_PYTHON
 PyObject*

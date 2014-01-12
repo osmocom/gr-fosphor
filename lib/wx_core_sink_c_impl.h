@@ -42,6 +42,7 @@ namespace gr {
       PyObject *d_cb_init;
       PyObject *d_cb_fini;
       PyObject *d_cb_swap;
+      PyObject *d_cb_update;
 
      protected:
       /* Delegated implementation of GL context management */
@@ -49,9 +50,11 @@ namespace gr {
       void glctx_swap();
       void glctx_poll();
       void glctx_fini();
+      void glctx_update();
 
      public:
-      wx_core_sink_c_impl(PyObject *cb_init, PyObject *cb_fini, PyObject *cb_swap);
+      wx_core_sink_c_impl(PyObject *cb_init, PyObject *cb_fini,
+                          PyObject *cb_swap, PyObject *cb_update);
       ~wx_core_sink_c_impl();
 
       void pycb_reshape(int width, int height);

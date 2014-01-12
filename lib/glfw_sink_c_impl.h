@@ -54,6 +54,7 @@ namespace gr {
       void glctx_swap();
       void glctx_poll();
       void glctx_fini();
+      void glctx_update();
 
      public:
       glfw_sink_c_impl();

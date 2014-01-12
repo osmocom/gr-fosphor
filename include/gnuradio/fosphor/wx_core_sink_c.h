@@ -47,7 +47,8 @@ namespace gr {
        * class. fosphor::wx_core_sink_c::make is the public interface for
        * creating new instances.
        */
-      static sptr make(PyObject *cb_init, PyObject *cb_fini, PyObject *cb_swap);
+      static sptr make(PyObject *cb_init, PyObject *cb_fini,
+                       PyObject *cb_swap, PyObject *cb_update);
 
       virtual void pycb_reshape(int width, int height) = 0;
     };
