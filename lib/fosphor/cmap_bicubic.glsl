@@ -125,6 +125,7 @@ vec4 bicubic(sampler2D tex_id, vec2 tex_coord)
 	vec2  tex_scale = 1.0 / vec2(tex_size);
 
 	tex_coord *= tex_size;
+	tex_coord -= vec2(0.5,0.5);
 
 	float fx = fract(tex_coord.x);
 	float fy = fract(tex_coord.y);
