@@ -22,11 +22,11 @@
 struct app_state
 {
 	struct fosphor *fosphor;
+	struct fosphor_render render;
 
 	FILE *src_fh;
 	void *src_buf;
 
-	int w, h;
 	int db_ref, db_per_div_idx;
 };
 
@@ -177,7 +177,7 @@ glfw_render(GLFWwindow *wnd)
 	}
 
 	/* Draw fosphor */
-	fosphor_draw(g_as->fosphor, g_as->w, g_as->h);
+	fosphor_draw(g_as->fosphor, &g_as->render);
 
 	/* Done, swap buffer */
 	glfwSwapBuffers(wnd);
@@ -198,8 +198,10 @@ glfw_cb_reshape(GLFWwindow *wnd, int w, int h)
 
 	glViewport(0, 0, w, h);
 
-	g_as->w = w;
-	g_as->h = h;
+	g_as->render.width  = w;
+	g_as->render.height = h;
+
+	fosphor_render_refresh(&g_as->render);
 }
 
 static void
@@ -325,6 +327,8 @@ int main(int argc, char *argv[])
 		rv = -EIO;
 		goto error;
 	}
+
+	fosphor_render_defaults(&g_as->render);
 
 	fosphor_set_power_range(g_as->fosphor, g_as->db_ref, k_db_per_div[g_as->db_per_div_idx]);
 

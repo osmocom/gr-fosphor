@@ -36,6 +36,7 @@
 #include "gl_platform.h"
 
 #include "axis.h"
+#include "fosphor.h"
 #include "gl.h"
 #include "gl_cmap.h"
 #include "gl_cmap_gen.h"
@@ -286,90 +287,192 @@ fosphor_gl_get_shared_id(struct fosphor *self,
 
 
 void
-fosphor_gl_draw(struct fosphor *self, int w, int h, int wf_pos)
+fosphor_gl_draw(struct fosphor *self, struct fosphor_render *render)
 {
 	struct fosphor_gl_state *gl = self->gl;
 	struct freq_axis freq_axis;
-	float x_div_width, y_div_width;
-	float x[2], y[4];
+	float x[2], y[2], u[2], v[2];
+	float tw, bw;
 	int i;
 
-	/* Dimensions */
-	x_div_width = (float)((w - 50) / 10);
-	x[0] = 40.0f;
-	x[1] = x[0] + 10.0f * x_div_width + 1.0f;
+	/* Utils */
+	tw = 1.0f / (float)FOSPHOR_FFT_LEN;	/* Texel width */
+	bw = 1.0f / (float)(FOSPHOR_FFT_LEN-1);	/* Bin width (displayed) */
 
-	y_div_width = (float)((h - 30) / 20);
-	y[3] = (float)h - 10.0f;
-	y[2] = y[3] - 10.0f * y_div_width - 1.0f;
-	y[1] = y[2] - 20.0f;
-	y[0] = 10.0f;
+	/* Texture mapping notes:
+	 *
+	 *  - The texture have the "DC" bin at texel 0, however we want it to
+	 *    be displayed centered and to do so, texture coordinates are used.
+	 *  - One of the bin is not displayed (the one at u=0.5f) because
+	 *    it is neither positive freq, nor negative ones, but both. To
+	 *    compensate for this, the (1.0f - tw) factor is used.
+	 *
+	 * Vertex mapping notes:
+	 *
+	 *  - We want the vertex to appear at the center of the displayed bins
+	 *  - The vertex 'X' coordinates are filled in by the display kernel as
+	 *    ((bin #) ^ (N >> 1)) / (N >> 1) - 1
+	 *  - So the DC bin is 0.0f and the undisplayed bin is -1. The others
+	 *    are spread between [ -1+2*tw  to  1-2*tw ]
+	 *  - For display, that range is first remapped to [0 to 1], then to
+	 *    [ bw/2 to 1-bw/2 ] (where bw is normalized displayed bin width)
+	 *    so that each point maps to the center of the bin on the textures.
+	 *  - Finally the zoom is applied and then the transform to map on the
+	 *    requested screen area
+	 */
 
         /* Draw waterfall */
-        float v = (float)wf_pos / 1024.0f;
+	if (render->options & FRO_WATERFALL)
+	{
+		x[0] = render->_x[0];
+		x[1] = render->_x[1];
 
-	fosphor_gl_cmap_enable(gl->cmap_ctx,
-	                       gl->tex_waterfall, gl->cmap_waterfall,
-	                       self->power.scale, self->power.offset,
-	                       GL_CMAP_MODE_BILINEAR);
+		y[0] = render->_y_wf[0];
+		y[1] = render->_y_wf[1];
 
-        glBegin( GL_QUADS );
-        glTexCoord2f(0.5f, v - 1.0f); glVertex2f(x[0], y[0]);
-        glTexCoord2f(1.5f, v - 1.0f); glVertex2f(x[1], y[0]);
-        glTexCoord2f(1.5f, v);        glVertex2f(x[1], y[1]);
-        glTexCoord2f(0.5f, v);        glVertex2f(x[0], y[1]);
-        glEnd();
+		u[0] = 0.5f + tw + ((1.0f - tw) * render->freq_start);
+		u[1] = 0.5f + tw + ((1.0f - tw) * render->freq_stop);
 
-	fosphor_gl_cmap_disable();
+		v[1] = (float)render->_wf_pos / 1024.0f;
+		v[0] = v[1] - render->wf_span;
 
-        /* Draw histogram */
-	fosphor_gl_cmap_enable(gl->cmap_ctx,
-	                       gl->tex_histogram, gl->cmap_histogram,
-	                       1.1f, 0.0f, GL_CMAP_MODE_BILINEAR);
+		fosphor_gl_cmap_enable(gl->cmap_ctx,
+		                       gl->tex_waterfall, gl->cmap_waterfall,
+		                       self->power.scale, self->power.offset,
+		                       GL_CMAP_MODE_BILINEAR);
 
-        glBegin( GL_QUADS );
-        glTexCoord2f(0.5f, 0.0f); glVertex2f(x[0], y[2]);
-        glTexCoord2f(1.5f, 0.0f); glVertex2f(x[1], y[2]);
-        glTexCoord2f(1.5f, 1.0f); glVertex2f(x[1], y[3]);
-        glTexCoord2f(0.5f, 1.0f); glVertex2f(x[0], y[3]);
-        glEnd();
+		glBegin( GL_QUADS );
+		glTexCoord2f(u[0], v[0]); glVertex2f(x[0], y[0]);
+		glTexCoord2f(u[1], v[0]); glVertex2f(x[1], y[0]);
+		glTexCoord2f(u[1], v[1]); glVertex2f(x[1], y[1]);
+		glTexCoord2f(u[0], v[1]); glVertex2f(x[0], y[1]);
+		glEnd();
 
-	fosphor_gl_cmap_disable();
+		fosphor_gl_cmap_disable();
+	}
 
-        /* Draw spectrum */
-        glPushMatrix();
+	/* Draw histogram */
+	if (render->options & FRO_HISTO)
+	{
+		x[0] = render->_x[0];
+		x[1] = render->_x[1];
 
-        glTranslatef(x[0], y[2], 0.0f);
-	glScalef((x[1] - x[0]) / 2.0f, y[3] - y[2], 1.0f);
+		y[0] = render->_y_histo[0];
+		y[1] = render->_y_histo[1];
 
-        glScalef(1.0f, self->power.scale, 1.0f);
-        glTranslatef(1.0f, self->power.offset, 0.0f);
+		u[0] = 0.5f + tw + ((1.0f - tw) * render->freq_start);
+		u[1] = 0.5f + tw + ((1.0f - tw) * render->freq_stop);
 
-        glBindBuffer(GL_ARRAY_BUFFER, gl->vbo_spectrum);
-        glVertexPointer(2, GL_FLOAT, 0, 0);
+		v[0] = 0.0f;
+		v[1] = 1.0f;
 
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glEnable(GL_LINE_SMOOTH);
-        glLineWidth(1.0f);
+		fosphor_gl_cmap_enable(gl->cmap_ctx,
+		                       gl->tex_histogram, gl->cmap_histogram,
+		                       1.1f, 0.0f, GL_CMAP_MODE_BILINEAR);
 
-                /* Live */
-        glColor4f(1.0f, 1.0f, 1.0f, 0.75f);
+		glBegin( GL_QUADS );
+		glTexCoord2f(u[0], v[0]); glVertex2f(x[0], y[0]);
+		glTexCoord2f(u[1], v[0]); glVertex2f(x[1], y[0]);
+		glTexCoord2f(u[1], v[1]); glVertex2f(x[1], y[1]);
+		glTexCoord2f(u[0], v[1]); glVertex2f(x[0], y[1]);
+		glEnd();
 
-        glEnableClientState(GL_VERTEX_ARRAY);
-        glDrawArrays(GL_LINE_STRIP, 0, FOSPHOR_FFT_LEN);
-        glDisableClientState(GL_VERTEX_ARRAY);
+		fosphor_gl_cmap_disable();
+	}
+	else if (render->options & (FRO_LIVE | FRO_MAX_HOLD))
+	{
+		x[0] = render->_x[0];
+		x[1] = render->_x[1];
 
-                /* Max hold */
-        glColor4f(1.0f, 0.0f, 0.0f, 0.75f);
+		y[0] = render->_y_histo[0];
+		y[1] = render->_y_histo[1];
 
-        glEnableClientState(GL_VERTEX_ARRAY);
-        glDrawArrays(GL_LINE_STRIP, FOSPHOR_FFT_LEN, FOSPHOR_FFT_LEN);
-        glDisableClientState(GL_VERTEX_ARRAY);
+		glColor3f(0.0f, 0.0f, 0.1f);
 
-        glDisable(GL_BLEND);
+		glBegin( GL_QUADS );
+		glVertex2f(x[0], y[0]);
+		glVertex2f(x[1], y[0]);
+		glVertex2f(x[1], y[1]);
+		glVertex2f(x[0], y[1]);
+		glEnd();
+	}
 
-        glPopMatrix();
+	/* Draw spectrum */
+	if (render->options & (FRO_LIVE | FRO_MAX_HOLD))
+	{
+		int idx[2], len;
+
+		/* Select end-points */
+		idx[0] = 1 + (int)ceilf (render->freq_start * (float)(FOSPHOR_FFT_LEN - 1) - 0.5f);
+		idx[1] = 1 + (int)floorf(render->freq_stop  * (float)(FOSPHOR_FFT_LEN - 1) - 0.5f);
+		len = idx[1] - idx[0] + 1;
+
+		/* Setup */
+		glPushMatrix();
+
+			/* Screen position scaling */
+		glTranslatef(
+			render->_x[0],
+			render->_y_histo[0],
+			0.0f
+		);
+
+		glScalef(
+			render->_x[1] - render->_x[0],
+			render->_y_histo[1] - render->_y_histo[0],
+			1.0f
+		);
+
+			/* Power offset / scaling */
+		glScalef(1.0f, self->power.scale, 1.0f);
+		glTranslatef(0.0f, self->power.offset, 0.0f);
+
+			/* Spectrum range selection */
+		glScalef(1.0f / (render->freq_stop - render->freq_start), 1.0f, 1.0f);
+		glTranslatef(-render->freq_start, 0.0f, 0.0f);
+
+			/* Map the center of each N-1 bins */
+		glTranslatef(0.5f * bw, 0.0f, 0.0f);
+		glScalef(1.0f - bw, 1.0f, 1.0f);
+
+			/* Spectrum x scaling to [0.0 -> 1.0] range */
+		glTranslatef(0.5f, 0.0f, 0.0f);
+		glScalef(0.5f / (1.0f - 2.0f * tw), 1.0f, 1.0f);
+
+			/* GL state setup */
+		glBindBuffer(GL_ARRAY_BUFFER, gl->vbo_spectrum);
+		glVertexPointer(2, GL_FLOAT, 0, 0);
+
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_LINE_SMOOTH);
+		glLineWidth(1.0f);
+
+		/* Live */
+		if (render->options & FRO_LIVE)
+		{
+			glColor4f(1.0f, 1.0f, 1.0f, 0.75f);
+
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glDrawArrays(GL_LINE_STRIP, idx[0], len);
+			glDisableClientState(GL_VERTEX_ARRAY);
+		}
+
+		/* Max hold */
+		if (render->options & FRO_MAX_HOLD)
+		{
+			glColor4f(1.0f, 0.0f, 0.0f, 0.75f);
+
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glDrawArrays(GL_LINE_STRIP, idx[0] + FOSPHOR_FFT_LEN, len);
+			glDisableClientState(GL_VERTEX_ARRAY);
+		}
+
+		/* Cleanup */
+		glDisable(GL_BLEND);
+
+		glPopMatrix();
+	}
 
 	/* Setup frequency axis */
 	freq_axis_build(&freq_axis,
@@ -378,50 +481,57 @@ fosphor_gl_draw(struct fosphor *self, int w, int h, int wf_pos)
 	);
 
 	/* Draw grid */
-	for (i=0; i<11; i++)
+	if (render->options & (FRO_LIVE | FRO_MAX_HOLD | FRO_HISTO))
 	{
-		float fg_color[3] = { 1.00f, 1.00f, 0.33f };
-		float xv, yv, xv_ofs;
-		char buf[32];
+		for (i=0; i<11; i++)
+		{
+			float fg_color[3] = { 1.00f, 1.00f, 0.33f };
+			float xv, yv, xv_ofs;
+			char buf[32];
 
-		xv = x[0] + x_div_width * i;
-		yv = y[2] + y_div_width * i;
+			xv = render->_x[0]       + i * render->_x_div;
+			yv = render->_y_histo[0] + i * render->_y_histo_div;
 
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
 
-		glBegin(GL_LINES);
-		glVertex2f(xv + 0.5f, y[2]+0.5f);
-		glVertex2f(xv + 0.5f, y[3]-0.5f);
-		glEnd();
+			glBegin(GL_LINES);
+			glVertex2f(xv + 0.5f, render->_y_histo[0]+0.5f);
+			glVertex2f(xv + 0.5f, render->_y_histo[1]-0.5f);
+			glEnd();
 
-		glBegin(GL_LINES);
-		glVertex2f(x[0] + 0.5f, yv + 0.5f);
-		glVertex2f(x[1] - 0.5f, yv + 0.5f);
-		glEnd();
+			glBegin(GL_LINES);
+			glVertex2f(render->_x[0] + 0.5f, yv + 0.5f);
+			glVertex2f(render->_x[1] - 0.5f, yv + 0.5f);
+			glEnd();
 
-		glDisable(GL_BLEND);
+			glDisable(GL_BLEND);
 
-		glf_begin(gl->font, fg_color);
+			glf_begin(gl->font, fg_color);
 
-		glf_printf(gl->font,
-		           x[0] - 5.0f, GLF_RIGHT,
-		           yv, GLF_CENTER,
-		           "%d", self->power.db_ref - (10-i) * self->power.db_per_div
-		);
+			if (render->options & FRO_LABEL_PWR) {
+				glf_printf(gl->font,
+				           render->_x_label, GLF_RIGHT,
+				           yv, GLF_CENTER,
+				           "%d", self->power.db_ref - (10-i) * self->power.db_per_div
+				);
+			}
 
-		freq_axis_render(&freq_axis, buf, i-5);
+			if (render->options & FRO_LABEL_FREQ) {
+				freq_axis_render(&freq_axis, buf, i-5);
 
-		xv_ofs = (i == 0) ? 5.0f : (i == 10 ? -5.0f : 0.0f);
+				xv_ofs = (i == 0) ? 5.0f : (i == 10 ? -5.0f : 0.0f);
 
-		glf_printf(gl->font,
-			   xv + xv_ofs, GLF_CENTER,
-			   y[2] - 10.0f, GLF_CENTER,
-			   "%s", buf
-		);
+				glf_printf(gl->font,
+				           xv + xv_ofs, GLF_CENTER,
+				           render->_y_label, GLF_CENTER,
+				           "%s", buf
+				);
+			}
 
-		glf_end();
+			glf_end();
+		}
 	}
 
 	/* Ensure GL is done */

@@ -33,6 +33,7 @@
 #include "gl_platform.h"
 
 struct fosphor;
+struct fosphor_render;
 
 int  fosphor_gl_init(struct fosphor *self);
 void fosphor_gl_release(struct fosphor *self);
@@ -47,7 +48,7 @@ enum fosphor_gl_id {
 GLuint fosphor_gl_get_shared_id(struct fosphor *self,
                                 enum fosphor_gl_id id);
 
-void fosphor_gl_draw(struct fosphor *self, int w, int h, int wf_pos);
+void fosphor_gl_draw(struct fosphor *self, struct fosphor_render *render);
 
 /*! @} */
 

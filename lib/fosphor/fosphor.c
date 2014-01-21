@@ -91,10 +91,10 @@ fosphor_process(struct fosphor *self, void *samples, int len)
 }
 
 void
-fosphor_draw(struct fosphor *self, int w, int h)
+fosphor_draw(struct fosphor *self, struct fosphor_render *render)
 {
-	int wf_pos = fosphor_cl_get_waterfall_position(self);
-	fosphor_gl_draw(self, w, h, wf_pos);
+	render->_wf_pos = fosphor_cl_get_waterfall_position(self);
+	fosphor_gl_draw(self, render);
 }
 
 
@@ -149,6 +149,111 @@ fosphor_set_frequency_range(struct fosphor *self, double center, double span)
 {
 	self->frequency.center = center;
 	self->frequency.span   = span;
+}
+
+
+void
+fosphor_render_defaults(struct fosphor_render *render)
+{
+	render->pos_x  = 0;
+	render->pos_y  = 0;
+	render->width  = 1024;
+	render->height = 1024;
+
+	render->options =
+		FRO_LIVE	|
+		FRO_MAX_HOLD	|
+		FRO_HISTO	|
+		FRO_WATERFALL	|
+		FRO_LABEL_FREQ	|
+		FRO_LABEL_PWR	|
+		FRO_LABEL_TIME;
+
+	render->histo_wf_ratio = 0.5f;
+	render->freq_start     = 0.0f;
+	render->freq_stop      = 1.0f;
+	render->wf_span        = 1.0f;
+}
+
+void
+fosphor_render_refresh(struct fosphor_render *render)
+{
+	int disp_spectrum, disp_waterfall;
+	int avail, div, rsvd;
+	float over, y_top, y_bot;
+
+	/* Which screen zone ? */
+	disp_spectrum  = !!(render->options & (FRO_LIVE | FRO_MAX_HOLD | FRO_HISTO));
+	disp_waterfall = !!(render->options & FRO_WATERFALL);
+
+	/* Split the X space */
+	if (render->options & (FRO_LABEL_PWR | FRO_LABEL_TIME))
+		rsvd = 50;
+	else
+		rsvd = 20;
+
+	avail = render->width - rsvd;
+	div   = avail / 10;
+	over  = avail - (10 * div);
+
+	render->_x_div = (float)div;
+	render->_x[0] = render->pos_x + (float)(rsvd - 10) + (float)(over / 2);
+	render->_x[1] = render->_x[0] + (10.0f * render->_x_div) + 1.0f;
+	render->_x_label = render->_x[0] - 5.0f;
+
+	/* Split the Y space */
+	y_top = render->pos_y + (float)render->height - 10.0f;
+	y_bot = render->pos_y + 10.0f;
+
+	if (disp_spectrum)
+	{
+		/* Spacing */
+		rsvd = 10;
+		if (disp_spectrum)			rsvd += 10;
+		if (disp_waterfall)			rsvd += 10;
+		if (render->options & FRO_LABEL_FREQ)	rsvd += 10;
+
+		/* Divisions */
+		if (disp_waterfall) {
+			avail = (int)((float)(render->height - rsvd) * render->histo_wf_ratio);
+			div   = avail / 10;
+			over  = 0;
+		} else {
+			avail = render->height - rsvd;
+			div   = avail / 10;
+			over  = avail - (10 * div);
+		}
+
+		render->_y_histo_div = (float)div;
+		render->_y_histo[1]  = y_top - (float)(over / 2);
+		render->_y_histo[0]  = render->_y_histo[1] - (10.0f * render->_y_histo_div) - 1.0f;
+
+		y_top = render->_y_histo[0] - (float)(over / 2) - 10.0f;
+	} else {
+		render->_y_histo_div = 0.0f;
+		render->_y_histo[1]  = 0.0f;
+		render->_y_histo[0]  = 0.0f;
+	}
+
+	if (render->options & FRO_LABEL_FREQ) {
+		if (render->options & FRO_HISTO) {
+			render->_y_label = y_top;
+			y_top -= 10.0f;
+		} else {
+			render->_y_label = y_bot;
+			y_bot += 10.0f;
+		}
+	} else {
+		render->_y_label = 0.0f;
+	}
+
+	if (disp_waterfall) {
+		render->_y_wf[1] = y_top;
+		render->_y_wf[0] = y_bot;
+	} else {
+		render->_y_wf[1] = 0.0f;
+		render->_y_wf[0] = 0.0f;
+	}
 }
 
 /*! @} */
