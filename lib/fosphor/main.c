@@ -22,12 +22,18 @@
 struct app_state
 {
 	struct fosphor *fosphor;
-	struct fosphor_render render;
+	struct fosphor_render render_main;
+	struct fosphor_render render_zoom;
 
 	FILE *src_fh;
 	void *src_buf;
 
+	int w, h;
+
 	int db_ref, db_per_div_idx;
+	float ratio;
+	double zoom_width, zoom_center;
+	int zoom_enable;
 };
 
 static struct app_state _g_as, *g_as = &_g_as;
@@ -177,10 +183,66 @@ glfw_render(GLFWwindow *wnd)
 	}
 
 	/* Draw fosphor */
-	fosphor_draw(g_as->fosphor, &g_as->render);
+	fosphor_draw(g_as->fosphor, &g_as->render_main);
+
+	if (g_as->zoom_enable)
+		fosphor_draw(g_as->fosphor, &g_as->render_zoom);
 
 	/* Done, swap buffer */
 	glfwSwapBuffers(wnd);
+}
+
+static void
+_update_fosphor(void)
+{
+	float f;
+
+	/* Configure the screen zones */
+	if (g_as->zoom_enable)
+	{
+		int a = (int)(g_as->w * 0.65f);
+
+		g_as->render_main.width  = a;
+		g_as->render_main.height = g_as->h;
+
+		g_as->render_zoom.pos_x  = a - 10;
+		g_as->render_zoom.width  = g_as->w - a + 10;
+		g_as->render_zoom.height = g_as->h;
+	}
+	else
+	{
+		g_as->render_main.width  = g_as->w;
+		g_as->render_main.height = g_as->h;
+	}
+
+	g_as->render_main.histo_wf_ratio = g_as->ratio;
+	g_as->render_zoom.histo_wf_ratio = g_as->ratio;
+
+	/* Only render channels when there is a zoom */
+	if (g_as->zoom_enable)
+		g_as->render_main.options |= FRO_CHANNELS;
+	else
+		g_as->render_main.options &= ~FRO_CHANNELS;
+
+	/* Set the zoom */
+	g_as->render_main.channels[0].enabled = g_as->zoom_enable;
+	g_as->render_main.channels[0].center  = (float)g_as->zoom_center;
+	g_as->render_main.channels[0].width   = (float)g_as->zoom_width;
+
+	f = (float)(g_as->zoom_center - g_as->zoom_width / 2.0);
+	g_as->render_zoom.freq_start = f > 0.0f ? (f < 1.0f ? f : 1.0f)  : 0.0f;
+
+	f = (float)(g_as->zoom_center + g_as->zoom_width / 2.0);
+	g_as->render_zoom.freq_stop  = f > 0.0f ? (f < 1.0f ? f : 1.0f)  : 0.0f;
+
+	/* Update render options */
+	fosphor_render_refresh(&g_as->render_main);
+	fosphor_render_refresh(&g_as->render_zoom);
+
+	/* Set other fosphor params */
+	if (g_as->fosphor) {
+		fosphor_set_power_range(g_as->fosphor, g_as->db_ref, k_db_per_div[g_as->db_per_div_idx]);
+	}
 }
 
 static void
@@ -198,16 +260,16 @@ glfw_cb_reshape(GLFWwindow *wnd, int w, int h)
 
 	glViewport(0, 0, w, h);
 
-	g_as->render.width  = w;
-	g_as->render.height = h;
+	g_as->w = w;
+	g_as->h = h;
 
-	fosphor_render_refresh(&g_as->render);
+	_update_fosphor();
 }
 
 static void
 glfw_cb_key(GLFWwindow *wnd, int key, int scancode, int action, int mods)
 {
-	if (action != GLFW_PRESS)
+	if (action != GLFW_PRESS && action != GLFW_REPEAT)
 		return;
 
 	switch (key)
@@ -233,9 +295,39 @@ glfw_cb_key(GLFWwindow *wnd, int key, int scancode, int action, int mods)
 		if (g_as->db_per_div_idx < 4)
 			g_as->db_per_div_idx++;
 		break;
+
+	case GLFW_KEY_W:
+		g_as->zoom_width *= 2.0;
+		break;
+
+	case GLFW_KEY_S:
+		g_as->zoom_width /= 2.0;
+		break;
+
+	case GLFW_KEY_A:
+		g_as->zoom_center -= g_as->zoom_width / 8.0;
+		break;
+
+	case GLFW_KEY_D:
+		g_as->zoom_center += g_as->zoom_width / 8.0;
+		break;
+
+	case GLFW_KEY_Z:
+		g_as->zoom_enable ^= 1;
+		break;
+
+	case GLFW_KEY_Q:
+		if (g_as->ratio < 0.8f)
+			g_as->ratio += 0.1f;
+		break;
+
+	case GLFW_KEY_E:
+		if (g_as->ratio > 0.2f)
+			g_as->ratio -= 0.1f;
+		break;
 	}
 
-	fosphor_set_power_range(g_as->fosphor, g_as->db_ref, k_db_per_div[g_as->db_per_div_idx]);
+	_update_fosphor();
 }
 
 static GLFWwindow *
@@ -311,6 +403,9 @@ int main(int argc, char *argv[])
 	/* Init our state */
 	g_as->db_per_div_idx = 3;
 	g_as->db_ref = 0;
+	g_as->ratio = 0.5f;
+	g_as->zoom_center = 0.5;
+	g_as->zoom_width  = 0.2;
 
 	/* Init GLFW */
 	wnd = glfw_init();
@@ -328,7 +423,12 @@ int main(int argc, char *argv[])
 		goto error;
 	}
 
-	fosphor_render_defaults(&g_as->render);
+	fosphor_render_defaults(&g_as->render_main);
+	fosphor_render_defaults(&g_as->render_zoom);
+	g_as->render_zoom.options &= ~(FRO_LABEL_PWR | FRO_LABEL_TIME);
+
+	g_as->render_main.histo_wf_ratio = 0.35f;
+	g_as->render_zoom.histo_wf_ratio = 0.35f;
 
 	fosphor_set_power_range(g_as->fosphor, g_as->db_ref, k_db_per_div[g_as->db_per_div_idx]);
 
