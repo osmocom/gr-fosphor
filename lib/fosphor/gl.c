@@ -534,6 +534,110 @@ fosphor_gl_draw(struct fosphor *self, struct fosphor_render *render)
 		}
 	}
 
+	/* Draw channels */
+	if (render->options & FRO_CHANNELS)
+	{
+		struct {
+			int   dir;
+			float pos;
+		} pt[2*FOSPHOR_MAX_CHANNELS+2], tpt;
+
+		int i, j, n;
+
+		/* Generate the points from the channels */
+		n = 2;
+
+		pt[0].dir = -1; pt[0].pos = 0.0f;
+		pt[1].dir =  1; pt[1].pos = 1.0f;
+
+		for (i=0; i<FOSPHOR_MAX_CHANNELS; i++)
+		{
+			float f;
+
+			if (!render->channels[i].enabled)
+				continue;
+
+			f = render->channels[i].center
+				- render->channels[i].width / 2.0f;
+			pt[n].dir = 1;
+			pt[n].pos = (f > 0.0f) ? (f < 1.0f ? f : 1.0f) : 0.0f;
+			n++;
+
+			f = render->channels[i].center
+				+ render->channels[i].width / 2.0f;
+
+			pt[n].dir = -1;
+			pt[n].pos = (f > 0.0f) ? (f < 1.0f ? f : 1.0f) : 0.0f;
+			n++;
+		}
+
+		/* Only if there is something to do ... */
+		if (n > 2)
+		{
+			int l = pt[0].dir;
+
+			/* GL setup */
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+			glPushMatrix();
+
+			glTranslatef(render->_x[0], 0.0f, 0.0f);
+			glScalef(render->_x[1] - render->_x[0], 1.0f, 1.0f);
+
+			/* Sort and draw at the same time */
+			for (i=1; i<n; i++)
+			{
+				int mi = i;
+
+				/* Find min index */
+				for (j=i+1; j<n; j++) {
+					if (pt[j].pos < pt[mi].pos)
+						mi = j;
+				}
+
+				/* Swap */
+				tpt    = pt[i];
+				pt[i]  = pt[mi];
+				pt[mi] = tpt;
+
+				/* Draw */
+				if ((pt[i-1].pos != pt[i].pos) && (l != 0))
+				{
+					if (l < 0)
+						glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
+					else
+						glColor4f(1.0f, 1.0f, 1.0f, 0.2f - 0.2f / (1 + l));
+
+					if (render->options & FRO_WATERFALL) {
+						glBegin( GL_QUADS );
+						glVertex2f(pt[i  ].pos, render->_y_histo[0]);
+						glVertex2f(pt[i-1].pos, render->_y_histo[0]);
+						glVertex2f(pt[i-1].pos, render->_y_histo[1]);
+						glVertex2f(pt[i  ].pos, render->_y_histo[1]);
+						glEnd();
+					}
+
+					if (render->options & (FRO_LIVE | FRO_MAX_HOLD | FRO_HISTO)) {
+						glBegin( GL_QUADS );
+						glVertex2f(pt[i  ].pos, render->_y_wf[0]);
+						glVertex2f(pt[i-1].pos, render->_y_wf[0]);
+						glVertex2f(pt[i-1].pos, render->_y_wf[1]);
+						glVertex2f(pt[i  ].pos, render->_y_wf[1]);
+						glEnd();
+					}
+				}
+
+				l += pt[i].dir;
+			}
+
+			/* GL cleanup */
+			glPopMatrix();
+
+			glDisable(GL_BLEND);
+		}
+	}
+
 	/* Ensure GL is done */
 	glFinish();
 }

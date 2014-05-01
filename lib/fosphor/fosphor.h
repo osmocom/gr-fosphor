@@ -52,6 +52,15 @@ void fosphor_set_frequency_range(struct fosphor *self,
 
 /* Render */
 
+#define FOSPHOR_MAX_CHANNELS	8
+
+struct fosphor_channel
+{
+	int   enabled;		/*!< \brief Showed (1) or hidden (0) */
+	float center;		/*!< \brief Normalized center frequency */
+	float width;		/*!< \brief Normalized bandwidth */
+};
+
 #define FRO_LIVE	(1<<0)	/*!< \brief Display live spectrum */
 #define FRO_MAX_HOLD	(1<<1)	/*!< \brief Display max-hold spectrum */
 #define FRO_HISTO	(1<<2)	/*!< \brief Display histogram */
@@ -59,6 +68,7 @@ void fosphor_set_frequency_range(struct fosphor *self,
 #define FRO_LABEL_FREQ	(1<<4)	/*!< \brief Display frequency labels */
 #define FRO_LABEL_PWR	(1<<5)	/*!< \brief Display power labels */
 #define FRO_LABEL_TIME	(1<<6)	/*!< \brief Display time labels */
+#define FRO_CHANNELS	(1<<7)	/*!< \brief Display channels */
 
 /*! \brief fosphor render options */
 struct fosphor_render
@@ -73,6 +83,9 @@ struct fosphor_render
 	float freq_start;	/*!< \brief Frequency zoom start [0,1[ */
 	float freq_stop;	/*!< \brief Frequency zoom stop  ]0,1] */
 	float wf_span;		/*!< \brief Waterfall time zoom  ]0,1] */
+
+		/* \brief Displayed channels */
+	struct fosphor_channel channels[FOSPHOR_MAX_CHANNELS];
 
 	/* Private fields */
 	int   _wf_pos;		/*!< \brief (private) Waterfall position */
