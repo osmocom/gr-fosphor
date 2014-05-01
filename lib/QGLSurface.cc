@@ -74,6 +74,27 @@ QGLSurface::keyPressEvent(QKeyEvent *ke)
 	case Qt::Key_Right:
 		this->d_block->execute_ui_action(qt_sink_c_impl::DB_PER_DIV_UP);
 		break;
+	case Qt::Key_Z:
+		this->d_block->execute_ui_action(qt_sink_c_impl::ZOOM_TOGGLE);
+		break;
+	case Qt::Key_W:
+		this->d_block->execute_ui_action(qt_sink_c_impl::ZOOM_WIDTH_UP);
+		break;
+	case Qt::Key_S:
+		this->d_block->execute_ui_action(qt_sink_c_impl::ZOOM_WIDTH_DOWN);
+		break;
+	case Qt::Key_D:
+		this->d_block->execute_ui_action(qt_sink_c_impl::ZOOM_CENTER_UP);
+		break;
+	case Qt::Key_A:
+		this->d_block->execute_ui_action(qt_sink_c_impl::ZOOM_CENTER_DOWN);
+		break;
+	case Qt::Key_Q:
+		this->d_block->execute_ui_action(qt_sink_c_impl::RATIO_UP);
+		break;
+	case Qt::Key_E:
+		this->d_block->execute_ui_action(qt_sink_c_impl::RATIO_DOWN);
+		break;
 	}
 }
 

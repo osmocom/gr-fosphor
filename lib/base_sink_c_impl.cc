@@ -53,15 +53,27 @@ const int base_sink_c_impl::k_db_per_div[] = {1, 2, 5, 10, 20};
 
 
 base_sink_c_impl::base_sink_c_impl()
-  : d_db_ref(0), d_db_per_div_idx(3), d_active(false),
+  : d_db_ref(0), d_db_per_div_idx(3),
+    d_zoom_enabled(false), d_zoom_center(0.5), d_zoom_width(0.2),
+    d_ratio(0.35f), d_active(false),
     d_frequency(), d_fft_window(gr::fft::window::WIN_BLACKMAN_hARRIS)
 {
 	/* Init FIFO */
 	this->d_fifo = new fifo(2 * 1024 * 1024);
+
+	/* Init render options */
+	this->d_render_main = new fosphor_render();
+	fosphor_render_defaults(this->d_render_main);
+
+	this->d_render_zoom = new fosphor_render();
+	fosphor_render_defaults(this->d_render_zoom);
+	this->d_render_zoom->options &= ~(FRO_LABEL_PWR | FRO_LABEL_TIME);
 }
 
 base_sink_c_impl::~base_sink_c_impl()
 {
+	delete this->d_render_zoom;
+	delete this->d_render_main;
 	delete this->d_fifo;
 }
 
@@ -148,7 +160,10 @@ base_sink_c_impl::render(void)
 	}
 
 	/* Draw */
-	fosphor_draw(this->d_fosphor, this->d_width, this->d_height);
+	fosphor_draw(this->d_fosphor, this->d_render_main);
+
+	if (this->d_zoom_enabled)
+		fosphor_draw(this->d_fosphor, this->d_render_zoom);
 
 	/* Done, swap buffer */
 	this->glctx_swap();
@@ -207,6 +222,43 @@ base_sink_c_impl::settings_apply(uint32_t settings)
 			gr::fft::window::build(this->d_fft_window, 1024, 6.76);
 		fosphor_set_fft_window(this->d_fosphor, window.data());
 	}
+
+	if (settings & (SETTING_DIMENSIONS | SETTING_RENDER_OPTIONS))
+	{
+		float f;
+
+		if (this->d_zoom_enabled) {
+			int a = (int)(this->d_width * 0.65f);
+			this->d_render_main->width = a;
+			this->d_render_main->options |= FRO_CHANNELS;
+			this->d_render_zoom->pos_x = a - 10;
+			this->d_render_zoom->width = this->d_width - a + 10;
+		} else {
+			this->d_render_main->width = this->d_width;
+			this->d_render_main->options &= ~FRO_CHANNELS;
+		}
+
+		this->d_render_main->height = this->d_height;
+		this->d_render_zoom->height = this->d_height;
+
+		this->d_render_main->histo_wf_ratio = this->d_ratio;
+		this->d_render_zoom->histo_wf_ratio = this->d_ratio;
+
+		this->d_render_main->channels[0].enabled = this->d_zoom_enabled;
+		this->d_render_main->channels[0].center  = (float)this->d_zoom_center;
+		this->d_render_main->channels[0].width   = (float)this->d_zoom_width;
+
+		f = (float)(this->d_zoom_center - this->d_zoom_width / 2.0);
+		this->d_render_zoom->freq_start =
+			f > 0.0f ? (f < 1.0f ? f : 1.0f) : 0.0f;
+
+		f = (float)(this->d_zoom_center + this->d_zoom_width / 2.0);
+		this->d_render_zoom->freq_stop =
+			f > 0.0f ? (f < 1.0f ? f : 1.0f) : 0.0f;
+
+		fosphor_render_refresh(this->d_render_main);
+		fosphor_render_refresh(this->d_render_zoom);
+	}
 }
 
 
@@ -240,9 +292,46 @@ base_sink_c_impl::execute_ui_action(enum ui_action_t action)
 	case REF_DOWN:
 		this->d_db_ref -= k_db_per_div[this->d_db_per_div_idx];
 		break;
+
+	case ZOOM_TOGGLE:
+		this->d_zoom_enabled ^= 1;
+		break;
+
+	case ZOOM_WIDTH_UP:
+		if (this->d_zoom_enabled)
+			this->d_zoom_width *= 2.0;
+		break;
+
+	case ZOOM_WIDTH_DOWN:
+		if (this->d_zoom_enabled)
+			this->d_zoom_width /= 2.0;
+		break;
+
+	case ZOOM_CENTER_UP:
+		if (this->d_zoom_enabled)
+			this->d_zoom_center += this->d_zoom_width / 8.0;
+		break;
+
+	case ZOOM_CENTER_DOWN:
+		if (this->d_zoom_enabled)
+			this->d_zoom_center -= this->d_zoom_width / 8.0;
+		break;
+
+	case RATIO_UP:
+		if (this->d_ratio < 0.8f)
+			this->d_ratio += 0.05f;
+		break;
+
+	case RATIO_DOWN:
+		if (this->d_ratio > 0.2f)
+			this->d_ratio -= 0.05f;
+		break;
 	}
 
-	this->settings_mark_changed(SETTING_POWER_RANGE);
+	this->settings_mark_changed(
+		SETTING_POWER_RANGE |
+		SETTING_RENDER_OPTIONS
+	);
 }
 
 void

@@ -46,6 +46,13 @@ namespace gr {
         DB_PER_DIV_DOWN,
         REF_UP,
         REF_DOWN,
+	ZOOM_TOGGLE,
+	ZOOM_WIDTH_UP,
+	ZOOM_WIDTH_DOWN,
+	ZOOM_CENTER_UP,
+	ZOOM_CENTER_DOWN,
+	RATIO_UP,
+	RATIO_DOWN,
       };
 
       virtual void execute_ui_action(enum ui_action_t action) = 0;

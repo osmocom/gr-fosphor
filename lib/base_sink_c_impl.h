@@ -29,6 +29,7 @@
 #include <gnuradio/fosphor/base_sink_c.h>
 
 struct fosphor;
+struct fosphor_render;
 
 namespace gr {
   namespace fosphor {
@@ -53,6 +54,8 @@ namespace gr {
       fifo *d_fifo;
 
       struct fosphor *d_fosphor;
+      struct fosphor_render *d_render_main;
+      struct fosphor_render *d_render_zoom;
 
       void render();
 
@@ -62,6 +65,7 @@ namespace gr {
         SETTING_POWER_RANGE	= (1 << 1),
         SETTING_FREQUENCY_RANGE	= (1 << 2),
         SETTING_FFT_WINDOW	= (1 << 3),
+	SETTING_RENDER_OPTIONS	= (1 << 4),
       };
 
       uint32_t d_settings_changed;
@@ -78,6 +82,12 @@ namespace gr {
       static const int k_db_per_div[];
       int d_db_ref;
       int d_db_per_div_idx;
+
+      bool  d_zoom_enabled;
+      double d_zoom_center;
+      double d_zoom_width;
+
+      float d_ratio;
 
       struct {
         double center;

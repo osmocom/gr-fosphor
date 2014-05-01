@@ -66,19 +66,47 @@ glfw_sink_c_impl::glfw_cb_key(int key, int scancode, int action, int mods)
 		break;
 
 	case GLFW_KEY_UP:
-		this->base_sink_c_impl::execute_ui_action(REF_DOWN);
+		this->execute_ui_action(REF_DOWN);
 		break;
 
 	case GLFW_KEY_DOWN:
-		this->base_sink_c_impl::execute_ui_action(REF_UP);
+		this->execute_ui_action(REF_UP);
 		break;
 
 	case GLFW_KEY_LEFT:
-		this->base_sink_c_impl::execute_ui_action(DB_PER_DIV_DOWN);
+		this->execute_ui_action(DB_PER_DIV_DOWN);
 		break;
 
 	case GLFW_KEY_RIGHT:
-		this->base_sink_c_impl::execute_ui_action(DB_PER_DIV_UP);
+		this->execute_ui_action(DB_PER_DIV_UP);
+		break;
+
+	case GLFW_KEY_Z:
+		this->execute_ui_action(ZOOM_TOGGLE);
+		break;
+
+	case GLFW_KEY_W:
+		this->execute_ui_action(ZOOM_WIDTH_UP);
+		break;
+
+	case GLFW_KEY_S:
+		this->execute_ui_action(ZOOM_WIDTH_DOWN);
+		break;
+
+	case GLFW_KEY_D:
+		this->execute_ui_action(ZOOM_CENTER_UP);
+		break;
+
+	case GLFW_KEY_A:
+		this->execute_ui_action(ZOOM_CENTER_DOWN);
+		break;
+
+	case GLFW_KEY_Q:
+		this->execute_ui_action(RATIO_UP);
+		break;
+
+	case GLFW_KEY_E:
+		this->execute_ui_action(RATIO_DOWN);
 		break;
 	}
 }

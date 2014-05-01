@@ -64,15 +64,24 @@ class wx_sink_c(gr.hier_block2):
         self.sink.pycb_reshape(*evt.GetSize())
 
     def _evt_key_down(self, evt):
+        actions = {
+            wx.WXK_UP:      base_sink_c.REF_DOWN,
+            wx.WXK_DOWN:    base_sink_c.REF_UP,
+            wx.WXK_LEFT:    base_sink_c.DB_PER_DIV_DOWN,
+            wx.WXK_RIGHT:   base_sink_c.DB_PER_DIV_UP,
+            ord('Z'):       base_sink_c.ZOOM_TOGGLE,
+            ord('W'):       base_sink_c.ZOOM_WIDTH_UP,
+            ord('S'):       base_sink_c.ZOOM_WIDTH_DOWN,
+            ord('D'):       base_sink_c.ZOOM_CENTER_UP,
+            ord('A'):       base_sink_c.ZOOM_CENTER_DOWN,
+            ord('Q'):       base_sink_c.RATIO_UP,
+            ord('E'):       base_sink_c.RATIO_DOWN,
+        }
+
         k = evt.GetKeyCode()
-        if k == wx.WXK_UP:
-            self.sink.execute_ui_action(base_sink_c.REF_DOWN)
-        elif k == wx.WXK_DOWN:
-            self.sink.execute_ui_action(base_sink_c.REF_UP)
-        elif k == wx.WXK_LEFT:
-            self.sink.execute_ui_action(base_sink_c.DB_PER_DIV_DOWN)
-        elif k == wx.WXK_RIGHT:
-            self.sink.execute_ui_action(base_sink_c.DB_PER_DIV_UP)
+
+        if k in actions:
+            self.sink.execute_ui_action(actions[k])
         else:
             evt.Skip()
 
