@@ -551,6 +551,9 @@ cl_do_release(struct fosphor_cl_state *cl)
 	if (cl->prog_fft)
 		clReleaseProgram(cl->prog_fft);
 
+	if (cl->mem_fft_win)
+		clReleaseMemObject(cl->mem_fft_win);
+
 	if (cl->mem_fft_out)
 		clReleaseMemObject(cl->mem_fft_out);
 
