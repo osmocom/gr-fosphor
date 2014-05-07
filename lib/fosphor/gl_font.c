@@ -330,6 +330,19 @@ _glf_add_char(const struct gl_font *glf, float *data, char c, float x)
 	#undef VTX
 }
 
+float
+glf_width_str(const struct gl_font *glf, const char *str)
+{
+	float xb = 0.0f;
+	int i;
+
+	for (i=0; str[i]; i++) {
+		xb += (float)glf->glyphs[str[i] - GLF_MIN_CHR].advance_x;
+	}
+
+	return xb;
+}
+
 void
 glf_draw_str(const struct gl_font *glf,
              float x, enum glf_align x_align,

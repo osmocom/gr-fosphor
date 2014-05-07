@@ -50,6 +50,8 @@ void glf_free(struct gl_font *glf);
 int glf_load_face_file(struct gl_font *glf, const char *filename);
 int glf_load_face_mem(struct gl_font *glf, const void *data, size_t len);
 
+float glf_width_str(const struct gl_font *glf, const char *str);
+
 void glf_draw_str(const struct gl_font *glf,
                   float x, enum glf_align x_align,
                   float y, enum glf_align y_align,
