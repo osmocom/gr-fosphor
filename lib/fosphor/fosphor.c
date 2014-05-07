@@ -170,6 +170,7 @@ fosphor_render_defaults(struct fosphor_render *render)
 		FRO_LABEL_TIME;
 
 	render->histo_wf_ratio = 0.5f;
+	render->freq_n_div     = 10;
 	render->freq_start     = 0.0f;
 	render->freq_stop      = 1.0f;
 	render->wf_span        = 1.0f;
@@ -192,13 +193,19 @@ fosphor_render_refresh(struct fosphor_render *render)
 	else
 		rsvd = 20;
 
+	render->freq_n_div = ((int)(render->width - rsvd) / 80) & ~1;
+	if (render->freq_n_div > 10)
+		render->freq_n_div = 10;
+	if (render->freq_n_div < 2)
+		render->freq_n_div = 2;
+
 	avail = render->width - rsvd;
-	div   = avail / 10;
-	over  = avail - (10 * div);
+	div   = avail / render->freq_n_div;
+	over  = avail - (render->freq_n_div * div);
 
 	render->_x_div = (float)div;
 	render->_x[0] = render->pos_x + (float)(rsvd - 10) + (float)(over / 2);
-	render->_x[1] = render->_x[0] + (10.0f * render->_x_div) + 1.0f;
+	render->_x[1] = render->_x[0] + (render->freq_n_div * render->_x_div) + 1.0f;
 	render->_x_label = render->_x[0] - 5.0f;
 
 	/* Split the Y space */

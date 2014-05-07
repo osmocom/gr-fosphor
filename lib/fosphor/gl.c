@@ -478,7 +478,7 @@ fosphor_gl_draw(struct fosphor *self, struct fosphor_render *render)
 	freq_axis_build(&freq_axis,
 	                self->frequency.center,
 	                self->frequency.span,
-			10
+	                render->freq_n_div
 	);
 
 	/* Draw grid */
@@ -487,11 +487,42 @@ fosphor_gl_draw(struct fosphor *self, struct fosphor_render *render)
 		for (i=0; i<11; i++)
 		{
 			float fg_color[3] = { 1.00f, 1.00f, 0.33f };
-			float xv, yv, xv_ofs;
+			float yv;
+
+			yv = render->_y_histo[0] + i * render->_y_histo_div;
+
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
+
+			glBegin(GL_LINES);
+			glVertex2f(render->_x[0] + 0.5f, yv + 0.5f);
+			glVertex2f(render->_x[1] - 0.5f, yv + 0.5f);
+			glEnd();
+
+			glDisable(GL_BLEND);
+
+			if (render->options & FRO_LABEL_PWR)
+			{
+				glf_begin(gl->font, fg_color);
+
+				glf_printf(gl->font,
+				           render->_x_label, GLF_RIGHT,
+				           yv, GLF_CENTER,
+				           "%d", self->power.db_ref - (10-i) * self->power.db_per_div
+				);
+
+				glf_end();
+			}
+		}
+
+		for (i=0; i<=render->freq_n_div; i++)
+		{
+			float fg_color[3] = { 1.00f, 1.00f, 0.33f };
+			float xv, xv_ofs, xv_ofs_total;
 			char buf[32];
 
-			xv = render->_x[0]       + i * render->_x_div;
-			yv = render->_y_histo[0] + i * render->_y_histo_div;
+			xv = render->_x[0] + i * render->_x_div;
 
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -502,36 +533,32 @@ fosphor_gl_draw(struct fosphor *self, struct fosphor_render *render)
 			glVertex2f(xv + 0.5f, render->_y_histo[1]-0.5f);
 			glEnd();
 
-			glBegin(GL_LINES);
-			glVertex2f(render->_x[0] + 0.5f, yv + 0.5f);
-			glVertex2f(render->_x[1] - 0.5f, yv + 0.5f);
-			glEnd();
-
 			glDisable(GL_BLEND);
 
-			glf_begin(gl->font, fg_color);
+			freq_axis_render(&freq_axis, buf,  (render->freq_n_div / 2));
+			xv_ofs_total  = glf_width_str(gl->font, buf);
+			freq_axis_render(&freq_axis, buf, -(render->freq_n_div / 2));
+			xv_ofs_total += glf_width_str(gl->font, buf);
+			xv_ofs_total /= 2.0f;
 
-			if (render->options & FRO_LABEL_PWR) {
-				glf_printf(gl->font,
-				           render->_x_label, GLF_RIGHT,
-				           yv, GLF_CENTER,
-				           "%d", self->power.db_ref - (10-i) * self->power.db_per_div
-				);
-			}
+			if (render->options & FRO_LABEL_FREQ)
+			{
+				int ib = i - (render->freq_n_div / 2);
 
-			if (render->options & FRO_LABEL_FREQ) {
-				freq_axis_render(&freq_axis, buf, i-5);
+				glf_begin(gl->font, fg_color);
 
-				xv_ofs = (i == 0) ? 5.0f : (i == 10 ? -5.0f : 0.0f);
+				freq_axis_render(&freq_axis, buf, ib);
+
+				xv_ofs = floor((- xv_ofs_total * ib) / render->freq_n_div);
 
 				glf_printf(gl->font,
 				           xv + xv_ofs, GLF_CENTER,
 				           render->_y_label, GLF_CENTER,
 				           "%s", buf
 				);
-			}
 
-			glf_end();
+				glf_end();
+			}
 		}
 	}
 
