@@ -94,18 +94,24 @@ freq_axis_build(struct freq_axis *fx, double center, double span)
 	/* Select display format for abolute frequencies */
 	if (center != 0.0)
 	{
-		double max_freq = fx->center + (span / 2.0);
+		double min_freq, max_freq, big_freq;
 		char prefix[2] = {0, 0};
 		int exp, x, y, z;
 
-		_si_scaling(max_freq, 4, prefix, &exp);
+		max_freq = fx->center + (span / 2.0);
+		min_freq = fx->center - (span / 2.0);
+
+		big_freq = (fabs(max_freq) > fabs(min_freq)) ?
+				fabs(max_freq) : fabs(min_freq);
+
+		_si_scaling(big_freq, 4, prefix, &exp);
 
 		if (prefix[0] == ' ')
 			prefix[0] = '\0';
 
 		fx->abs_scale = 1.0 / powf(10.0, exp);
 
-		x = (int)floor(log10f(max_freq)) - exp + 1;
+		x = (int)floor(log10f(big_freq)) - exp + 1;
 		y = _num_decimals(fx->center * fx->abs_scale);
 		z = _num_decimals(fx->step   * fx->abs_scale);
 
