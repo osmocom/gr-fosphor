@@ -475,11 +475,34 @@ fosphor_gl_draw(struct fosphor *self, struct fosphor_render *render)
 	}
 
 	/* Setup frequency axis */
-	freq_axis_build(&freq_axis,
-	                self->frequency.center,
-	                self->frequency.span,
-	                render->freq_n_div
-	);
+	if (render->freq_start != 0.0f || render->freq_stop != 1.0f)
+	{
+		/* The freq_{start,stop} have some imprecisions due to the floating
+		 * point nature. To avoid this crapping the display of the axis, we
+		 * try to 'round' them */
+
+		double freq_start = round(1e7 * render->freq_start) / 1e7;
+		double freq_stop  = round(1e7 * render->freq_stop)  / 1e7;
+
+		double rel_center = ((freq_stop + freq_start) / 2.0) - 0.5;
+		double rel_span   =  (freq_stop - freq_start);
+
+		freq_axis_build(&freq_axis,
+				self->frequency.center + rel_center * self->frequency.span,
+				self->frequency.span * rel_span,
+				render->freq_n_div
+		);
+	}
+	else
+	{
+		/* Use the straight number we were provider without math to
+		 * avoid any imprecisions */
+		freq_axis_build(&freq_axis,
+				self->frequency.center,
+				self->frequency.span,
+				render->freq_n_div
+		);
+	}
 
 	/* Draw grid */
 	if (render->options & (FRO_LIVE | FRO_MAX_HOLD | FRO_HISTO))
