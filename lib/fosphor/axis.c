@@ -73,12 +73,12 @@ _num_decimals(double val)
 
 
 void
-freq_axis_build(struct freq_axis *fx, double center, double span)
+freq_axis_build(struct freq_axis *fx, double center, double span, int n_div)
 {
 	/* Basic info */
 	fx->center = center;
 	fx->span   = span;
-	fx->step   = span / 10.0;
+	fx->step   = span / n_div;
 
 	/* Select mode of operation */
 	if (span == 0.0) {

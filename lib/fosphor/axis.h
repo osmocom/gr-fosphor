@@ -42,7 +42,7 @@ struct freq_axis
 	double rel_step;
 };
 
-void freq_axis_build(struct freq_axis *fx, double center, double span);
+void freq_axis_build(struct freq_axis *fx, double center, double span, int n_div);
 void freq_axis_render(struct freq_axis *fx, char *str, int step);
 
 /*! @} */

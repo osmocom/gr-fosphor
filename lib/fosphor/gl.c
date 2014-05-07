@@ -477,7 +477,8 @@ fosphor_gl_draw(struct fosphor *self, struct fosphor_render *render)
 	/* Setup frequency axis */
 	freq_axis_build(&freq_axis,
 	                self->frequency.center,
-	                self->frequency.span
+	                self->frequency.span,
+			10
 	);
 
 	/* Draw grid */
