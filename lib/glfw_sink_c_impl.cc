@@ -108,6 +108,10 @@ glfw_sink_c_impl::glfw_cb_key(int key, int scancode, int action, int mods)
 	case GLFW_KEY_E:
 		this->execute_ui_action(RATIO_DOWN);
 		break;
+
+	case GLFW_KEY_SPACE:
+		this->execute_ui_action(FREEZE_TOGGLE);
+		break;
 	}
 }
 

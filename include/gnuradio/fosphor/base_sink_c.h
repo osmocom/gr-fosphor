@@ -53,6 +53,7 @@ namespace gr {
 	ZOOM_CENTER_DOWN,
 	RATIO_UP,
 	RATIO_DOWN,
+	FREEZE_TOGGLE,
       };
 
       virtual void execute_ui_action(enum ui_action_t action) = 0;

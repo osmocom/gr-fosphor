@@ -76,6 +76,7 @@ class wx_sink_c(gr.hier_block2):
             ord('A'):       base_sink_c.ZOOM_CENTER_DOWN,
             ord('Q'):       base_sink_c.RATIO_UP,
             ord('E'):       base_sink_c.RATIO_DOWN,
+            wx.WXK_SPACE:   base_sink_c.FREEZE_TOGGLE,
         }
 
         k = evt.GetKeyCode()

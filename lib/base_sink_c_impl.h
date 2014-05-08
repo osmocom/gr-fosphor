@@ -46,6 +46,7 @@ namespace gr {
       /* Worker thread */
       gr::thread::thread d_worker;
       bool d_active;
+      bool d_frozen;
 
       void worker();
       static void _worker(base_sink_c_impl *obj);

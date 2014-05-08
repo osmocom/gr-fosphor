@@ -55,7 +55,7 @@ const int base_sink_c_impl::k_db_per_div[] = {1, 2, 5, 10, 20};
 base_sink_c_impl::base_sink_c_impl()
   : d_db_ref(0), d_db_per_div_idx(3),
     d_zoom_enabled(false), d_zoom_center(0.5), d_zoom_width(0.2),
-    d_ratio(0.35f), d_active(false),
+    d_ratio(0.35f), d_frozen(false), d_active(false),
     d_frequency(), d_fft_window(gr::fft::window::WIN_BLACKMAN_hARRIS)
 {
 	/* Init FIFO */
@@ -151,9 +151,11 @@ base_sink_c_impl::render(void)
 		if (!len)
 			break;
 
-		/* Send to process */
-		data = this->d_fifo->read_peek(len, false);
-		fosphor_process(this->d_fosphor, data, len);
+		/* Send to process (if not frozen) */
+		if (!this->d_frozen) {
+			data = this->d_fifo->read_peek(len, false);
+			fosphor_process(this->d_fosphor, data, len);
+		}
 
 		/* Discard */
 		this->d_fifo->read_discard(len);
@@ -325,6 +327,10 @@ base_sink_c_impl::execute_ui_action(enum ui_action_t action)
 	case RATIO_DOWN:
 		if (this->d_ratio > 0.2f)
 			this->d_ratio -= 0.05f;
+		break;
+
+	case FREEZE_TOGGLE:
+		this->d_frozen ^= 1;
 		break;
 	}
 

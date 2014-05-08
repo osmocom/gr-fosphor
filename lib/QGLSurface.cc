@@ -95,6 +95,9 @@ QGLSurface::keyPressEvent(QKeyEvent *ke)
 	case Qt::Key_E:
 		this->d_block->execute_ui_action(qt_sink_c_impl::RATIO_DOWN);
 		break;
+	case Qt::Key_Space:
+		this->d_block->execute_ui_action(qt_sink_c_impl::FREEZE_TOGGLE);
+		break;
 	}
 }
 
