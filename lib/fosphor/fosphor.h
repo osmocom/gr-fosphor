@@ -106,6 +106,18 @@ void fosphor_render_defaults(struct fosphor_render *render);
 void fosphor_render_refresh(struct fosphor_render *render);
 
 
+/* Position Mapping */
+
+double fosphor_pos2freq(struct fosphor *self, struct fosphor_render *render, int x);
+float  fosphor_pos2pwr (struct fosphor *self, struct fosphor_render *render, int y);
+int    fosphor_pos2samp(struct fosphor *self, struct fosphor_render *render, int y);
+int    fosphor_freq2pos(struct fosphor *self, struct fosphor_render *render, double freq);
+int    fosphor_pwr2pos (struct fosphor *self, struct fosphor_render *render, float pwr);
+int    fosphor_samp2pos(struct fosphor *self, struct fosphor_render *render, int time);
+
+int    fosphor_render_pos_inside(struct fosphor_render *render, int x, int y);
+
+
 /*! @} */
 
 #endif /* __FOSPHOR_FOSPHOR_H__ */

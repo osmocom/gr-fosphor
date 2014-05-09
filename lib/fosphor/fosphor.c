@@ -289,4 +289,114 @@ fosphor_render_refresh(struct fosphor_render *render)
 	}
 }
 
+
+/*
+ * Mapping notes:
+ *  - We consider the int x/y coordinates to be the center of that pixels
+ *    (so we add 0.5f to each to get the OpenGL coordinates)
+ *
+ *  - For frequency the OpenGL surface boundaries (so the 'thin' lines between
+ *    pixels) are defined as (center - 0.5 * span) -> (center + 0.5 * span)
+ *
+ *  - For power the center of the drawn line maps to the annotated power level
+ *
+ *  - For samples we map the first pixel line to sample 0 and the last pixel
+ *    line to fft_size * n_spectra. (That's approxiate but pretty much the
+ *    best we can do)
+ */
+
+double
+fosphor_pos2freq(struct fosphor *self, struct fosphor_render *render, int x)
+{
+	float xf = (float)x + 0.5f;
+	float xs = render->_x[1] - render->_x[0];
+	float xr = (xf - render->_x[0]) / xs;
+
+	double view_center = self->frequency.center + self->frequency.span * (double)(render->freq_center - 0.5f);
+	double view_span   = self->frequency.span * (double)render->freq_span;
+
+	return view_center + view_span * (double)(xr - 0.5f);
+}
+
+float
+fosphor_pos2pwr(struct fosphor *self, struct fosphor_render *render, int y)
+{
+	float yf = (float)y;
+	float ys = render->_y_histo[1] - render->_y_histo[0] - 1.0f;
+	float yr = (yf - render->_y_histo[0]) / ys;
+
+	return self->power.db_ref - 10.0f * self->power.db_per_div * (1.0f - yr);
+}
+
+int
+fosphor_pos2samp(struct fosphor *self, struct fosphor_render *render, int y)
+{
+	float yf = (float)y;
+	float ys = render->_y_wf[1] - render->_y_wf[0] - 1.0f;
+	float yr = (yf - render->_y_wf[0]) / ys;
+
+	return (int)((1.0f - yr) * (float)(FOSPHOR_FFT_LEN * 1024)) * render->wf_span;
+}
+
+int
+fosphor_freq2pos(struct fosphor *self, struct fosphor_render *render, double freq)
+{
+	double view_center = self->frequency.center + self->frequency.span * (double)(render->freq_center - 0.5f);
+	double view_span   = self->frequency.span * (double)render->freq_span;
+
+	double fr = ((freq - view_center) / view_span);
+	float  xs = render->_x[1] - render->_x[0];
+
+	return (int)roundf(render->_x[0] + (float)(fr + 0.5) * xs - 0.5f);
+}
+
+int
+fosphor_pwr2pos(struct fosphor *self, struct fosphor_render *render, float pwr)
+{
+	float pr = (self->power.db_ref - pwr) / (10.0f * self->power.db_per_div);
+	float ys = render->_y_histo[1] - render->_y_histo[0] - 1.0f;
+
+	return (int)roundf(render->_y_histo[0] + (1.0f - pr) * ys);
+}
+
+int
+fosphor_samp2pos(struct fosphor *self, struct fosphor_render *render, int time)
+{
+	float tf = (float)time;
+	float tr = tf / ((float)(FOSPHOR_FFT_LEN * 1024) * render->wf_span);
+	float ys = render->_y_wf[1] - render->_y_wf[0] - 1.0f;
+
+	return (int)roundf(render->_y_wf[0] + (1.0f - tr) * ys);
+}
+
+int
+fosphor_render_pos_inside(struct fosphor_render *render, int x, int y)
+{
+	int in = 0;
+	float fx = (float)x;
+	float fy = (float)y;
+
+	/* Check X */
+	if ((fx >= render->_x[0]) && (fx < render->_x[1]))
+		in |= 1;
+
+	/* Histogram */
+	if (render->options & (FRO_HISTO | FRO_LIVE | FRO_MAX_HOLD))
+	{
+		if ((fy >= render->_y_histo[0]) && (fy < render->_y_histo[1]))
+			in |= 2;
+	}
+
+	/* Waterfall */
+	if (render->options & FRO_WATERFALL)
+	{
+		if ((fy >= render->_y_wf[0]) && (fy < render->_y_wf[1]))
+			in |= 4;
+	}
+
+	/* Result */
+	return in;
+}
+
+
 /*! @} */
