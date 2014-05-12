@@ -53,6 +53,9 @@ namespace gr {
      public:
       qt_sink_c_impl(QWidget *parent=NULL);
 
+      void exec_();
+      QWidget* qwidget();
+
 #if defined(PY_VERSION) || defined(SWIGPYTHON)
       PyObject* pyqwidget();
 #else

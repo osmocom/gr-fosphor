@@ -93,6 +93,19 @@ qt_sink_c_impl::glctx_update()
 }
 
 
+void
+qt_sink_c_impl::exec_()
+{
+	d_qApplication->exec();
+}
+
+QWidget*
+qt_sink_c_impl::qwidget()
+{
+	return dynamic_cast<QWidget*>(this->d_gui);
+}
+
+
 #ifdef ENABLE_PYTHON
 PyObject*
 qt_sink_c_impl::pyqwidget()

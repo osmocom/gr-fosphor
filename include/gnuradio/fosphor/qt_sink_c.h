@@ -52,6 +52,9 @@ namespace gr {
        */
       static sptr make(QWidget *parent=NULL);
 
+      virtual void exec_() = 0;
+      virtual QWidget* qwidget() = 0;
+
 #if defined(PY_VERSION) || defined(SWIGPYTHON)
       virtual PyObject* pyqwidget() = 0;
 #else
