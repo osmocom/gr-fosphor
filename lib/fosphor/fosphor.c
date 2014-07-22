@@ -180,8 +180,8 @@ void
 fosphor_render_refresh(struct fosphor_render *render)
 {
 	int disp_spectrum, disp_waterfall;
-	int avail, div, rsvd;
-	float over, y_top, y_bot;
+	int avail, div, over, rsvd;
+	float y_top, y_bot;
 
 	/* Which screen zone ? */
 	disp_spectrum  = !!(render->options & (FRO_LIVE | FRO_MAX_HOLD | FRO_HISTO));
