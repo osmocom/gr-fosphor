@@ -4,7 +4,7 @@
  * Display OpenCL kernel. Formats the raw FFT output into GL objects we
  * use for display.
  *
- * Copyright (C) 2013 Sylvain Munaut
+ * Copyright (C) 2013-2014 Sylvain Munaut
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
