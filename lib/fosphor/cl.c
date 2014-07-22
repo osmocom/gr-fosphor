@@ -350,7 +350,7 @@ cl_load_program(cl_device_id dev_id, cl_context ctx,
 
 		bin_buf = malloc(bin_len);
 
-		clGetProgramInfo(prog, CL_PROGRAM_BINARIES, bin_len, &bin_buf, NULL );
+		clGetProgramInfo(prog, CL_PROGRAM_BINARIES, sizeof(char *), &bin_buf, NULL );
 
 		FILE *fh = fopen(name_buf, "wb");
 		if (fwrite(bin_buf, bin_len, 1, fh) != 1)
