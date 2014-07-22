@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /*
- * Copyright 2013 Sylvain Munaut <tnt@246tNt.com>
+ * Copyright 2013-2014 Sylvain Munaut <tnt@246tNt.com>
  * Copyright 2013 Dimitri Stolnikov <horiz0n@gmx.net>
  *
  * This is free software; you can redistribute it and/or modify
