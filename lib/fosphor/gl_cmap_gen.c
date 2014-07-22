@@ -268,4 +268,57 @@ fosphor_gl_cmap_png(uint32_t *rgba, int N, void *arg)
 #endif
 
 
+int
+fosphor_gl_cmap_prog(uint32_t *rgba, int N, void *arg)
+{
+	const struct {
+		float p;
+		float rgb[3];
+	} colors[] = {
+		{ .p =  0.0f, .rgb = { 0.29f, 0.00f, 0.00f } },
+		{ .p =  1.0f, .rgb = { 0.46f, 0.00f, 0.00f } },
+		{ .p =  2.0f, .rgb = { 0.62f, 0.00f, 0.00f } },
+		{ .p =  3.0f, .rgb = { 0.78f, 0.00f, 0.00f } },
+		{ .p =  4.0f, .rgb = { 1.00f, 0.00f, 0.00f } },
+		{ .p =  5.0f, .rgb = { 1.00f, 0.43f, 0.10f } },
+		{ .p =  6.0f, .rgb = { 1.00f, 1.00f, 0.00f } },
+		{ .p =  7.0f, .rgb = { 1.00f, 1.00f, 1.00f } },
+		{ .p =  8.0f, .rgb = { 0.11f, 0.56f, 1.00f } },
+		{ .p =  9.0f, .rgb = { 0.00f, 0.00f, 0.57f } },
+		{ .p = 10.0f, .rgb = { 0.00f, 0.00f, 0.31f } },
+		{ .p = 11.0f, .rgb = { 0.00f, 0.00f, 0.19f } },
+		{ .p = 12.0f, .rgb = { 0.00f, 0.00f, 0.12f } },
+	};
+
+	const int NC = 12;
+	int i;
+
+	for (i=0; i<N; i++)
+	{
+		float rgb[3];
+		float p = 1.0f - ((1.0f * i) / (N - 1));
+		float ps = p * 9.0f;
+		float m;
+		int li, j;
+
+		/* Scan for li */
+		for (li=0; li<(NC-1) && colors[li+1].p < ps; li++);
+
+		/* Linear interpolation */
+		ps -= colors[li].p;
+		ps /= colors[li+1].p - colors[li].p;
+
+		m = ps;
+
+		/* Mix */
+		for (j=0; j<3; j++)
+			rgb[j] = colors[li].rgb[j] * (1.0f - m) + colors[li+1].rgb[j] * m;
+
+		/* Set resulting color */
+		_set_rgba_from_rgb(&rgba[i], rgb[0], rgb[1], rgb[2]);
+	}
+
+	return 0;
+}
+
 /*! @} */

@@ -21,6 +21,7 @@
 
 int fosphor_gl_cmap_histogram(uint32_t *rgba, int N, void *arg);
 int fosphor_gl_cmap_waterfall(uint32_t *rgba, int N, void *arg);
+int fosphor_gl_cmap_prog(uint32_t *rgba, int N, void *arg);
 int fosphor_gl_cmap_png(uint32_t *rgba, int N, void *rsrc_name);
 
 /*! @} */
