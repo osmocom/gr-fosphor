@@ -388,7 +388,7 @@ cl_do_init(struct fosphor *self)
 	ctx_props[1] = (cl_context_properties) CGLGetShareGroup(CGLGetCurrentContext());
 	ctx_props[2] = 0;
 
-#elif defined(__WIN32__)
+#elif defined(_WIN32)
 
 		/* Win 32 variant */
 	ctx_props[0] = CL_GL_CONTEXT_KHR;
