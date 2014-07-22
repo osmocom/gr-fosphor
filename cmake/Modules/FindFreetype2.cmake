@@ -70,9 +70,9 @@ if(NOT FREETYPE2_FOUND)
     if(FREETYPE2_INCLUDE_DIR_ftheader)
       string(COMPARE EQUAL ${FREETYPE2_INCLUDE_DIR_ft2build} ${FREETYPE2_INCLUDE_DIR_ftheader} FREETYPE2_DIRS_SAME)
       if(FREETYPE2_DIRS_SAME)
-        set(FREETYPE2_INCLUDE_DIRS ${FREETYPE2_INCLUDE_DIR_ft2build})
+        set(FREETYPE2_INCLUDE_DIRS ${FREETYPE2_INCLUDE_DIR_ft2build} CACHE INTERNAL "freetype2 include directories")
       else()
-        set(FREETYPE2_INCLUDE_DIRS ${FREETYPE2_INCLUDE_DIR_ft2build};${FREETYPE2_INCLUDE_DIR_ftheader})
+        set(FREETYPE2_INCLUDE_DIRS ${FREETYPE2_INCLUDE_DIR_ft2build};${FREETYPE2_INCLUDE_DIR_ftheader} CACHE INTERNAL "freetype2 include directories")
       endif()
 
       find_library(FREETYPE2_LIBRARIES
