@@ -100,12 +100,23 @@ done:
 	rgb[2] = b;
 }
 
+static inline void
+_set_rgba_from_rgb(uint32_t *rgba, float r, float g, float b)
+{
+	unsigned char rc,gc,bc,ac;
+
+	rc = (unsigned char) roundf(r * 255.0f);
+	gc = (unsigned char) roundf(g * 255.0f);
+	bc = (unsigned char) roundf(b * 255.0f);
+	ac = 255;
+
+	*rgba = (ac << 24) | (bc << 16) | (gc << 8) | rc;
+}
 
 static inline void
 _set_rgba_from_hsv(uint32_t *rgba, float h, float s, float v)
 {
 		float hsv[3], rgb[3];
-		unsigned char r,g,b,a;
 
 		hsv[0] = h;
 		hsv[1] = s;
@@ -113,12 +124,7 @@ _set_rgba_from_hsv(uint32_t *rgba, float h, float s, float v)
 
 		_hsv2rgb(rgb, hsv);
 
-		r = (unsigned char) roundf(rgb[0] * 255.0f);
-		g = (unsigned char) roundf(rgb[1] * 255.0f);
-		b = (unsigned char) roundf(rgb[2] * 255.0f);
-		a = 255;
-
-		*rgba = (a << 24) | (b << 16) | (g << 8) | r;
+		_set_rgba_from_rgb(rgba, rgb[0], rgb[1], rgb[2]);
 }
 
 
