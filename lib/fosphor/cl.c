@@ -34,6 +34,7 @@
 #include <string.h>
 
 #include "cl_platform.h"
+#include "cl_compat.h"
 
 #if defined(__APPLE__) || defined(MAXOSX)
 # include <OpenGL/OpenGL.h>
@@ -461,7 +462,7 @@ cl_do_init(struct fosphor *self)
 
 	/* GL shared objects */
 		/* Waterfall texture */
-	cl->mem_waterfall = clCreateFromGLTexture2D(cl->ctx,
+	cl->mem_waterfall = clCreateFromGLTexture(cl->ctx,
 		CL_MEM_READ_WRITE, GL_TEXTURE_2D, 0,
 		fosphor_gl_get_shared_id(self, GL_ID_TEX_WATERFALL),
 		&err
@@ -469,7 +470,7 @@ cl_do_init(struct fosphor *self)
 	CL_ERR_CHECK(err, "Unable to share waterfall texture into OpenCL context");
 
 		/* Histogram texture */
-	cl->mem_histogram = clCreateFromGLTexture2D(cl->ctx,
+	cl->mem_histogram = clCreateFromGLTexture(cl->ctx,
 		CL_MEM_READ_WRITE, GL_TEXTURE_2D, 0,
 		fosphor_gl_get_shared_id(self, GL_ID_TEX_HISTOGRAM),
 		&err
@@ -599,6 +600,10 @@ fosphor_cl_init(struct fosphor *self)
 	CL_ERR_CHECK(err, "Unable to fetch device name");
 
 	fprintf(stderr, "[+] Selected device: %s\n", dev_name);
+
+	/* Setup compatibility layer for this platform */
+	cl_compat_init();
+	cl_compat_check_platform(cl->pl_id);
 
 	/* Initialize selected platform / device */
 	err = cl_do_init(self);

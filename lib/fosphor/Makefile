@@ -6,7 +6,7 @@ ifneq ($(AMDAPPSDKROOT), )
 CFLAGS+=-I$(AMDAPPSDKROOT)/include
 endif
 ifeq ($(UNAME), Linux)
-LDLIBS+=-lOpenCL -lGL
+LDLIBS+=-lOpenCL -lGL -ldl
 endif
 ifeq ($(UNAME), Darwin)
 LDLIBS+=-framework OpenCL -framework OpenGL -framework Cocoa -framework IOKit
@@ -20,7 +20,7 @@ all: main
 resource_data.c: $(RESOURCE_FILES) mkresources.py
 	./mkresources.py $(RESOURCE_FILES) > resource_data.c
 
-main: resource.o resource_data.o axis.o cl.o fosphor.o gl.o gl_cmap.o gl_cmap_gen.o gl_font.o main.o
+main: resource.o resource_data.o axis.o cl.o cl_compat.o fosphor.o gl.o gl_cmap.o gl_cmap_gen.o gl_font.o main.o
 
 clean:
 	rm -f main *.o resource_data.c

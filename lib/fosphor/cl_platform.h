@@ -27,22 +27,15 @@
 # define _WIN32
 #endif
 
+
 #if defined(__APPLE__) || defined(MAXOSX)
 # include <OpenCL/cl.h>
 # include <OpenCL/cl_ext.h>
 # include <OpenCL/cl_gl.h>
 # include <OpenCL/cl_gl_ext.h>
-# ifdef CL_VERSION_1_2
-#  define clCreateFromGLTexture2D clCreateFromGLTexture
-# endif
 #else
 # define CL_USE_DEPRECATED_OPENCL_1_1_APIS
 # include <CL/cl.h>
 # include <CL/cl_ext.h>
 # include <CL/cl_gl.h>
-#endif
-
-#ifndef CL_DEVICE_COMPUTE_CAPABILITY_MAJOR_NV
-# define CL_DEVICE_COMPUTE_CAPABILITY_MAJOR_NV	0x4000
-# define CL_DEVICE_COMPUTE_CAPABILITY_MINOR_NV	0x4001
 #endif
