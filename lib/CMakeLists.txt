@@ -65,6 +65,7 @@ endif(ENABLE_QT)
 list(APPEND fosphor_sources
 	fosphor/axis.c
 	fosphor/cl.c
+	fosphor/cl_compat.c
 	fosphor/fosphor.c
 	fosphor/gl.c
 	fosphor/gl_cmap.c
@@ -86,6 +87,7 @@ list(APPEND fosphor_libraries
 	${FREETYPE2_LIBRARIES}
 	${Boost_LIBRARIES}
 	${GNURADIO_ALL_LIBRARIES}
+	${CMAKE_DL_LIBS}
 )
 
 list_cond_append(ENABLE_PYTHON fosphor_libraries ${PYTHON_LIBRARY})
