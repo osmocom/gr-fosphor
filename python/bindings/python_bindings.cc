@@ -17,6 +17,7 @@ namespace py = pybind11;
 void bind_base_sink_c(py::module& m);
 void bind_glfw_sink_c(py::module& m);
 void bind_qt_sink_c(py::module& m);
+void bind_overlap_cc(py::module& m);
 
 // We need this hack because import_array() returns NULL
 // for newer Python versions.
@@ -40,4 +41,5 @@ PYBIND11_MODULE(fosphor_python, m)
 	bind_base_sink_c(m);
 	bind_glfw_sink_c(m);
 	bind_qt_sink_c(m);
+	bind_overlap_cc(m);
 }

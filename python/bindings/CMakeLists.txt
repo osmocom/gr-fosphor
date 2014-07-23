@@ -56,6 +56,7 @@ list(APPEND fosphor_python_files
     base_sink_c_python.cc
     glfw_sink_c_python.cc
     qt_sink_c_python.cc
+    overlap_cc_python.cc
     python_bindings.cc)
 
 GR_PYBIND_MAKE(fosphor

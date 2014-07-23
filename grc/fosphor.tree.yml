@@ -4,3 +4,5 @@
     - fosphor_qt_sink_c
   - GLFW:
     - fosphor_glfw_sink_c
+- Stream Operators:
+  - overlap_cc

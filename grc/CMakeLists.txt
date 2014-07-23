@@ -9,6 +9,6 @@ list_cond_append(ENABLE_GLFW fosphor_grc fosphor_glfw_sink_c.block.yml)
 list_cond_append(ENABLE_QT   fosphor_grc fosphor_qt_sink_c.block.yml)
 
 install(FILES
-    fosphor.tree.yml ${fosphor_grc}
+    fosphor.tree.yml overlap_cc.block.yml ${fosphor_grc}
     DESTINATION share/gnuradio/grc/blocks
 )

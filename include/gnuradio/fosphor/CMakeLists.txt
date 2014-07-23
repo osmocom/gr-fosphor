@@ -11,6 +11,7 @@
 list(APPEND fosphor_headers
     api.h
     base_sink_c.h
+    overlap_cc.h
 )
 
 list_cond_append(ENABLE_GLFW fosphor_headers glfw_sink_c.h)

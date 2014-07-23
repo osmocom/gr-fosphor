@@ -1,0 +1,30 @@
+id: overlap_cc
+label: FFT Overlap
+
+parameters:
+-   id: wlen
+    label: Window length
+    dtype: int
+    default: '1024'
+-   id: overlap
+    label: Overlap ratio
+    dtype: int
+    default: '1'
+
+inputs:
+-   domain: stream
+    dtype: complex
+
+outputs:
+-   domain: stream
+    dtype: complex
+
+templates:
+    imports: |-
+        from gnuradio import fosphor
+    make: |-
+        fosphor.overlap_cc(${wlen}, ${overlap})
+    callbacks:
+    - set_overlap_ratio(${overlap})
+
+file_format: 1

@@ -35,6 +35,7 @@ list(APPEND fosphor_sources
 	fosphor/resource_data.c
 	fifo.cc
 	base_sink_c_impl.cc
+	overlap_cc_impl.cc
 )
 
 list_cond_append(ENABLE_GLFW fosphor_sources glfw_sink_c_impl.cc)
