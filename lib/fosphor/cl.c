@@ -59,7 +59,7 @@ struct fosphor_cl_features
 #define FLG_CL_LOCAL_ATOMIC_EXT	(1<<3)
 
 	cl_device_type type;
-	char vendor[32];
+	char vendor[128];
 	int local_mem;
 	int flags;
 	int wg_size;
