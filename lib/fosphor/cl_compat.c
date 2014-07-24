@@ -116,6 +116,145 @@ ALT_WRAP(cl_mem,
 	);
 }
 
+ALT_WRAP(cl_mem,
+         clCreateImage,
+             (cl_context context,
+              cl_mem_flags flags,
+              const cl_image_format *image_format,
+              const cl_image_desc *image_desc,
+              void *host_ptr,
+              cl_int *errcode_ret),
+             (context, flags, image_format, image_desc, host_ptr, errcode_ret)
+)
+{
+	if (image_desc->image_type != CL_MEM_OBJECT_IMAGE2D)
+	{
+		*errcode_ret = CL_IMAGE_FORMAT_NOT_SUPPORTED;
+		return NULL;
+	}
+
+	return clCreateImage2D(
+		context,
+		flags,
+		image_format,
+		image_desc->image_width,
+		image_desc->image_height,
+		image_desc->image_row_pitch,
+		host_ptr,
+		errcode_ret
+	);
+}
+
+ALT_WRAP(cl_int,
+         clEnqueueFillBuffer,
+             (cl_command_queue command_queue,
+              cl_mem buffer,
+              const void *pattern,
+              size_t pattern_size,
+              size_t offset,
+              size_t size,
+              cl_uint num_events_in_wait_list,
+              const cl_event *event_wait_list,
+              cl_event *event),
+             (command_queue, buffer, pattern, pattern_size, offset, size,
+              num_events_in_wait_list, event_wait_list, event)
+)
+{
+	cl_int err;
+	char *buf;
+	int i;
+
+	/* Generate the pattern 'manually' */
+	buf = malloc(size);
+	if (!buf)
+		return CL_OUT_OF_RESOURCES;
+
+	for (i=0; i<size; i+=pattern_size)
+	{
+		int s = (size - i) > pattern_size ? pattern_size : (size - i);
+		memcpy(&buf[i], pattern, s);
+	}
+
+	/* Do a blocking write */
+	err = clEnqueueWriteBuffer(
+		command_queue,
+		buffer,
+		CL_TRUE,
+		offset,
+		size,
+		buf,
+		num_events_in_wait_list,
+		event_wait_list,
+		event
+	);
+
+	/* Done */
+	free(buf);
+
+	return err;
+}
+
+ALT_WRAP(cl_int,
+         clEnqueueFillImage,
+             (cl_command_queue command_queue,
+              cl_mem image,
+              const void *fill_color,
+              const size_t *origin,
+              const size_t *region,
+              cl_uint num_events_in_wait_list,
+              const cl_event *event_wait_list,
+              cl_event *event),
+             (command_queue, image, fill_color, origin, region,
+              num_events_in_wait_list, event_wait_list, event)
+)
+{
+	cl_int err;
+	cl_image_format fmt;
+	float *buf, *color = (float *)fill_color;
+	int i;
+
+	/* Grab a bunch of infos about the image */
+	err = clGetImageInfo(image, CL_IMAGE_FORMAT, sizeof(fmt), &fmt, NULL);
+	if (err != CL_SUCCESS)
+		return err;
+
+	/* Very limited replacement :p */
+	if ((fmt.image_channel_order != CL_R) ||
+	    (fmt.image_channel_data_type != CL_FLOAT))
+		return CL_IMAGE_FORMAT_NOT_SUPPORTED;
+
+	if ((origin[2] != 0) || (region[2] != 1))
+		return CL_IMAGE_FORMAT_NOT_SUPPORTED;
+
+	/* Fill a buffer manually */
+	buf = malloc(region[0] * region[1] * sizeof(float));
+	if (!buf)
+		return CL_OUT_OF_RESOURCES;
+
+	for (i=0; i<(region[0] * region[1]); i++)
+		buf[i] = color[0];
+
+	/* Do a blocking write */
+	err = clEnqueueWriteImage(
+		command_queue,
+		image,
+		CL_TRUE,
+		origin,
+		region,
+		0,
+		0,
+		buf,
+		num_events_in_wait_list,
+		event_wait_list,
+		event
+	);
+
+	/* Done */
+	free(buf);
+
+	return err;
+}
+
 
 /* -------------------------------------------------------------------------- */
 /* Compat API control                                                         */
@@ -125,6 +264,9 @@ void
 cl_compat_init(void)
 {
 	ALT_INIT(clCreateFromGLTexture)
+	ALT_INIT(clCreateImage)
+	ALT_INIT(clEnqueueFillBuffer)
+	ALT_INIT(clEnqueueFillImage)
 }
 
 void
