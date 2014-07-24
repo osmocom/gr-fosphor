@@ -230,11 +230,12 @@ cl_device_score(cl_device_id dev_id, struct fosphor_cl_features *feat)
 		return rv;
 
 	/* Check compatibility */
-	if (!(feat->flags & FLG_CL_GL_SHARING))
-		return -1;
-
 	if (!(feat->flags & (FLG_CL_NVIDIA_SM11 | FLG_CL_OPENCL_11 | FLG_CL_LOCAL_ATOMIC_EXT)))
 		return -1;
+
+	/* Prefer device with CL/GL sharing */
+	if (feat->flags & FLG_CL_GL_SHARING)
+		score += 500;
 
 	/* Prefer GPU (preferrably NVidia / AMD) */
 	if (feat->type == CL_DEVICE_TYPE_GPU)
@@ -478,6 +479,72 @@ error:
 }
 
 static int
+cl_init_buffers_nogl(struct fosphor *self)
+{
+	struct fosphor_cl_state *cl = self->cl;
+	cl_image_format img_fmt;
+	cl_image_desc img_desc;
+	cl_int err;
+
+	/* Common settings */
+	img_fmt.image_channel_order = CL_R;
+	img_fmt.image_channel_data_type = CL_FLOAT;
+
+	img_desc.image_type = CL_MEM_OBJECT_IMAGE2D;
+	img_desc.image_width = FOSPHOR_FFT_LEN;
+	img_desc.image_depth = 0;
+	img_desc.image_array_size = 0;
+	img_desc.image_row_pitch = 0;
+	img_desc.image_slice_pitch = 0;
+	img_desc.num_mip_levels = 0;
+	img_desc.num_samples = 0;
+	img_desc.buffer = NULL;
+
+	/* Waterfall texture */
+	img_desc.image_height = 1024;
+
+	cl->mem_waterfall = clCreateImage(
+		cl->ctx,
+		CL_MEM_WRITE_ONLY,
+		&img_fmt,
+		&img_desc,
+		NULL,
+		&err
+	);
+	CL_ERR_CHECK(err, "Unable to create waterfall image");
+
+	/* Histogram texture */
+	img_desc.image_height = 128;
+
+	cl->mem_histogram = clCreateImage(
+		cl->ctx,
+		CL_MEM_READ_WRITE,
+		&img_fmt,
+		&img_desc,
+		NULL,
+		&err
+	);
+	CL_ERR_CHECK(err, "Unable to create histogram image");
+
+	/* Spectrum VBO */
+	cl->mem_spectrum = clCreateBuffer(
+		cl->ctx,
+		CL_MEM_READ_WRITE,
+		2 * 2 * sizeof(cl_float) * FOSPHOR_FFT_LEN,
+		NULL,
+		&err
+	);
+	CL_ERR_CHECK(err, "Unable to create spectrum VBO buffer");
+
+	/* All done */
+	err = 0;
+
+error:
+	return err;
+}
+
+
+static int
 cl_do_init(struct fosphor *self)
 {
 	struct fosphor_cl_state *cl = self->cl;
@@ -485,37 +552,52 @@ cl_do_init(struct fosphor *self)
 	const char *disp_opts;
 	cl_int err;
 
+	/* Setup some options */
+	if ((cl->feat.type == CL_DEVICE_TYPE_GPU) &&
+	    (cl->feat.flags & FLG_CL_GL_SHARING))
+	{
+		/* Only use CLGL sharing with GPU. Most CPU impl of it will
+		 * just fail with float textures */
+		self->flags |= FLG_FOSPHOR_USE_CLGL_SHARING;
+	}
+
 	/* Context */
+	ctx_props[0] = 0;
+
+	if (self->flags & FLG_FOSPHOR_USE_CLGL_SHARING)
+	{
+		/* Setup context properties */
 #if defined(__APPLE__) || defined(MAXOSX)
 
-		/* OSX variant */
-	ctx_props[0] = CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE;
-	ctx_props[1] = (cl_context_properties) CGLGetShareGroup(CGLGetCurrentContext());
-	ctx_props[2] = 0;
+			/* OSX variant */
+		ctx_props[0] = CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE;
+		ctx_props[1] = (cl_context_properties) CGLGetShareGroup(CGLGetCurrentContext());
+		ctx_props[2] = 0;
 
 #elif defined(_WIN32)
 
-		/* Win 32 variant */
-	ctx_props[0] = CL_GL_CONTEXT_KHR;
-	ctx_props[1] = (cl_context_properties) wglGetCurrentContext();
-	ctx_props[2] = CL_WGL_HDC_KHR;
-	ctx_props[3] = (cl_context_properties) wglGetCurrentDC();
-	ctx_props[4] = CL_CONTEXT_PLATFORM;
-	ctx_props[5] = (cl_context_properties) cl->pl_id;
-	ctx_props[6] = 0;
+			/* Win 32 variant */
+		ctx_props[0] = CL_GL_CONTEXT_KHR;
+		ctx_props[1] = (cl_context_properties) wglGetCurrentContext();
+		ctx_props[2] = CL_WGL_HDC_KHR;
+		ctx_props[3] = (cl_context_properties) wglGetCurrentDC();
+		ctx_props[4] = CL_CONTEXT_PLATFORM;
+		ctx_props[5] = (cl_context_properties) cl->pl_id;
+		ctx_props[6] = 0;
 
 #else
 
-		/* Linux variant */
-	ctx_props[0] = CL_GL_CONTEXT_KHR;
-	ctx_props[1] = (cl_context_properties) glXGetCurrentContext();
-	ctx_props[2] = CL_GLX_DISPLAY_KHR;
-	ctx_props[3] = (cl_context_properties) glXGetCurrentDisplay();
-	ctx_props[4] = CL_CONTEXT_PLATFORM;
-	ctx_props[5] = (cl_context_properties) cl->pl_id;
-	ctx_props[6] = 0;
+			/* Linux variant */
+		ctx_props[0] = CL_GL_CONTEXT_KHR;
+		ctx_props[1] = (cl_context_properties) glXGetCurrentContext();
+		ctx_props[2] = CL_GLX_DISPLAY_KHR;
+		ctx_props[3] = (cl_context_properties) glXGetCurrentDisplay();
+		ctx_props[4] = CL_CONTEXT_PLATFORM;
+		ctx_props[5] = (cl_context_properties) cl->pl_id;
+		ctx_props[6] = 0;
 
 #endif
+	}
 
 	cl->ctx = clCreateContext(ctx_props, 1, &cl->dev_id, NULL, NULL, &err);
 	CL_ERR_CHECK(err, "Unable to create context");
@@ -565,7 +647,10 @@ cl_do_init(struct fosphor *self)
 	CL_ERR_CHECK(err, "Unable to configure FFT kernel");
 
 	/* Display kernel result memory objects */
-	err = cl_init_buffers_gl(self);
+	if (self->flags & FLG_FOSPHOR_USE_CLGL_SHARING)
+		err = cl_init_buffers_gl(self);
+	else
+		err = cl_init_buffers_nogl(self);
 
 	if (err != CL_SUCCESS)
 		goto error;
@@ -778,7 +863,7 @@ fosphor_cl_process(struct fosphor *self,
 	CL_ERR_CHECK(err, "Unable to queue FFT kernel execution");
 
 	/* Capture all GL objects */
-	if (cl->state != CL_PENDING) {
+	if ((cl->state != CL_PENDING) && (self->flags & FLG_FOSPHOR_USE_CLGL_SHARING)) {
 		cl_mem objs[3];
 
 		objs[0] = cl->mem_waterfall;
@@ -831,19 +916,71 @@ fosphor_cl_finish(struct fosphor *self)
 	struct fosphor_cl_state *cl = self->cl;
 
 	cl_int err;
-	cl_mem objs[3];
 
 	/* Check if we really need to finish */
 	if (cl->state != CL_PENDING)
 		return 0;
 
-	/* Release all GL objects */
-	objs[0] = cl->mem_waterfall;
-	objs[1] = cl->mem_histogram;
-	objs[2] = cl->mem_spectrum;
+	/* Act depending on current mode */
+	if (self->flags & FLG_FOSPHOR_USE_CLGL_SHARING)
+	{
+		/* If we use CL/GL sharing, we need to release the objects */
+		cl_mem objs[3];
 
-	err = clEnqueueReleaseGLObjects(cl->cq, 3, objs, 0, NULL, NULL);
-	CL_ERR_CHECK(err, "Unable to release GL objects");
+		objs[0] = cl->mem_waterfall;
+		objs[1] = cl->mem_histogram;
+		objs[2] = cl->mem_spectrum;
+
+		err = clEnqueueReleaseGLObjects(cl->cq, 3, objs, 0, NULL, NULL);
+		CL_ERR_CHECK(err, "Unable to release GL objects");
+	}
+	else
+	{
+		/* If we don't use CL/GL sharing, we need to fetch the results */
+		size_t img_origin[3] = { 0, 0, 0 };
+		size_t img_region[3] = { 1024, 0, 1 };
+
+			/* Waterfall */
+		img_region[1] = 1024;
+
+		err = clEnqueueReadImage(cl->cq,
+			cl->mem_waterfall,
+			CL_FALSE,
+			img_origin,
+			img_region,
+			0,
+			0,
+			self->img_waterfall,
+			0, NULL, NULL
+		);
+		CL_ERR_CHECK(err, "Unable to queue readback of waterfall image");
+
+			/* Histogram */
+		img_region[1] = 128;
+
+		err = clEnqueueReadImage(cl->cq,
+			cl->mem_histogram,
+			CL_FALSE,
+			img_origin,
+			img_region,
+			0,
+			0,
+			self->img_histogram,
+			0, NULL, NULL
+		);
+		CL_ERR_CHECK(err, "Unable to queue readback of histogram image");
+
+			/* Live spectrum */
+		err = clEnqueueReadBuffer(cl->cq,
+			cl->mem_spectrum,
+			CL_FALSE,
+			0,
+			2 * 2 * sizeof(cl_float) * FOSPHOR_FFT_LEN,
+			self->buf_spectrum,
+			0, NULL, NULL
+		);
+		CL_ERR_CHECK(err, "Unable to queue readback of spectrum buffer");
+	}
 
 	/* Ensure CL is done */
 	clFinish(cl->cq);

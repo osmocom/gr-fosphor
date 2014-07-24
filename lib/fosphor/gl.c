@@ -83,7 +83,20 @@ gl_tex2d_float_clear(GLuint tex_id, int width, int height)
 			glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, cw, ch, GL_RED, GL_FLOAT, buf);
 		}
 	}
+}
 
+static void
+gl_tex2d_write(GLuint tex_id, float *src, int width, int height)
+{
+	glBindTexture(GL_TEXTURE_2D, tex_id);
+
+	glTexImage2D(
+		GL_TEXTURE_2D,
+		0, GL_R32F,
+		width, height, 0,
+		GL_RED, GL_FLOAT,
+		src
+	);
 }
 
 static void
@@ -104,7 +117,7 @@ gl_vbo_clear(GLuint vbo_id, int size)
 
 #if 0
 static void
-gl_vbo_read(GLuint vbo_id, int size, void *dst)
+gl_vbo_read(GLuint vbo_id, void *dst, int size)
 {
 	void *ptr;
 
@@ -119,6 +132,27 @@ gl_vbo_read(GLuint vbo_id, int size, void *dst)
 	glUnmapBuffer(GL_ARRAY_BUFFER);
 }
 #endif
+
+static void
+gl_vbo_write(GLuint vbo_id, void *src, int size)
+{
+#if 0
+	void *ptr;
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_id);
+
+	ptr = glMapBuffer(GL_ARRAY_BUFFER, GL_READ_ONLY);
+	if (!ptr)
+		abort();
+
+	memcpy(ptr, src, size);
+
+	glUnmapBuffer(GL_ARRAY_BUFFER);
+#else
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_id);
+	glBufferData(GL_ARRAY_BUFFER, size, src, GL_DYNAMIC_DRAW);
+#endif
+}
 
 static void
 gl_deferred_init(struct fosphor *self)
@@ -283,6 +317,22 @@ fosphor_gl_get_shared_id(struct fosphor *self,
 	}
 
 	return 0;
+}
+
+
+void
+fosphor_gl_refresh(struct fosphor *self)
+{
+	struct fosphor_gl_state *gl = self->gl;
+
+	if (self->flags & FLG_FOSPHOR_USE_CLGL_SHARING)
+		return;
+
+	gl_deferred_init(self);
+
+	gl_tex2d_write(gl->tex_waterfall, self->img_waterfall, FOSPHOR_FFT_LEN, 1024);
+	gl_tex2d_write(gl->tex_histogram, self->img_histogram, FOSPHOR_FFT_LEN,  128);
+	gl_vbo_write(gl->vbo_spectrum, self->buf_spectrum, 2 * 2 * sizeof(float) * FOSPHOR_FFT_LEN);
 }
 
 

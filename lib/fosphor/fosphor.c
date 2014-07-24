@@ -60,6 +60,19 @@ fosphor_init(void)
 	if (rv)
 		goto error;
 
+	/* Buffers (if needed) */
+	if (!(self->flags & FLG_FOSPHOR_USE_CLGL_SHARING))
+	{
+		self->img_waterfall = malloc(FOSPHOR_FFT_LEN * 1024 * sizeof(float));
+		self->img_histogram = malloc(FOSPHOR_FFT_LEN *  128 * sizeof(float));
+		self->buf_spectrum  = malloc(2 * 2 * FOSPHOR_FFT_LEN * sizeof(float));
+
+		if (!self->img_waterfall ||
+		    !self->img_histogram ||
+		    !self->buf_spectrum)
+			goto error;
+	}
+
 	/* Initial state */
 	fosphor_set_fft_window_default(self);
 	fosphor_set_power_range(self, 0, 10);
@@ -78,6 +91,10 @@ fosphor_release(struct fosphor *self)
 	if (!self)
 		return;
 
+	free(self->img_waterfall);
+	free(self->img_histogram);
+	free(self->buf_spectrum);
+
 	fosphor_cl_release(self);
 	fosphor_gl_release(self);
 
@@ -93,7 +110,8 @@ fosphor_process(struct fosphor *self, void *samples, int len)
 void
 fosphor_draw(struct fosphor *self, struct fosphor_render *render)
 {
-	fosphor_cl_finish(self);
+	if (fosphor_cl_finish(self) > 0)
+		fosphor_gl_refresh(self);
 	render->_wf_pos = fosphor_cl_get_waterfall_position(self);
 	fosphor_gl_draw(self, render);
 }

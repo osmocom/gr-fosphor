@@ -48,6 +48,7 @@ enum fosphor_gl_id {
 GLuint fosphor_gl_get_shared_id(struct fosphor *self,
                                 enum fosphor_gl_id id);
 
+void fosphor_gl_refresh(struct fosphor *self);
 void fosphor_gl_draw(struct fosphor *self, struct fosphor_render *render);
 
 /*! @} */

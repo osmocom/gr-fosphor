@@ -45,7 +45,14 @@ struct fosphor
 	struct fosphor_cl_state *cl;
 	struct fosphor_gl_state *gl;
 
+#define FLG_FOSPHOR_USE_CLGL_SHARING	(1<<0)
+	int flags;
+
 	float fft_win[FOSPHOR_FFT_LEN];
+
+	float *img_waterfall;
+	float *img_histogram;
+	float *buf_spectrum;
 
 	struct {
 		int db_ref;
