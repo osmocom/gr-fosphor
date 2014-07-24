@@ -374,6 +374,44 @@ error:
 }
 
 static int
+cl_init_buffers_gl(struct fosphor *self)
+{
+	struct fosphor_cl_state *cl = self->cl;
+	cl_int err;
+
+	/* GL shared objects */
+		/* Waterfall texture */
+	cl->mem_waterfall = clCreateFromGLTexture(cl->ctx,
+		CL_MEM_WRITE_ONLY, GL_TEXTURE_2D, 0,
+		fosphor_gl_get_shared_id(self, GL_ID_TEX_WATERFALL),
+		&err
+	);
+	CL_ERR_CHECK(err, "Unable to share waterfall texture into OpenCL context");
+
+		/* Histogram texture */
+	cl->mem_histogram = clCreateFromGLTexture(cl->ctx,
+		CL_MEM_READ_WRITE, GL_TEXTURE_2D, 0,
+		fosphor_gl_get_shared_id(self, GL_ID_TEX_HISTOGRAM),
+		&err
+	);
+	CL_ERR_CHECK(err, "Unable to share histogram texture into OpenCL context");
+
+		/* Spectrum VBO */
+	cl->mem_spectrum = clCreateFromGLBuffer(cl->ctx,
+		CL_MEM_WRITE_ONLY,
+		fosphor_gl_get_shared_id(self, GL_ID_VBO_SPECTRUM),
+		&err
+	);
+	CL_ERR_CHECK(err, "Unable to share spectrum VBO into OpenCL context");
+
+	/* All done */
+	err = 0;
+
+error:
+	return err;
+}
+
+static int
 cl_do_init(struct fosphor *self)
 {
 	struct fosphor_cl_state *cl = self->cl;
@@ -460,30 +498,11 @@ cl_do_init(struct fosphor *self)
 
 	CL_ERR_CHECK(err, "Unable to configure FFT kernel");
 
-	/* GL shared objects */
-		/* Waterfall texture */
-	cl->mem_waterfall = clCreateFromGLTexture(cl->ctx,
-		CL_MEM_READ_WRITE, GL_TEXTURE_2D, 0,
-		fosphor_gl_get_shared_id(self, GL_ID_TEX_WATERFALL),
-		&err
-	);
-	CL_ERR_CHECK(err, "Unable to share waterfall texture into OpenCL context");
+	/* Display kernel result memory objects */
+	err = cl_init_buffers_gl(self);
 
-		/* Histogram texture */
-	cl->mem_histogram = clCreateFromGLTexture(cl->ctx,
-		CL_MEM_READ_WRITE, GL_TEXTURE_2D, 0,
-		fosphor_gl_get_shared_id(self, GL_ID_TEX_HISTOGRAM),
-		&err
-	);
-	CL_ERR_CHECK(err, "Unable to share histogram texture into OpenCL context");
-
-		/* Spectrum VBO */
-	cl->mem_spectrum = clCreateFromGLBuffer(cl->ctx,
-		CL_MEM_WRITE_ONLY,
-		fosphor_gl_get_shared_id(self, GL_ID_VBO_SPECTRUM),
-		&err
-	);
-	CL_ERR_CHECK(err, "Unable to share spectrum VBO into OpenCL context");
+	if (err != CL_SUCCESS)
+		goto error;
 
 	/* Display program/kernel */
 	if (cl->feat.flags & FLG_CL_NVIDIA_SM11)
