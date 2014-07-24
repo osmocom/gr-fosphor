@@ -85,7 +85,7 @@ struct fosphor_render
 	float freq_stop;	/*!< \brief Frequency zoom stop  ]0,1] */
 	float wf_span;		/*!< \brief Waterfall time zoom  ]0,1] */
 
-		/* \brief Displayed channels */
+		/*! \brief Displayed channels */
 	struct fosphor_channel channels[FOSPHOR_MAX_CHANNELS];
 
 	/* Private fields */
