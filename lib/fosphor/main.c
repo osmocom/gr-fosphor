@@ -407,6 +407,14 @@ int main(int argc, char *argv[])
 	g_as->zoom_center = 0.5;
 	g_as->zoom_width  = 0.2;
 
+	/* Default fosphor render options */
+	fosphor_render_defaults(&g_as->render_main);
+	fosphor_render_defaults(&g_as->render_zoom);
+	g_as->render_zoom.options &= ~(FRO_LABEL_PWR | FRO_LABEL_TIME);
+
+	g_as->render_main.histo_wf_ratio = 0.35f;
+	g_as->render_zoom.histo_wf_ratio = 0.35f;
+
 	/* Init GLFW */
 	wnd = glfw_init();
 	if (!wnd) {
@@ -422,13 +430,6 @@ int main(int argc, char *argv[])
 		rv = -EIO;
 		goto error;
 	}
-
-	fosphor_render_defaults(&g_as->render_main);
-	fosphor_render_defaults(&g_as->render_zoom);
-	g_as->render_zoom.options &= ~(FRO_LABEL_PWR | FRO_LABEL_TIME);
-
-	g_as->render_main.histo_wf_ratio = 0.35f;
-	g_as->render_zoom.histo_wf_ratio = 0.35f;
 
 	fosphor_set_power_range(g_as->fosphor, g_as->db_ref, k_db_per_div[g_as->db_per_div_idx]);
 
