@@ -93,6 +93,7 @@ fosphor_process(struct fosphor *self, void *samples, int len)
 void
 fosphor_draw(struct fosphor *self, struct fosphor_render *render)
 {
+	fosphor_cl_finish(self);
 	render->_wf_pos = fosphor_cl_get_waterfall_position(self);
 	fosphor_gl_draw(self, render);
 }

@@ -37,6 +37,7 @@ void fosphor_cl_release(struct fosphor *self);
 
 int fosphor_cl_process(struct fosphor *self,
                        void *samples, int len);
+int fosphor_cl_finish(struct fosphor *self);
 
 void fosphor_cl_load_fft_window(struct fosphor *self, float *win);
 int  fosphor_cl_get_waterfall_position(struct fosphor *self);

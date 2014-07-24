@@ -100,8 +100,13 @@ struct fosphor_cl_state
 	float		histo_scale;
 	float		histo_offset;
 
-	/* Waterfall position */
+	/* State */
 	int		waterfall_pos;
+	enum {
+		CL_BOOTING = 0,
+		CL_PENDING,
+		CL_READY,
+	} state;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -608,6 +613,8 @@ fosphor_cl_init(struct fosphor *self)
 
 	memset(cl, 0, sizeof(struct fosphor_cl_state));
 
+	cl->state = CL_BOOTING;
+
 	/* Find suitable device */
 	if (cl_find_device(&cl->pl_id, &cl->dev_id, &cl->feat)) {
 		fprintf(stderr, "[!] No suitable OpenCL device found\n");
@@ -667,7 +674,6 @@ fosphor_cl_process(struct fosphor *self,
 	cl_int err;
 	size_t local[2], global[2];
 	int n_spectra = len / FOSPHOR_FFT_LEN;
-	cl_mem objs[3];
 
 	/* Validate batch size */
 	if (len & ((FOSPHOR_FFT_MULT_BATCH*FOSPHOR_FFT_LEN)-1))
@@ -710,14 +716,17 @@ fosphor_cl_process(struct fosphor *self,
 	err = clEnqueueNDRangeKernel(cl->cq, cl->kern_fft, 2, NULL, global, local, 0, NULL, NULL);
 	CL_ERR_CHECK(err, "Unable to queue FFT kernel execution");
 
-	/* GL Objects */
-	objs[0] = cl->mem_waterfall;
-	objs[2] = cl->mem_histogram;
-	objs[1] = cl->mem_spectrum;
-
 	/* Capture all GL objects */
-	err = clEnqueueAcquireGLObjects(cl->cq, 3, objs, 0, NULL, NULL);
-	CL_ERR_CHECK(err, "Unable to acquire GL objects");
+	if (cl->state != CL_PENDING) {
+		cl_mem objs[3];
+
+		objs[0] = cl->mem_waterfall;
+		objs[1] = cl->mem_histogram;
+		objs[2] = cl->mem_spectrum;
+
+		err = clEnqueueAcquireGLObjects(cl->cq, 3, objs, 0, NULL, NULL);
+		CL_ERR_CHECK(err, "Unable to acquire GL objects");
+	}
 
 	/* Configure display kernel */
 	err  = 0;
@@ -736,17 +745,45 @@ fosphor_cl_process(struct fosphor *self,
 	err = clEnqueueNDRangeKernel(cl->cq, cl->kern_display, 2, NULL, global, local, 0, NULL, NULL);
 	CL_ERR_CHECK(err, "Unable to queue display kernel execution");
 
+	/* Advance waterfall */
+	cl->waterfall_pos = (cl->waterfall_pos + n_spectra) & 1023;
+
+	/* New state */
+	cl->state = CL_PENDING;
+
+	return 0;
+
+error:
+	return -EIO;
+}
+
+int
+fosphor_cl_finish(struct fosphor *self)
+{
+	struct fosphor_cl_state *cl = self->cl;
+
+	cl_int err;
+	cl_mem objs[3];
+
+	/* Check if we really need to finish */
+	if (cl->state != CL_PENDING)
+		return 0;
+
 	/* Release all GL objects */
+	objs[0] = cl->mem_waterfall;
+	objs[1] = cl->mem_histogram;
+	objs[2] = cl->mem_spectrum;
+
 	err = clEnqueueReleaseGLObjects(cl->cq, 3, objs, 0, NULL, NULL);
 	CL_ERR_CHECK(err, "Unable to release GL objects");
 
 	/* Ensure CL is done */
 	clFinish(cl->cq);
 
-	/* Advance waterfall */
-	cl->waterfall_pos = (cl->waterfall_pos + n_spectra) & 1023;
+	/* New state */
+	cl->state = CL_READY;
 
-	return 0;
+	return 1;
 
 error:
 	return -EIO;
