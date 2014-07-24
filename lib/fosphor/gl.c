@@ -266,7 +266,7 @@ fosphor_gl_get_shared_id(struct fosphor *self,
 {
 	struct fosphor_gl_state *gl = self->gl;
 
-	/* CL is not sufficiently booted to complete the GL init
+	/* CL is now sufficiently booted to complete the GL init
 	 * in a CL context */
 	gl_deferred_init(self);
 
