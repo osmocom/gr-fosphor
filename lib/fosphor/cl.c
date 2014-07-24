@@ -379,6 +379,67 @@ error:
 }
 
 static int
+cl_queue_clear_buffers(struct fosphor *self)
+{
+	struct fosphor_cl_state *cl = self->cl;
+	float noise_floor, color[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+	size_t img_origin[3] = {0.0f, 0.0f, 0.0f}, img_region[3];
+	cl_int err;
+
+	/* Configure noise floor to the bottom of the scale */
+	noise_floor = - self->power.offset;
+
+	/* Init spectrum to noise floor */
+	err = clEnqueueFillBuffer(cl->cq,
+		cl->mem_spectrum,
+		&noise_floor, sizeof(float),
+		0,
+		2 * 2 * sizeof(cl_float) * FOSPHOR_FFT_LEN,
+		0, NULL, NULL
+	);
+	CL_ERR_CHECK(err, "Unable to queue clear of spectrum buffer");
+
+	/* Init the waterfall image to noise floor */
+	color[0] = noise_floor;
+
+	img_region[0] = FOSPHOR_FFT_LEN;
+	img_region[1] = 1024;
+	img_region[2] = 1;
+
+	err = clEnqueueFillImage(cl->cq,
+		cl->mem_waterfall,
+		color,
+		img_origin, img_region,
+		0, NULL, NULL
+	);
+	CL_ERR_CHECK(err, "Unable to queue clear of waterfall image");
+
+	/* Init the histogram image to all 0.0f values */
+	color[0] = 0.0f;
+
+	img_region[0] = FOSPHOR_FFT_LEN;
+	img_region[1] = 128;
+	img_region[2] = 1;
+
+	err = clEnqueueFillImage(cl->cq,
+		cl->mem_histogram,
+		color,
+		img_origin, img_region,
+		0, NULL, NULL
+	);
+	CL_ERR_CHECK(err, "Unable to queue clear of histogram image");
+
+	/* Need to finish because our patterns are on the stack */
+	clFinish(cl->cq);
+
+	return 0;
+
+	/* Error path */
+error:
+	return err;
+}
+
+static int
 cl_init_buffers_gl(struct fosphor *self)
 {
 	struct fosphor_cl_state *cl = self->cl;
@@ -726,6 +787,13 @@ fosphor_cl_process(struct fosphor *self,
 
 		err = clEnqueueAcquireGLObjects(cl->cq, 3, objs, 0, NULL, NULL);
 		CL_ERR_CHECK(err, "Unable to acquire GL objects");
+	}
+
+	/* If this is the first run, make sure to pre-clear the buffers */
+	if (cl->state == CL_BOOTING) {
+		err = cl_queue_clear_buffers(self);
+		if (err != CL_SUCCESS)
+			goto error;
 	}
 
 	/* Configure display kernel */
