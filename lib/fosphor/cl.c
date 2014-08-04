@@ -308,7 +308,8 @@ error:
 
 static cl_program
 cl_load_program(cl_device_id dev_id, cl_context ctx,
-                const char *resource_name, const char *opts)
+                const char *resource_name, const char *opts,
+		cl_int *err_ptr)
 {
 	cl_program prog = NULL;
 	const char *src;
@@ -318,6 +319,7 @@ cl_load_program(cl_device_id dev_id, cl_context ctx,
 	src = resource_get(resource_name, NULL);
 	if (!src) {
 		fprintf(stderr, "[!] Unable to load non-existent resource '%s'\n", resource_name);
+		err = CL_INVALID_VALUE;
 		goto error;
 	}
 
@@ -375,6 +377,9 @@ cl_load_program(cl_device_id dev_id, cl_context ctx,
 error:
 	if (prog)
 		clReleaseProgram(prog);
+
+	if (err_ptr)
+		*err_ptr = err;
 
 	return NULL;
 }
@@ -632,7 +637,7 @@ cl_do_init(struct fosphor *self)
 	CL_ERR_CHECK(err, "Unable to allocate FFT window buffer");
 
 	/* FFT program/kernels */
-	cl->prog_fft = cl_load_program(cl->dev_id, cl->ctx, "fft.cl", NULL);
+	cl->prog_fft = cl_load_program(cl->dev_id, cl->ctx, "fft.cl", NULL, &err);
 	if (!cl->prog_fft)
 		goto error;
 
@@ -663,7 +668,7 @@ cl_do_init(struct fosphor *self)
 	else
 		disp_opts = NULL;
 
-	cl->prog_display = cl_load_program(cl->dev_id, cl->ctx, "display.cl", disp_opts);
+	cl->prog_display = cl_load_program(cl->dev_id, cl->ctx, "display.cl", disp_opts, &err);
 	if (!cl->prog_display)
 		goto error;
 
