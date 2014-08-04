@@ -36,6 +36,7 @@
 #endif
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 /* Make sure we allow OpenCL 1.1 fn without warnings */
