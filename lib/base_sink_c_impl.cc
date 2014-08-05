@@ -49,6 +49,8 @@ base_sink_c::base_sink_c(const char *name)
 }
 
 
+gr::thread::mutex base_sink_c_impl::s_boot_mutex;
+
 const int base_sink_c_impl::k_db_per_div[] = {1, 2, 5, 10, 20};
 
 
@@ -84,9 +86,15 @@ void base_sink_c_impl::worker()
 	this->glctx_init();
 
 	/* Init fosphor */
-	this->d_fosphor = fosphor_init();
-	if (!this->d_fosphor)
-		return;
+	{
+		/* (prevent // init of multiple instance to be gentle on the OpenCL
+		 *  implementations that don't like this) */
+		gr::thread::scoped_lock guard(s_boot_mutex);
+
+		this->d_fosphor = fosphor_init();
+		if (!this->d_fosphor)
+			return;
+	}
 
 	this->settings_apply(~SETTING_DIMENSIONS);
 

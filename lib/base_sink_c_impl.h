@@ -60,6 +60,8 @@ namespace gr {
 
       void render();
 
+      static gr::thread::mutex s_boot_mutex;
+
       /* settings refresh logic */
       enum {
         SETTING_DIMENSIONS	= (1 << 0),
