@@ -922,9 +922,16 @@ fosphor_cl_finish(struct fosphor *self)
 
 	cl_int err;
 
-	/* Check if we really need to finish */
-	if (cl->state != CL_PENDING)
+	/* Check if we really need to do anything */
+	if (cl->state == CL_READY)
 		return 0;
+
+	/* If no data was processed, we may need to finish the boot */
+	if (cl->state == CL_BOOTING) {
+		err = cl_queue_clear_buffers(self);
+		if (err != CL_SUCCESS)
+			goto error;
+	}
 
 	/* Act depending on current mode */
 	if (self->flags & FLG_FOSPHOR_USE_CLGL_SHARING)
