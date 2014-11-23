@@ -32,6 +32,7 @@ QGLSurface::QGLSurface(QWidget *parent, qt_sink_c_impl *block)
 {
 	this->doneCurrent();
 	this->setFocusPolicy(Qt::StrongFocus);
+	this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }
 
 void
