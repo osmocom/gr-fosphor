@@ -928,6 +928,20 @@ fosphor_cl_finish(struct fosphor *self)
 
 	/* If no data was processed, we may need to finish the boot */
 	if (cl->state == CL_BOOTING) {
+		/* Acquire GL objects if needed */
+		if (self->flags & FLG_FOSPHOR_USE_CLGL_SHARING)
+		{
+			cl_mem objs[3];
+
+			objs[0] = cl->mem_waterfall;
+			objs[1] = cl->mem_histogram;
+			objs[2] = cl->mem_spectrum;
+
+			err = clEnqueueAcquireGLObjects(cl->cq, 3, objs, 0, NULL, NULL);
+			CL_ERR_CHECK(err, "Unable to acquire GL objects");
+		}
+
+		/* Clear the buffers */
 		err = cl_queue_clear_buffers(self);
 		if (err != CL_SUCCESS)
 			goto error;
