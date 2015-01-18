@@ -66,6 +66,31 @@ struct fosphor_gl_state
 /* Helpers / Internal API                                                     */
 /* -------------------------------------------------------------------------- */
 
+static int
+gl_check_extension(const char *ext_name)
+{
+	const char *ext_str;
+	const char *p;
+	int l = strlen(ext_name);
+
+	ext_str = (const char *)glGetString(GL_EXTENSIONS);
+	if (!ext_str) {
+		fprintf(stderr, "[w] Failed to retrieve GL extension list.\n");
+		return 0;
+	}
+
+	for (p=ext_str; (p=strstr(p, ext_name)) != NULL; p++)
+	{
+		if ((p != ext_str) && (p[-1] != ' '))
+			continue;
+		if ((p[l] != 0x00) && (p[l] != ' '))
+			continue;
+		return 1;
+	}
+
+	return 0;
+}
+
 static void
 gl_tex2d_float_clear(GLuint tex_id, int width, int height)
 {
@@ -157,6 +182,7 @@ static void
 gl_deferred_init(struct fosphor *self)
 {
 	struct fosphor_gl_state *gl = self->gl;
+	GLint tex_fmt;
 	int len;
 
 	/* Prevent double init */
@@ -164,6 +190,11 @@ gl_deferred_init(struct fosphor *self)
 		return;
 
 	gl->init_complete = 1;
+
+	/* Select texture format */
+	tex_fmt = gl_check_extension("GL_ARB_texture_rg") ?
+		GL_R32F :
+		GL_LUMINANCE32F_ARB;
 
 	/* Waterfall texture (FFT_LEN * 1024) */
 	glGenTextures(1, &gl->tex_waterfall);
@@ -175,7 +206,7 @@ gl_deferred_init(struct fosphor *self)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, FOSPHOR_FFT_LEN, 1024, 0, GL_RED, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, tex_fmt, FOSPHOR_FFT_LEN, 1024, 0, GL_RED, GL_FLOAT, NULL);
 
 	gl_tex2d_float_clear(gl->tex_waterfall, FOSPHOR_FFT_LEN, 1024);
 
@@ -189,7 +220,7 @@ gl_deferred_init(struct fosphor *self)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, FOSPHOR_FFT_LEN, 128, 0, GL_RED, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, tex_fmt, FOSPHOR_FFT_LEN, 128, 0, GL_RED, GL_FLOAT, NULL);
 
 	gl_tex2d_float_clear(gl->tex_histogram, FOSPHOR_FFT_LEN, 128);
 
