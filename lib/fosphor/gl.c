@@ -90,10 +90,9 @@ gl_tex2d_write(GLuint tex_id, float *src, int width, int height)
 {
 	glBindTexture(GL_TEXTURE_2D, tex_id);
 
-	glTexImage2D(
-		GL_TEXTURE_2D,
-		0, GL_R32F,
-		width, height, 0,
+	glTexSubImage2D(
+		GL_TEXTURE_2D, 0,
+		0, 0, width, height,
 		GL_RED, GL_FLOAT,
 		src
 	);
