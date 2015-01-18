@@ -127,7 +127,6 @@ struct fosphor_cl_state
 static int
 cl_device_query(cl_device_id dev_id, struct fosphor_cl_features *feat)
 {
-	cl_ulong lmem;
 	char txt[2048];
 	cl_int err;
 	int has_nv_attr;
