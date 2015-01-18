@@ -285,6 +285,11 @@ cl_compat_check_platform(cl_platform_id pl_id)
 		g_allow_cl12 = 0;
 	}
 
+	if (!strncmp(buf, "OpenCL 1.2 pocl", 15)) {
+		fprintf(stderr, "[w] POCL detected, blacklisting CL 1.2 since it's buggy\n");
+		g_allow_cl12 = 0;
+	}
+
 	if (strncmp(buf, "OpenCL 1.2 ", 11)) {
 		g_allow_cl12 = 0;
 	}
