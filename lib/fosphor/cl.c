@@ -61,7 +61,7 @@ struct fosphor_cl_features
 
 	cl_device_type type;
 	char vendor[128];
-	int local_mem;
+	unsigned long local_mem;
 	int flags;
 	int wg_size;
 	int wg_size_dim[2];
@@ -145,11 +145,9 @@ cl_device_query(cl_device_id dev_id, struct fosphor_cl_features *feat)
 		return -1;
 
 	/* Local memory size */
-	err = clGetDeviceInfo(dev_id, CL_DEVICE_LOCAL_MEM_SIZE, sizeof(cl_ulong), &lmem, NULL);
+	err = clGetDeviceInfo(dev_id, CL_DEVICE_LOCAL_MEM_SIZE, sizeof(cl_ulong), &feat->local_mem, NULL);
 	if (err != CL_SUCCESS)
 		return -1;
-
-	feat->local_mem = lmem;
 
 	/* CL/GL extension */
 	err = clGetDeviceInfo(dev_id, CL_DEVICE_EXTENSIONS, sizeof(txt)-1, txt, NULL);
