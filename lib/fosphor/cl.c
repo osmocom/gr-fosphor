@@ -253,7 +253,7 @@ cl_device_score(cl_device_id dev_id, struct fosphor_cl_features *feat)
 	}
 
 	/* Bigger local mem */
-	score += (feat->local_mem >> 10);
+	score += (feat->local_mem < (1<<20)) ? (feat->local_mem >> 11) : (1 << 9);
 
 	return score;
 }
