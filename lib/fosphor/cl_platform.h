@@ -35,6 +35,7 @@
 # include <OpenCL/cl_gl_ext.h>
 #else
 # define CL_USE_DEPRECATED_OPENCL_1_1_APIS
+# define CL_USE_DEPRECATED_OPENCL_2_0_APIS
 # include <CL/cl.h>
 # include <CL/cl_ext.h>
 # include <CL/cl_gl.h>
