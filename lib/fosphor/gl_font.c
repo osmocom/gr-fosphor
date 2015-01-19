@@ -469,6 +469,8 @@ glf_begin(const struct gl_font *glf, float fg_color[3])
 
 	glBindTexture(GL_TEXTURE_2D, glf->tex.id);
 
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
 	if (glf->flags & GLF_FLG_LCD) {
 		glColor3f(1.0f, 1.0f, 1.0f);
 		glBlendColor(fg_color[0], fg_color[1], fg_color[2], 0.0f);
