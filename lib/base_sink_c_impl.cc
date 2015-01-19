@@ -241,11 +241,13 @@ base_sink_c_impl::settings_apply(uint32_t settings)
 			int a = (int)(this->d_width * 0.65f);
 			this->d_render_main->width = a;
 			this->d_render_main->options |= FRO_CHANNELS;
+			this->d_render_main->options &= ~FRO_COLOR_SCALE;
 			this->d_render_zoom->pos_x = a - 10;
 			this->d_render_zoom->width = this->d_width - a + 10;
 		} else {
 			this->d_render_main->width = this->d_width;
 			this->d_render_main->options &= ~FRO_CHANNELS;
+			this->d_render_main->options |= FRO_COLOR_SCALE;
 		}
 
 		this->d_render_main->height = this->d_height;
