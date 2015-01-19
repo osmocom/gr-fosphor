@@ -23,8 +23,13 @@
  * a derivative work (i.e. "a work based on the program").
  */
 
-/* Require GLSL 1.5 compatibility profile */
-#version 150 compatibility
+/* Require GLSL 1.5 compatibility profile to build without warning
+ * But we use 1.3 since some cards don't allow 1.5 compatibility but
+ * will work with 1.3
+ */
+
+/* #version 150 compatibility */
+#version 130
 
 
 /* ------------------------------------------------------------------------ */
