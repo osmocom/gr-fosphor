@@ -69,6 +69,7 @@ struct fosphor_channel
 #define FRO_LABEL_PWR	(1<<5)	/*!< \brief Display power labels */
 #define FRO_LABEL_TIME	(1<<6)	/*!< \brief Display time labels */
 #define FRO_CHANNELS	(1<<7)	/*!< \brief Display channels */
+#define FRO_COLOR_SCALE	(1<<8)	/*!< \brief Display intensity color scale */
 
 /*! \brief fosphor render options */
 struct fosphor_render

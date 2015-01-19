@@ -272,6 +272,29 @@ fosphor_gl_cmap_disable(void)
 	glUseProgram(0);
 }
 
+void
+fosphor_gl_cmap_draw_scale(GLuint cmap_id,
+                           float x0, float x1, float y0, float y1)
+{
+	/* Enable texture-1D */
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_1D, cmap_id);
+	glEnable(GL_TEXTURE_1D);
+
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+	/* Draw QUAD */
+	glBegin( GL_QUADS );
+	glTexCoord1f(0.0f); glVertex2f(x0, y0);
+	glTexCoord1f(0.0f); glVertex2f(x1, y0);
+	glTexCoord1f(1.0f); glVertex2f(x1, y1);
+	glTexCoord1f(1.0f); glVertex2f(x0, y1);
+	glEnd();
+
+	/* Disable texturing */
+	glDisable(GL_TEXTURE_1D);
+}
+
 
 int
 fosphor_gl_cmap_generate(GLuint *cmap_id, gl_cmap_gen_func_t gfn, int N)

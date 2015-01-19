@@ -186,7 +186,8 @@ fosphor_render_defaults(struct fosphor_render *render)
 		FRO_WATERFALL	|
 		FRO_LABEL_FREQ	|
 		FRO_LABEL_PWR	|
-		FRO_LABEL_TIME;
+		FRO_LABEL_TIME	|
+		FRO_COLOR_SCALE;
 
 	render->histo_wf_ratio = 0.5f;
 	render->freq_n_div     = 10;
@@ -199,7 +200,7 @@ void
 fosphor_render_refresh(struct fosphor_render *render)
 {
 	int disp_spectrum, disp_waterfall;
-	int avail, div, over, rsvd;
+	int avail, div, over, rsvd, rsvd_lr[2];
 	float y_top, y_bot;
 
 	/* Which screen zone ? */
@@ -207,10 +208,16 @@ fosphor_render_refresh(struct fosphor_render *render)
 	disp_waterfall = !!(render->options & FRO_WATERFALL);
 
 	/* Split the X space */
+	rsvd_lr[0] = 10;
+	rsvd_lr[1] = 10;
+
 	if (render->options & (FRO_LABEL_PWR | FRO_LABEL_TIME))
-		rsvd = 50;
-	else
-		rsvd = 20;
+		rsvd_lr[0] += 30;
+
+	if (render->options & FRO_COLOR_SCALE)
+		rsvd_lr[1] += 10;
+
+	rsvd = rsvd_lr[0] + rsvd_lr[1];
 
 	render->freq_n_div = ((int)(render->width - rsvd) / 80) & ~1;
 	if (render->freq_n_div > 10)
@@ -223,7 +230,7 @@ fosphor_render_refresh(struct fosphor_render *render)
 	over  = avail - (render->freq_n_div * div);
 
 	render->_x_div = (float)div;
-	render->_x[0] = render->pos_x + (float)(rsvd - 10) + (float)(over / 2);
+	render->_x[0] = render->pos_x + (float)(rsvd_lr[0]) + (float)(over / 2);
 	render->_x[1] = render->_x[0] + (render->freq_n_div * render->_x_div) + 1.0f;
 	render->_x_label = render->_x[0] - 5.0f;
 

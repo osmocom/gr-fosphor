@@ -204,6 +204,7 @@ _update_fosphor(void)
 
 		g_as->render_main.width  = a;
 		g_as->render_main.height = g_as->h;
+		g_as->render_main.options &= ~FRO_COLOR_SCALE;
 
 		g_as->render_zoom.pos_x  = a - 10;
 		g_as->render_zoom.width  = g_as->w - a + 10;
@@ -213,6 +214,7 @@ _update_fosphor(void)
 	{
 		g_as->render_main.width  = g_as->w;
 		g_as->render_main.height = g_as->h;
+		g_as->render_main.options |= FRO_COLOR_SCALE;
 	}
 
 	g_as->render_main.histo_wf_ratio = g_as->ratio;
