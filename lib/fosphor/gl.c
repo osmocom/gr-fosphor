@@ -464,7 +464,7 @@ fosphor_gl_draw(struct fosphor *self, struct fosphor_render *render)
 		fosphor_gl_cmap_disable();
 
 		if (render->options & FRO_COLOR_SCALE)
-			fosphor_gl_cmap_draw_scale(gl->cmap_waterfall,
+			fosphor_gl_cmap_draw_scale(gl->cmap_histogram,
 						   x[1]+2.0f, x[1]+10.0f, y[0], y[1]);
 	}
 	else if (render->options & (FRO_LIVE | FRO_MAX_HOLD))
