@@ -203,6 +203,9 @@ __kernel void display(
 		/* Compute vertex position */
 		vertex = live_vbo[i];
 
+		if (!isfinite(vertex.y)) /* Safety if previous val is weird */
+			vertex.y = sum / get_local_size(1);
+
 		vertex.x = ((float)i / (float)n) - 1.0f;
 		vertex.y = vertex.y * native_powr(live_one_minus_alpha, (float)fft_batch) +
 		           sum      * live_alpha;
@@ -283,25 +286,27 @@ __kernel void display(
 		n = get_global_size(0) >> 1;
 		i = get_global_id(0) ^ n;
 
+		max_pwr = max_vbo[i].y;
+		if (!isfinite(max_pwr))
+			max_pwr = - MAXFLOAT; /* Will be replaced by max() below */
+
 		vertex.x = ((float)i / (float)n) - 1.0f;
 #ifdef MAX_HOLD_LIVE
-		vertex.y = max(live_vbo[i].y, max_vbo[i].y);
+		vertex.y = max(live_vbo[i].y, max_pwr);
 #endif
 #ifdef MAX_HOLD_NORMAL
-		max_pwr = max_vbo[i].y;
 		for (i=0; i<get_local_size(1); i++)
 			max_pwr = max(max_pwr, max_buf[i * get_local_size(0) + get_local_id(0)]);
 		vertex.y = max_pwr;
 #endif
 #ifdef MAX_HOLD_DECAY
-		max_pwr = max_vbo[i].y * 0.999f + 0.001f * live_vbo[i].y;
+		max_pwr = max_pwr * 0.999f + 0.001f * live_vbo[i].y;
 		for (j=0; j<get_local_size(1); j++)
 			max_pwr = max(max_pwr, max_buf[j * get_local_size(0) + get_local_id(0)]);
 		vertex.y = max_pwr;
 #endif
 
 		max_vbo[i] = vertex;
-
 	}
 }
 
