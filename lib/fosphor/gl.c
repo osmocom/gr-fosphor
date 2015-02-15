@@ -778,7 +778,11 @@ fosphor_gl_draw(struct fosphor *self, struct fosphor_render *render)
 	}
 
 	/* Ensure GL is done */
-	glFinish();
+	/* Make this optional.  If after the draw we do a swap buffer, we _know_
+	   that GL will be done after it
+	   Also, if we do multiple draw, then this is completely useless
+	 */
+	/* glFinish(); */
 }
 
 /*! @} */
