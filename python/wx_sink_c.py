@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # Copyright 2013-2014 Sylvain Munaut <tnt@246tNt.com>
