@@ -36,7 +36,7 @@
 #include "cl_platform.h"
 #include "cl_compat.h"
 
-#if defined(__APPLE__) || defined(MAXOSX)
+#if defined(__APPLE__) || defined(MACOSX)
 # include <OpenGL/OpenGL.h>
 # include <OpenGL/gl.h>
 #elif defined(_WIN32)
@@ -569,7 +569,7 @@ cl_do_init(struct fosphor *self)
 	if (self->flags & FLG_FOSPHOR_USE_CLGL_SHARING)
 	{
 		/* Setup context properties */
-#if defined(__APPLE__) || defined(MAXOSX)
+#if defined(__APPLE__) || defined(MACOSX)
 
 			/* OSX variant */
 		ctx_props[0] = CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE;

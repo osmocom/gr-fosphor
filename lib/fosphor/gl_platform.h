@@ -27,7 +27,7 @@
 # define _WIN32
 #endif
 
-#if defined(__APPLE__) || defined(MAXOSX)
+#if defined(__APPLE__) || defined(MACOSX)
 # define GL_GLEXT_PROTOTYPES
 # include <OpenGL/gl.h>
 #elif defined(_WIN32)

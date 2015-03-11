@@ -28,7 +28,7 @@
 #endif
 
 
-#if defined(__APPLE__) || defined(MAXOSX)
+#if defined(__APPLE__) || defined(MACOSX)
 # include <OpenCL/cl.h>
 # include <OpenCL/cl_ext.h>
 # include <OpenCL/cl_gl.h>
