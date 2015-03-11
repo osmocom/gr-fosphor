@@ -297,7 +297,7 @@ fosphor_gl_cmap_draw_scale(GLuint cmap_id,
 
 
 int
-fosphor_gl_cmap_generate(GLuint *cmap_id, gl_cmap_gen_func_t gfn, int N)
+fosphor_gl_cmap_generate(GLuint *cmap_id, gl_cmap_gen_func_t gfn, void *gfn_arg, int N)
 {
 	uint32_t *rgba;
 
@@ -313,7 +313,7 @@ fosphor_gl_cmap_generate(GLuint *cmap_id, gl_cmap_gen_func_t gfn, int N)
 	glBindTexture(GL_TEXTURE_1D, *cmap_id);
 
 	/* Generate texture data */
-	gfn(rgba, N);
+	gfn(rgba, N, gfn_arg);
 
 	/* Upload data */
 	glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, N, 0,

@@ -56,8 +56,8 @@ void fosphor_gl_cmap_disable(void);
 void fosphor_gl_cmap_draw_scale(GLuint cmap_id,
                                 float x0, float x1, float y0, float y1);
 
-typedef void (*gl_cmap_gen_func_t)(uint32_t *rgba, int N);
-int fosphor_gl_cmap_generate(GLuint *cmap_id, gl_cmap_gen_func_t gfn, int N);
+typedef int (*gl_cmap_gen_func_t)(uint32_t *rgba, int N, void *arg);
+int fosphor_gl_cmap_generate(GLuint *cmap_id, gl_cmap_gen_func_t gfn, void *gfn_arg, int N);
 
 
 /*! @} */

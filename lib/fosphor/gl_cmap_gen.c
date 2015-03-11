@@ -128,8 +128,8 @@ _set_rgba_from_hsv(uint32_t *rgba, float h, float s, float v)
 }
 
 
-void
-fosphor_gl_cmap_histogram(uint32_t *rgba, int N)
+int
+fosphor_gl_cmap_histogram(uint32_t *rgba, int N, void *arg)
 {
 	int i;
 	int m = N >> 4;
@@ -155,11 +155,13 @@ fosphor_gl_cmap_histogram(uint32_t *rgba, int N)
 			0.60f + ((p < 0.40f) ? p : 0.40f)
 		);
 	}
+
+	return 0;
 }
 
 
-void
-fosphor_gl_cmap_waterfall(uint32_t *rgba, int N)
+int
+fosphor_gl_cmap_waterfall(uint32_t *rgba, int N, void *arg)
 {
 	int i;
 
@@ -173,6 +175,8 @@ fosphor_gl_cmap_waterfall(uint32_t *rgba, int N)
 			((p * 0.95f) + 0.05f)	/* V */
 		);
 	}
+
+	return 0;
 }
 
 /*! @} */

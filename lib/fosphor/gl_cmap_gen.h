@@ -32,8 +32,8 @@
 
 #include <stdint.h>
 
-void fosphor_gl_cmap_histogram(uint32_t *rgba, int N);
-void fosphor_gl_cmap_waterfall(uint32_t *rgba, int N);
+int fosphor_gl_cmap_histogram(uint32_t *rgba, int N, void *arg);
+int fosphor_gl_cmap_waterfall(uint32_t *rgba, int N, void *arg);
 
 /*! @} */
 

@@ -279,9 +279,9 @@ fosphor_gl_init(struct fosphor *self)
 	rv  = (gl->cmap_ctx == NULL);
 
 	rv |= fosphor_gl_cmap_generate(&gl->cmap_waterfall,
-	                               fosphor_gl_cmap_waterfall, 256);
+	                               fosphor_gl_cmap_waterfall, NULL, 256);
 	rv |= fosphor_gl_cmap_generate(&gl->cmap_histogram,
-	                               fosphor_gl_cmap_histogram, 256);
+	                               fosphor_gl_cmap_histogram, NULL, 256);
 
 	if (rv)
 		goto error;
