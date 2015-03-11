@@ -1,7 +1,7 @@
 UNAME=$(shell uname)
 CC=gcc
-CFLAGS=-Wall -Werror -O2 `pkg-config freetype2 glfw3 --cflags` -g
-LDLIBS=`pkg-config freetype2 glfw3 --libs` -lm
+CFLAGS=-Wall -Werror -O2 `pkg-config freetype2 glfw3 libpng --cflags` -g
+LDLIBS=`pkg-config freetype2 glfw3 libpng --libs` -lm
 ifneq ($(AMDAPPSDKROOT), )
 CFLAGS+=-I$(AMDAPPSDKROOT)/include
 endif

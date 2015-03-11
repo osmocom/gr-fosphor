@@ -130,6 +130,8 @@ if (Qt5_FOUND)
        endforeach(module)
 endif (Qt5_FOUND)
 
+find_package(PNG 1.6.19)
+
 ########################################################################
 # Find gnuradio build dependencies
 ########################################################################
@@ -164,6 +166,10 @@ endif(DOXYGEN_FOUND)
 ########################################################################
 
 include(GrComponent)
+
+GR_REGISTER_COMPONENT("PNG" ENABLE_PNG
+    PNG_FOUND
+)
 
 GR_REGISTER_COMPONENT("Python" ENABLE_PYTHON
     PYTHONLIBS_FOUND pybind11_FOUND

@@ -85,6 +85,12 @@ if(ENABLE_QT)
     target_link_libraries(gnuradio-fosphor ${Qt5_LIBRARIES})
 endif(ENABLE_QT)
 
+if(ENABLE_PNG)
+    add_definitions(-DENABLE_PNG)
+    target_include_directories(gnuradio-fosphor PRIVATE ${PNG_INCLUDE_DIRS})
+    target_link_libraries(gnuradio-fosphor ${PNG_LIBRARIES})
+endif(ENABLE_PNG)
+
 set_target_properties(gnuradio-fosphor PROPERTIES DEFINE_SYMBOL "gnuradio_fosphor_EXPORTS")
 
 if(APPLE)
