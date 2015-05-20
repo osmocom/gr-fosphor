@@ -57,7 +57,7 @@ typedef struct _cl_image_desc {
 	cl_mem buffer;
 } cl_image_desc;
 
-cl_mem
+cl_mem CL_API_CALL
 clCreateFromGLTexture(cl_context context,
                       cl_mem_flags flags,
                       GLenum texture_target,
@@ -65,7 +65,7 @@ clCreateFromGLTexture(cl_context context,
                       GLuint texture,
                       cl_int *errcode_ret);
 
-cl_mem
+cl_mem CL_API_CALL
 clCreateImage(cl_context context,
               cl_mem_flags flags,
               const cl_image_format *image_format,
@@ -73,7 +73,7 @@ clCreateImage(cl_context context,
               void *host_ptr,
               cl_int *errcode_ret);
 
-cl_int
+cl_int CL_API_CALL
 clEnqueueFillBuffer(cl_command_queue command_queue,
                     cl_mem buffer,
                     const void *pattern,
@@ -84,7 +84,7 @@ clEnqueueFillBuffer(cl_command_queue command_queue,
                     const cl_event *event_wait_list,
                     cl_event *event);
 
-cl_int
+cl_int CL_API_CALL
 clEnqueueFillImage(cl_command_queue command_queue,
                    cl_mem image,
                    const void *fill_color,

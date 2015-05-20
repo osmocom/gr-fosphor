@@ -51,7 +51,7 @@
 
 #define ALT_WRAP(rtype, fn, arg_list, arg_call)		\
 							\
-	static CL_API_ENTRY rtype CL_API_CALL (* fn ## _icd) arg_list = NULL; \
+	static CL_API_ENTRY rtype (CL_API_CALL * fn ## _icd) arg_list = NULL; \
 	static rtype fn ## _alt arg_list;		\
 							\
 	CL_API_ENTRY rtype CL_API_CALL fn arg_list	\
