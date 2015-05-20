@@ -30,6 +30,10 @@ class ResourcePacker(object):
 		return [
 			"/* AUTO GENERATED - DO NOT MODIFY BY HAND */",
 			"#include \"resource_internal.h\"",
+		]
+
+	def rp_header(self):
+		return [
 			"struct resource_pack __resources[] = {",
 		]
 
@@ -79,35 +83,46 @@ class ResourcePacker(object):
 		return self._file_wrap(name, len(content), dl)
 
 	def file_binary(self, name, content):
-		dl = []
-		for i in range(0, len(content), 16):
-			l = content[i:i+16]
-			s = '"'
-			for c in l:
-				s += '\\x%02x' % ord(c)
-			s += '"'
-			dl.append(s)
-		return self._file_wrap(name, len(content), dl)
+		return self._file_wrap(name, len(content), [ self.file_binary_slug(name) ])
 
-	def footer(self):
+	def rp_footer(self):
 		return [
 			"\t/* Guard */",
 			"\t{ .name = (void*)0 }",
 			"};",
 		]
 
+	def file_binary_slug(self, name):
+		return 'data_' + name.encode('hex')
+
+	def file_binary_data(self, name, content):
+		dl = [ 'static const char %s[] = {' % self.file_binary_slug(name) ]
+		for i in range(0, len(content), 8):
+			dl.append('\t' + ' '.join(['0x%02x,' % ord(c) for c in content[i:i+8]]))
+		dl.append('};');
+		return dl
+
 	def process(self, filenames):
 		b = []
 		b.extend(self.header())
+
+		data = []
+		rp = []
+		rp.extend(self.rp_header())
 		for f in filenames:
 			fh = open(f, 'rb')
 			c = fh.read()
-			if '\x00' in c:
-				b.extend(self.file_binary(f, c))
+			if '\x00' in c or len(c) > 65535:
+				rp.extend(self.file_binary(f, c))
+				data.extend(self.file_binary_data(f, c))
 			else:
-				b.extend(self.file_text(f, c))
+				rp.extend(self.file_text(f, c))
 			fh.close()
-		b.extend(self.footer())
+		rp.extend(self.rp_footer())
+
+		b.extend(data)
+		b.extend(rp)
+
 		return b;
 
 
