@@ -106,7 +106,7 @@ done:
 	rgb[2] = b;
 }
 
-static inline void
+static void
 _set_rgba_from_rgb(uint32_t *rgba, float r, float g, float b)
 {
 	unsigned char rc,gc,bc,ac;
@@ -119,7 +119,7 @@ _set_rgba_from_rgb(uint32_t *rgba, float r, float g, float b)
 	*rgba = (ac << 24) | (bc << 16) | (gc << 8) | rc;
 }
 
-static inline void
+static void
 _set_rgba_from_hsv(uint32_t *rgba, float h, float s, float v)
 {
 	float hsv[3], rgb[3];
@@ -134,7 +134,7 @@ _set_rgba_from_hsv(uint32_t *rgba, float h, float s, float v)
 }
 
 
-static inline uint32_t
+static uint32_t
 _rgba_interpolate(uint32_t *rgba, int sz, int p, int N)
 {
 	int pos_i = (p * (sz-1)) / (N-1);
