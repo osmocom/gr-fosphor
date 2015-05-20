@@ -122,15 +122,15 @@ _set_rgba_from_rgb(uint32_t *rgba, float r, float g, float b)
 static inline void
 _set_rgba_from_hsv(uint32_t *rgba, float h, float s, float v)
 {
-		float hsv[3], rgb[3];
+	float hsv[3], rgb[3];
 
-		hsv[0] = h;
-		hsv[1] = s;
-		hsv[2] = v;
+	hsv[0] = h;
+	hsv[1] = s;
+	hsv[2] = v;
 
-		_hsv2rgb(rgb, hsv);
+	_hsv2rgb(rgb, hsv);
 
-		_set_rgba_from_rgb(rgba, rgb[0], rgb[1], rgb[2]);
+	_set_rgba_from_rgb(rgba, rgb[0], rgb[1], rgb[2]);
 }
 
 
