@@ -275,7 +275,13 @@ cl_find_device(cl_platform_id *pl_id_p, cl_device_id *dev_id_p,
 	{
 		/* Scan all devices */
 		err = clGetDeviceIDs(pl_list[i], CL_DEVICE_TYPE_ALL, MAX_DEVICES, dev_list, &dev_count);
-		CL_ERR_CHECK(err, "Unable to fetch device IDs");
+		if (err != CL_SUCCESS)
+		{
+			fprintf(stderr, "[w] CL Error (%d, %s:%d): "
+				"Unable to fetch device IDs for platform %d. Skipping.\n",
+				err, __FILE__, __LINE__, i);
+			continue;
+		}
 
 		for (j=0; j<dev_count; j++)
 		{
