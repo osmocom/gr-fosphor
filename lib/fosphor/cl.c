@@ -605,10 +605,25 @@ cl_do_init(struct fosphor *self)
 		ctx_props[6] = 0;
 
 #endif
+
+		/* Attempt to create context */
+		cl->ctx = clCreateContext(ctx_props, 1, &cl->dev_id, NULL, NULL, &err);
+		if (err != CL_SUCCESS) {
+			/* Failed, we'll retry again without CL/GL sharing */
+			fprintf(stderr, "[w] CL Error (%d, %s:%d): "
+				"Unable to create context with CL/GL sharing, retrying without\n",
+				err, __FILE__, __LINE__);
+
+			self->flags &= ~FLG_FOSPHOR_USE_CLGL_SHARING;
+			ctx_props[0] = 0;
+		}
 	}
 
-	cl->ctx = clCreateContext(ctx_props, 1, &cl->dev_id, NULL, NULL, &err);
-	CL_ERR_CHECK(err, "Unable to create context");
+	if (!(self->flags & FLG_FOSPHOR_USE_CLGL_SHARING))
+	{
+		cl->ctx = clCreateContext(ctx_props, 1, &cl->dev_id, NULL, NULL, &err);
+		CL_ERR_CHECK(err, "Unable to create context");
+	}
 
 	/* Command Queue */
 	cl->cq = clCreateCommandQueue(cl->ctx, cl->dev_id, 0, &err);
