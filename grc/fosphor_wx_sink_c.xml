@@ -88,4 +88,18 @@ $(parent).GridAdd(self.$(id).win, $(', '.join(map(str, $grid_pos()))))
     <name>in</name>
     <type>complex</type>
   </sink>
+
+  <doc>
+    Key Bindings
+    ============
+    z:      toggle zoom mode
+    a/d:    move zoom frequency down/up
+    s/w:    adjust zoom width
+    q/e:    adjust screen split between waterfall and fft
+    space:  pause display
+
+    (left)/(right)  adjust dB/div
+    (up)/(down)     adjust reference level
+
+  </doc>
 </block>

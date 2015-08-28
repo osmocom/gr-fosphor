@@ -73,5 +73,17 @@ $(gui_hint()($win))</make>
 The GUI hint can be used to position the widget within the application. \
 The hint is of the form [tab_id@tab_index]: [row, col, row_span, col_span]. \
 Both the tab specification and the grid position are optional.
+
+    Key Bindings
+    ============
+    z:      toggle zoom mode
+    a/d:    move zoom frequency down/up
+    s/w:    adjust zoom width
+    q/e:    adjust screen split between waterfall and fft
+    space:  pause display
+
+    (left)/(right)  adjust dB/div
+    (up)/(down)     adjust reference level
+
   </doc>
 </block>
