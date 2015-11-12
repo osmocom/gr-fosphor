@@ -45,7 +45,7 @@ static const int k_db_per_div[] = { 1, 2, 5, 10, 20 };
 /* Timing utils                                                             */
 /* ------------------------------------------------------------------------ */
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__MINGW32__)
 
 #include <time.h>
 #include <windows.h>
