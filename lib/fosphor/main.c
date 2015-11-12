@@ -48,7 +48,7 @@ static const int k_db_per_div[] = { 1, 2, 5, 10, 20 };
 #ifdef _WIN32
 
 #include <time.h>
-#include <Windows.h>
+#include <windows.h>
 
 #if defined(_MSC_VER) || defined(_MSC_EXTENSIONS)
 # define DELTA_EPOCH_IN_MICROSECS  11644473600000000Ui64

@@ -40,8 +40,8 @@
 # include <OpenGL/OpenGL.h>
 # include <OpenGL/gl.h>
 #elif defined(_WIN32)
-# include <Windows.h>
-# include <Wingdi.h>
+# include <windows.h>
+# include <wingdi.h>
 #else
 # include <GL/glx.h>
 #endif

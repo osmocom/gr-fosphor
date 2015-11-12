@@ -29,7 +29,7 @@
 
 /* Include whatever is needed for dynamic symbol lookup */
 #ifdef _WIN32
-# include <Windows.h>
+# include <windows.h>
 #else
 # define _GNU_SOURCE
 # include <dlfcn.h>
