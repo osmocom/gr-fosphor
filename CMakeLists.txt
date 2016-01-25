@@ -100,7 +100,7 @@ if(NOT OPENGL_FOUND)
 endif()
 
 find_package(OpenCL)
-if(NOT OPENCL_FOUND)
+if(NOT OpenCL_FOUND)
 	message(FATAL_ERROR "OpenCL required to compile gr-fosphor")
 endif()
 
