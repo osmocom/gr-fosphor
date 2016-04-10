@@ -35,6 +35,12 @@ struct gl_font;
 
 #define GLF_FLG_LCD	(1 << 0)
 
+#ifdef _MSC_VER
+#define CHECK_FORMAT 
+#else
+#define CHECK_FORMAT __attribute__((format(printf, 6, 7)))
+#endif
+
 enum glf_align
 {
 	GLF_LEFT,
@@ -60,7 +66,7 @@ void glf_draw_str(const struct gl_font *glf,
 void glf_printf(const struct gl_font *glf,
                 float x, enum glf_align x_align,
                 float y, enum glf_align y_align,
-                const char *fmt, ...) __attribute__((format(printf, 6, 7)));
+                const char *fmt, ...) CHECK_FORMAT;
 
 void glf_begin(const struct gl_font *glf, float fg_color[3]);
 void glf_end(void);
