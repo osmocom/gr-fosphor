@@ -31,6 +31,10 @@
 #include "fifo.h"
 #include "base_sink_c_impl.h"
 
+#ifdef ENABLE_GLEW
+# include <GL/glew.h>
+#endif
+
 extern "C" {
 #include "fosphor/fosphor.h"
 #include "fosphor/gl_platform.h"
@@ -87,6 +91,14 @@ void base_sink_c_impl::worker()
 
 	/* Init GL context */
 	this->glctx_init();
+
+#ifdef ENABLE_GLEW
+	GLenum glew_err = glewInit();
+	if (glew_err != GLEW_OK) {
+		GR_LOG_ERROR(d_logger, boost::format("GLEW initialization error : %s") % glewGetErrorString(glew_err));
+		goto error;
+	}
+#endif
 
 	/* Init fosphor */
 	{

@@ -48,6 +48,13 @@ link_directories(
 	${Boost_LIBRARY_DIRS}
 )
 
+if(WIN32)
+   find_package(GLEW REQUIRED)
+   include_directories(${GLEW_INCLUDE_DIRS})
+   list(APPEND fosphor_libraries ${GLEW_LIBRARIES})
+   add_definitions(-DENABLE_GLEW)
+endif(WIN32)
+
 if(ENABLE_PYTHON)
     add_definitions(-DENABLE_PYTHON)
     include_directories(${PYTHON_INCLUDE_DIRS})
