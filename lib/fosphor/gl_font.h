@@ -30,6 +30,12 @@
  *  \brief Basic OpenGL font rendering
  */
 
+#ifdef _MSC_VER
+# define ATTR_FORMAT(a,b,c)
+#else
+# define ATTR_FORMAT(a,b,c) __attribute__((format(a,b,c)))
+#endif
+
 
 struct gl_font;
 
@@ -60,7 +66,7 @@ void glf_draw_str(const struct gl_font *glf,
 void glf_printf(const struct gl_font *glf,
                 float x, enum glf_align x_align,
                 float y, enum glf_align y_align,
-                const char *fmt, ...) __attribute__((format(printf, 6, 7)));
+                const char *fmt, ...) ATTR_FORMAT(printf, 6, 7);
 
 void glf_begin(const struct gl_font *glf, float fg_color[3]);
 void glf_end(void);
