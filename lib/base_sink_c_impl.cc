@@ -82,6 +82,9 @@ base_sink_c_impl::~base_sink_c_impl()
 
 void base_sink_c_impl::worker()
 {
+	/* Zero-init */
+	this->d_fosphor = NULL;
+
 	/* Init GL context */
 	this->glctx_init();
 
@@ -92,8 +95,10 @@ void base_sink_c_impl::worker()
 		gr::thread::scoped_lock guard(s_boot_mutex);
 
 		this->d_fosphor = fosphor_init();
-		if (!this->d_fosphor)
-			return;
+		if (!this->d_fosphor) {
+			GR_LOG_ERROR(d_logger, "Failed to initialize fosphor");
+			goto error;
+		}
 	}
 
 	this->settings_apply(~SETTING_DIMENSIONS);
@@ -105,8 +110,10 @@ void base_sink_c_impl::worker()
 		this->glctx_poll();
 	}
 
+error:
 	/* Cleanup fosphor */
-	fosphor_release(this->d_fosphor);
+	if (this->d_fosphor)
+		fosphor_release(this->d_fosphor);
 
 	/* And GL context */
 	this->glctx_fini();
