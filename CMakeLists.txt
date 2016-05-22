@@ -104,8 +104,8 @@ if(NOT OpenCL_FOUND)
 	message(FATAL_ERROR "OpenCL required to compile gr-fosphor")
 endif()
 
-find_package(Freetype2)
-if(NOT FREETYPE2_FOUND)
+find_package(Freetype)
+if(NOT FREETYPE_FOUND)
 	message(FATAL_ERROR "freetype2 required to compile gr-fosphor")
 endif()
 

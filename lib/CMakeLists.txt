@@ -38,13 +38,13 @@ add_custom_command(
 include_directories(
 	${OPENGL_INCLUDE_DIRS}
 	${OpenCL_INCLUDE_DIRS}
-	${FREETYPE2_INCLUDE_DIRS}
+	${FREETYPE_INCLUDE_DIRS}
 	${Boost_INCLUDE_DIR}
 )
 link_directories(
 	${OPENGL_LIBRARY_DIRS}
 	${OpenCL_LIBRARY_DIRS}
-	${FREETYPE2_LIBRARY_DIRS}
+	${FREETYPE_LIBRARY_DIRS}
 	${Boost_LIBRARY_DIRS}
 )
 
@@ -85,7 +85,7 @@ list_cond_append(ENABLE_WX   fosphor_sources wx_core_sink_c_impl.cc)
 list(APPEND fosphor_libraries 
 	${OPENGL_LIBRARIES}
 	${OpenCL_LIBRARIES}
-	${FREETYPE2_LIBRARIES}
+	${FREETYPE_LIBRARIES}
 	${Boost_LIBRARIES}
 	${GNURADIO_ALL_LIBRARIES}
 	${CMAKE_DL_LIBS}
