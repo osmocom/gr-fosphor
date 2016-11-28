@@ -254,6 +254,15 @@ fosphor_gl_init(struct fosphor *self)
 
 	self->gl = gl;
 
+#ifdef USING_GLEW
+	GLenum err = glewInit();
+	if (GLEW_OK != err)
+	{
+	  /* Problem: glewInit failed, something is seriously wrong. */
+	  fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+	}
+#endif
+	
 	memset(gl, 0, sizeof(struct fosphor_gl_state));
 
 	/* Font */
