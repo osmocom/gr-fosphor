@@ -762,6 +762,21 @@ cl_do_release(struct fosphor_cl_state *cl)
 }
 
 
+static cl_int
+cl_lock_unlock(struct fosphor_cl_state *cl, int lock, cl_event *event)
+{
+	cl_mem objs[3];
+
+	objs[0] = cl->mem_waterfall;
+	objs[1] = cl->mem_histogram;
+	objs[2] = cl->mem_spectrum;
+
+	return lock ?
+		clEnqueueAcquireGLObjects(cl->cq, 3, objs, 0, NULL, event) :
+		clEnqueueReleaseGLObjects(cl->cq, 3, objs, 0, NULL, event);
+}
+
+
 /* -------------------------------------------------------------------------- */
 /* Exposed API                                                                */
 /* -------------------------------------------------------------------------- */
@@ -841,6 +856,7 @@ fosphor_cl_process(struct fosphor *self,
 	struct fosphor_cl_state *cl = self->cl;
 
 	cl_int err;
+	int locked = 0;
 	size_t local[2], global[2];
 	int n_spectra = len / FOSPHOR_FFT_LEN;
 
@@ -887,14 +903,9 @@ fosphor_cl_process(struct fosphor *self,
 
 	/* Capture all GL objects */
 	if ((cl->state != CL_PENDING) && (self->flags & FLG_FOSPHOR_USE_CLGL_SHARING)) {
-		cl_mem objs[3];
-
-		objs[0] = cl->mem_waterfall;
-		objs[1] = cl->mem_histogram;
-		objs[2] = cl->mem_spectrum;
-
-		err = clEnqueueAcquireGLObjects(cl->cq, 3, objs, 0, NULL, NULL);
+		err = cl_lock_unlock(cl, 1, NULL);
 		CL_ERR_CHECK(err, "Unable to acquire GL objects");
+		locked = 1;
 	}
 
 	/* If this is the first run, make sure to pre-clear the buffers */
@@ -930,6 +941,11 @@ fosphor_cl_process(struct fosphor *self,
 	return 0;
 
 error:
+	if (locked) {
+		err = cl_lock_unlock(cl, 0, NULL);
+		CL_ERR_CHECK(err, "Unable to release GL objects");
+	}
+
 	return -EIO;
 }
 
@@ -949,13 +965,7 @@ fosphor_cl_finish(struct fosphor *self)
 		/* Acquire GL objects if needed */
 		if (self->flags & FLG_FOSPHOR_USE_CLGL_SHARING)
 		{
-			cl_mem objs[3];
-
-			objs[0] = cl->mem_waterfall;
-			objs[1] = cl->mem_histogram;
-			objs[2] = cl->mem_spectrum;
-
-			err = clEnqueueAcquireGLObjects(cl->cq, 3, objs, 0, NULL, NULL);
+			err = cl_lock_unlock(cl, 1, NULL);
 			CL_ERR_CHECK(err, "Unable to acquire GL objects");
 		}
 
@@ -969,13 +979,7 @@ fosphor_cl_finish(struct fosphor *self)
 	if (self->flags & FLG_FOSPHOR_USE_CLGL_SHARING)
 	{
 		/* If we use CL/GL sharing, we need to release the objects */
-		cl_mem objs[3];
-
-		objs[0] = cl->mem_waterfall;
-		objs[1] = cl->mem_histogram;
-		objs[2] = cl->mem_spectrum;
-
-		err = clEnqueueReleaseGLObjects(cl->cq, 3, objs, 0, NULL, NULL);
+		err = cl_lock_unlock(cl, 0, NULL);
 		CL_ERR_CHECK(err, "Unable to release GL objects");
 	}
 	else
