@@ -387,7 +387,7 @@ error:
 	return NULL;
 }
 
-static int
+static cl_int
 cl_queue_clear_buffers(struct fosphor *self)
 {
 	struct fosphor_cl_state *cl = self->cl;
@@ -441,7 +441,7 @@ cl_queue_clear_buffers(struct fosphor *self)
 	/* Need to finish because our patterns are on the stack */
 	clFinish(cl->cq);
 
-	return 0;
+	return CL_SUCCESS;
 
 	/* Error path */
 error:
