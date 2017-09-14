@@ -32,8 +32,6 @@ list(APPEND fosphor_python
     __init__.py
 )
 
-list_cond_append(ENABLE_WX fosphor_python wx_sink_c.py)
-
 GR_PYTHON_INSTALL(
     FILES
     ${fosphor_python}

@@ -157,10 +157,6 @@ GR_REGISTER_COMPONENT("QT" ENABLE_QT
     Qt5_FOUND
 )
 
-GR_REGISTER_COMPONENT("WX" ENABLE_WX
-    PYTHONLIBS_FOUND SWIG_FOUND ENABLE_PYTHON
-)
-
 macro(list_cond_append cond list_name)
     if(${cond})
         list(APPEND ${list_name} ${ARGN})

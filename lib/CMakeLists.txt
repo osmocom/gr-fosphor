@@ -87,7 +87,6 @@ list(APPEND fosphor_sources
 
 list_cond_append(ENABLE_GLFW fosphor_sources glfw_sink_c_impl.cc)
 list_cond_append(ENABLE_QT   fosphor_sources QGLSurface.cc qt_sink_c_impl.cc)
-list_cond_append(ENABLE_WX   fosphor_sources wx_core_sink_c_impl.cc)
 
 list(APPEND fosphor_libraries 
 	${OPENGL_LIBRARIES}

@@ -19,7 +19,6 @@
 
 list_cond_append(ENABLE_GLFW fosphor_grc fosphor_glfw_sink_c.xml)
 list_cond_append(ENABLE_QT   fosphor_grc fosphor_qt_sink_c.xml)
-list_cond_append(ENABLE_WX   fosphor_grc fosphor_wx_sink_c.xml)
 
 install(FILES
     ${fosphor_grc}

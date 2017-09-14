@@ -27,7 +27,6 @@ list(APPEND fosphor_headers
 
 list_cond_append(ENABLE_GLFW fosphor_headers glfw_sink_c.h)
 list_cond_append(ENABLE_QT   fosphor_headers qt_sink_c.h)
-list_cond_append(ENABLE_WX   fosphor_headers wx_core_sink_c.h)
 
 install(FILES
     ${fosphor_headers}

@@ -41,7 +41,6 @@ set(GR_SWIG_DOC_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/../include/gnuradio/fosphor)
 
 list_cond_append(ENABLE_GLFW GR_SWIG_FLAGS -DENABLE_GLFW)
 list_cond_append(ENABLE_QT   GR_SWIG_FLAGS -DENABLE_QT)
-list_cond_append(ENABLE_WX   GR_SWIG_FLAGS -DENABLE_WX)
 
 GR_SWIG_MAKE(fosphor_swig fosphor_swig.i)
 

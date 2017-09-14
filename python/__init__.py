@@ -25,14 +25,3 @@ description here (python/__init__.py).
 
 # import swig generated symbols into the fosphor namespace
 from fosphor_swig import *
-
-# import any pure python here
-try:
-    from wx_sink_c import wx_sink_c
-except ImportError:
-    # No Python WX or OpenGL support most likely
-    import sys
-    exc_info = sys.exc_info()
-    def wx_sink_c(*args, **kwargs):
-        raise exc_info[0], exc_info[1], exc_info[2]
-#
