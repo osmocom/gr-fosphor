@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 Packs a given file list into a .c file to be included in the executable
@@ -21,6 +21,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import binascii
 import sys
 
 
@@ -60,21 +61,21 @@ class ResourcePacker(object):
 
 	def _wrap_str(self, s):
 		m = {
-			'\n' : '\\n',
-			'\t' : '\\t',
-			'\0' : '\\0',
-			'\\' : '\\\\',
-			'"'  : '\\"',
+			ord(b'\n') : '\\n',
+			ord(b'\t') : '\\t',
+			ord(b'\0') : '\\0',
+			ord(b'\\') : '\\\\',
+			ord(b'"')  : '\\"',
 		}
 
 		sa = []
 		for c in s:
 			if c in m:
 				sa.append(m[c])
-			elif ord(c) < 32:
-				sa.append('\\x%02x' % ord(c))
+			elif (c < 32) | (c >= 128):
+				sa.append('\\x%02x' % c)
 			else:
-				sa.append(c)
+				sa.append(chr(c))
 
 		return ''.join(sa)
 
@@ -93,12 +94,12 @@ class ResourcePacker(object):
 		]
 
 	def file_binary_slug(self, name):
-		return 'data_' + name.encode('hex')
+		return 'data_' + binascii.hexlify(name.encode('utf-8')).decode('utf-8')
 
 	def file_binary_data(self, name, content):
 		dl = [ 'static const char %s[] = {' % self.file_binary_slug(name) ]
 		for i in range(0, len(content), 8):
-			dl.append('\t' + ' '.join(['0x%02x,' % ord(c) for c in content[i:i+8]]))
+			dl.append('\t' + ' '.join(['0x%02x,' % c for c in content[i:i+8]]))
 		dl.append('};');
 		return dl
 
@@ -112,7 +113,7 @@ class ResourcePacker(object):
 		for f in filenames:
 			fh = open(f, 'rb')
 			c = fh.read()
-			if '\x00' in c or len(c) > 65535:
+			if b'\x00' in c or len(c) > 65535:
 				rp.extend(self.file_binary(f, c))
 				data.extend(self.file_binary_data(f, c))
 			else:
@@ -129,7 +130,7 @@ class ResourcePacker(object):
 def main(self, *files):
 	p = ResourcePacker()
 	r = p.process(files)
-	print '\n'.join(r)
+	print('\n'.join(r))
 
 
 if __name__ == '__main__':
