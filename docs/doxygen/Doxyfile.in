@@ -721,26 +721,13 @@ EXCLUDE_PATTERNS       = */.deps/* \
 # wildcard * is used, a substring. Examples: ANamespace, AClass,
 # AClass::ANamespace, ANamespace::*Test
 
-EXCLUDE_SYMBOLS        = ad9862 \
+EXCLUDE_SYMBOLS        = \
                          numpy \
                          *swig* \
                          *Swig* \
-                         *my_top_block* \
-                         *my_graph* \
-                         *app_top_block* \
-                         *am_rx_graph* \
-                         *_queue_watcher_thread* \
-                         *parse* \
-                         *MyFrame* \
-                         *MyApp* \
                          *PyObject* \
-                         *wfm_rx_block* \
                          *_sptr* \
-                         *debug* \
-                         *wfm_rx_sca_block* \
-                         *tv_rx_block* \
-                         *wxapt_rx_block* \
-                         *example_signal*
+                         *debug*
 
 # The EXAMPLE_PATH tag can be used to specify one or more files or
 # directories that contain example code fragments that are included (see
