@@ -1,0 +1,49 @@
+id: fosphor_glfw_sink_c
+label: fosphor sink (GLFW)
+
+parameters:
+-   id: wintype
+    label: Window Type
+    dtype: int
+    default: firdes.WIN_BLACKMAN_hARRIS
+    options: [firdes.WIN_BLACKMAN_hARRIS, firdes.WIN_HAMMING, firdes.WIN_HANN, firdes.WIN_BLACKMAN, firdes.WIN_RECTANGULAR, firdes.WIN_KAISER, firdes.WIN_FLATTOP]
+    option_labels: [Blackman-harris, Hamming, Hann, Blackman, Rectangular, Kaiser, Flat-top]
+    hide: part
+-   id: freq_center
+    label: Center Frequency (Hz)
+    dtype: real
+    default: '0'
+-   id: freq_span
+    label: span (Hz)
+    dtype: real
+    default: samp_rate
+
+inputs:
+-   domain: stream
+    dtype: complex
+
+templates:
+    imports: |-
+        from gnuradio import fosphor
+        from gnuradio.fft import window
+    make: |-
+        fosphor.glfw_sink_c()
+        self.${id}.set_fft_window(${wintype})
+        self.${id}.set_frequency_range(${freq_center}, ${freq_span})
+    callbacks:
+    - set_fft_window(${wintype})
+    - set_frequency_range(${freq_center}, ${freq_span})
+
+documentation: |-
+    Key Bindings
+    ============
+    z:      toggle zoom mode
+    a/d:    move zoom frequency down/up
+    s/w:    adjust zoom width
+    q/e:    adjust screen split between waterfall and fft
+    space:  pause display
+    
+    (left)/(right)  adjust dB/div
+    (up)/(down)     adjust reference level
+
+file_format: 1
