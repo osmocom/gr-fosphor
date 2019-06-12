@@ -58,6 +58,7 @@ struct fosphor_cl_features
 #define FLG_CL_NVIDIA_SM11	(1<<1)
 #define FLG_CL_OPENCL_11	(1<<2)
 #define FLG_CL_LOCAL_ATOMIC_EXT	(1<<3)
+#define FLG_CL_IMAGE		(1<<4)
 
 	cl_device_type type;
 	char vendor[128];
@@ -148,6 +149,15 @@ cl_device_query(cl_device_id dev_id, struct fosphor_cl_features *feat)
 	if (err != CL_SUCCESS)
 		return -1;
 
+	/* Image support */
+	cl_bool image_support;
+	err = clGetDeviceInfo(dev_id, CL_DEVICE_IMAGE_SUPPORT, sizeof(image_support), &image_support, NULL);
+	if (err != CL_SUCCESS)
+		return -1;
+
+	if (image_support == CL_TRUE)
+		feat->flags |= FLG_CL_IMAGE;
+
 	/* CL/GL extension */
 	err = clGetDeviceInfo(dev_id, CL_DEVICE_EXTENSIONS, sizeof(txt)-1, txt, NULL);
 	if (err != CL_SUCCESS)
@@ -228,6 +238,10 @@ cl_device_score(cl_device_id dev_id, struct fosphor_cl_features *feat)
 
 	/* Check compatibility */
 	if (!(feat->flags & (FLG_CL_NVIDIA_SM11 | FLG_CL_OPENCL_11 | FLG_CL_LOCAL_ATOMIC_EXT)))
+		return -1;
+
+	/* Image support is required */
+	if (!(feat->flags & FLG_CL_IMAGE))
 		return -1;
 
 	/* Prefer device with CL/GL sharing */
