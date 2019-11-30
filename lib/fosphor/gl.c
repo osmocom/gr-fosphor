@@ -91,6 +91,7 @@ gl_check_extension(const char *ext_name)
 	return 0;
 }
 
+#if 0
 static void
 gl_tex2d_float_clear(GLuint tex_id, int width, int height)
 {
@@ -109,6 +110,7 @@ gl_tex2d_float_clear(GLuint tex_id, int width, int height)
 		}
 	}
 }
+#endif
 
 static void
 gl_tex2d_write(GLuint tex_id, float *src, int width, int height)
@@ -123,6 +125,7 @@ gl_tex2d_write(GLuint tex_id, float *src, int width, int height)
 	);
 }
 
+#if 0
 static void
 gl_vbo_clear(GLuint vbo_id, int size)
 {
@@ -139,7 +142,6 @@ gl_vbo_clear(GLuint vbo_id, int size)
 	glUnmapBuffer(GL_ARRAY_BUFFER);
 }
 
-#if 0
 static void
 gl_vbo_read(GLuint vbo_id, void *dst, int size)
 {
@@ -208,8 +210,6 @@ gl_deferred_init(struct fosphor *self)
 
 	glTexImage2D(GL_TEXTURE_2D, 0, tex_fmt, FOSPHOR_FFT_LEN, 1024, 0, GL_RED, GL_FLOAT, NULL);
 
-	gl_tex2d_float_clear(gl->tex_waterfall, FOSPHOR_FFT_LEN, 1024);
-
 	/* Histogram texture (FFT_LEN * 128) */
 	glGenTextures(1, &gl->tex_histogram);
 
@@ -222,8 +222,6 @@ gl_deferred_init(struct fosphor *self)
 
 	glTexImage2D(GL_TEXTURE_2D, 0, tex_fmt, FOSPHOR_FFT_LEN, 128, 0, GL_RED, GL_FLOAT, NULL);
 
-	gl_tex2d_float_clear(gl->tex_histogram, FOSPHOR_FFT_LEN, 128);
-
 	/* Spectrum VBO (2 * FFT_LEN, half for live, half for 'hold') */
 	glGenBuffers(1, &gl->vbo_spectrum);
 
@@ -231,8 +229,6 @@ gl_deferred_init(struct fosphor *self)
 
 	len = 2 * sizeof(float) * 2 * FOSPHOR_FFT_LEN;
 	glBufferData(GL_ARRAY_BUFFER, len, NULL, GL_DYNAMIC_DRAW);
-
-	gl_vbo_clear(gl->vbo_spectrum, len);
 }
 
 
