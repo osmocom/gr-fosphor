@@ -64,11 +64,11 @@ namespace gr {
 
       /* settings refresh logic */
       enum {
-        SETTING_DIMENSIONS	= (1 << 0),
-        SETTING_POWER_RANGE	= (1 << 1),
-        SETTING_FREQUENCY_RANGE	= (1 << 2),
-        SETTING_FFT_WINDOW	= (1 << 3),
-	SETTING_RENDER_OPTIONS	= (1 << 4),
+        SETTING_DIMENSIONS      = (1 << 0),
+        SETTING_POWER_RANGE     = (1 << 1),
+        SETTING_FREQUENCY_RANGE = (1 << 2),
+        SETTING_FFT_WINDOW      = (1 << 3),
+        SETTING_RENDER_OPTIONS  = (1 << 4),
       };
 
       uint32_t d_settings_changed;
