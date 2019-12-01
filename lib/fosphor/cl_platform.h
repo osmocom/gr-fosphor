@@ -27,6 +27,7 @@
 # define _WIN32
 #endif
 
+#define CL_TARGET_OPENCL_VERSION 120
 
 #if defined(__APPLE__) || defined(MACOSX)
 # include <OpenCL/cl.h>
