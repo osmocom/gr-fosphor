@@ -18,10 +18,5 @@
 
 # The presence of this file turns this directory into a Python package
 
-'''
-This is the GNU Radio FOSPHOR module. Place your Python package
-description here (python/__init__.py).
-'''
-
 # import swig generated symbols into the fosphor namespace
-from fosphor_swig import *
+from .fosphor_swig import *
