@@ -45,11 +45,14 @@ namespace gr {
      private:
       /* Worker thread */
       gr::thread::thread d_worker;
+      bool d_visible;
       bool d_active;
       bool d_frozen;
 
       void worker();
       static void _worker(base_sink_c_impl *obj);
+
+      gr::thread::mutex d_render_mutex;
 
       /* fosphor core */
       fifo *d_fifo;
@@ -111,6 +114,7 @@ namespace gr {
 
       /* Callbacks from GL window */
       void cb_reshape(int width, int height);
+      void cb_visibility(bool visible);
 
      public:
       virtual ~base_sink_c_impl();

@@ -61,7 +61,7 @@ const int base_sink_c_impl::k_db_per_div[] = {1, 2, 5, 10, 20};
 base_sink_c_impl::base_sink_c_impl()
   : d_db_ref(0), d_db_per_div_idx(3),
     d_zoom_enabled(false), d_zoom_center(0.5), d_zoom_width(0.2),
-    d_ratio(0.35f), d_frozen(false), d_active(false),
+    d_ratio(0.35f), d_frozen(false), d_active(false), d_visible(true),
     d_frequency(), d_fft_window(gr::fft::window::WIN_BLACKMAN_hARRIS)
 {
 	/* Init FIFO */
@@ -150,13 +150,9 @@ base_sink_c_impl::render(void)
 	/* Handle pending settings */
 	this->settings_apply(this->settings_get_and_reset_changed());
 
-	/* Clear everything */
-	glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
-	glClear(GL_COLOR_BUFFER_BIT);
-
+	/* Process as much we can */
 	tot_len = this->d_fifo->used();
 
-	/* Process as much we can */
 	for (i=0; i<max_iter && tot_len; i++)
 	{
 		gr_complex *data;
@@ -188,14 +184,30 @@ base_sink_c_impl::render(void)
 		this->d_fifo->read_discard(len);
 	}
 
-	/* Draw */
-	fosphor_draw(this->d_fosphor, this->d_render_main);
+	/* Are we visible ? */
+	{
+		gr::thread::scoped_lock guard(this->d_render_mutex);
 
-	if (this->d_zoom_enabled)
-		fosphor_draw(this->d_fosphor, this->d_render_zoom);
+		if (this->d_visible) {
+			/* Clear everything */
+			glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
+			glClear(GL_COLOR_BUFFER_BIT);
 
-	/* Done, swap buffer */
-	this->glctx_swap();
+			/* Draw */
+			fosphor_draw(this->d_fosphor, this->d_render_main);
+
+			if (this->d_zoom_enabled)
+				fosphor_draw(this->d_fosphor, this->d_render_zoom);
+
+			/* Done, swap buffer */
+			this->glctx_swap();
+		}
+	}
+
+	if (!this->d_visible) {
+		/* If hidden, we can't draw or swap buffer, so just wait a bit */
+		boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+	}
 }
 
 
@@ -299,6 +311,13 @@ base_sink_c_impl::cb_reshape(int width, int height)
 	this->d_width    = width;
 	this->d_height   = height;
 	this->settings_mark_changed(SETTING_DIMENSIONS);
+}
+
+void
+base_sink_c_impl::cb_visibility(bool visible)
+{
+	gr::thread::scoped_lock guard(this->d_render_mutex);
+	this->d_visible = visible;
 }
 
 
