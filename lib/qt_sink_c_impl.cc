@@ -64,7 +64,7 @@ qt_sink_c_impl::qt_sink_c_impl(QWidget *parent)
 void
 qt_sink_c_impl::glctx_init()
 {
-	this->d_gui->makeCurrent();
+	this->d_gui->grabContext();
 	this->d_gui->setFocus();
 }
 
@@ -83,7 +83,7 @@ qt_sink_c_impl::glctx_poll()
 void
 qt_sink_c_impl::glctx_fini()
 {
-	this->d_gui->doneCurrent();
+	this->d_gui->releaseContext();
 }
 
 void

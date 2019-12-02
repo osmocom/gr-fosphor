@@ -23,6 +23,8 @@
 
 #include <QGLWidget>
 
+class QThread;
+
 namespace gr {
   namespace fosphor {
 
@@ -33,14 +35,21 @@ namespace gr {
       Q_OBJECT
 
       qt_sink_c_impl *d_block;
+      QThread *d_gui_thread;
 
      protected:
       void paintEvent(QPaintEvent *pe);
       void resizeEvent(QResizeEvent *re);
       void keyPressEvent(QKeyEvent *ke);
 
+     private slots:
+      void giveContext(QThread *thread);
+
      public:
       QGLSurface(QWidget *parent, qt_sink_c_impl *d_block);
+
+      void grabContext();
+      void releaseContext();
     };
 
   } // namespace fosphor

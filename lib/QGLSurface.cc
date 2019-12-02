@@ -19,6 +19,8 @@
  */
 
 #include <QtEvents>
+#include <QThread>
+
 #include "QGLSurface.h"
 #include "qt_sink_c_impl.h"
 
@@ -30,7 +32,10 @@ namespace gr {
 QGLSurface::QGLSurface(QWidget *parent, qt_sink_c_impl *block)
   : QGLWidget(parent), d_block(block)
 {
-	this->doneCurrent();
+	/* Save the pointer to the main GUI thread */
+	this->d_gui_thread = this->thread();
+
+	/* QWidget policies */
 	this->setFocusPolicy(Qt::StrongFocus);
 	this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }
@@ -100,6 +105,34 @@ QGLSurface::keyPressEvent(QKeyEvent *ke)
 		this->d_block->execute_ui_action(qt_sink_c_impl::FREEZE_TOGGLE);
 		break;
 	}
+}
+
+
+void
+QGLSurface::grabContext()
+{
+	QMetaObject::invokeMethod(
+		this,
+		"giveContext",
+		Qt::BlockingQueuedConnection,
+		Q_ARG(QThread*, QThread::currentThread())
+	);
+
+	this->makeCurrent();
+}
+
+void
+QGLSurface::releaseContext()
+{
+	this->doneCurrent();
+	this->context()->moveToThread(this->d_gui_thread);
+}
+
+void
+QGLSurface::giveContext(QThread *thread)
+{
+	this->doneCurrent();
+	this->context()->moveToThread(thread);
 }
 
   } /* namespace fosphor */

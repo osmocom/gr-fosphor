@@ -26,10 +26,10 @@
 
 #include "base_sink_c_impl.h"
 
-class QGLWidget;
-
 namespace gr {
   namespace fosphor {
+
+    class QGLSurface;
 
     /*!
      * \brief Qt version of fosphor sink (implementation)
@@ -40,7 +40,7 @@ namespace gr {
      friend class QGLSurface;
 
      private:
-      QGLWidget *d_gui;
+      QGLSurface *d_gui;
 
      protected:
       /* Delegated implementation of GL context management */
