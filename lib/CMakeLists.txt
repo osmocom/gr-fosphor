@@ -67,7 +67,7 @@ endif(ENABLE_GLFW)
 
 if(ENABLE_QT)
     set(CMAKE_AUTOMOC ON)
-    include_directories(${QT_INCLUDE_DIRS})
+    include_directories(${Qt5_INCLUDE_DIRS})
 endif(ENABLE_QT)
 
 list(APPEND fosphor_sources
@@ -100,7 +100,7 @@ list(APPEND fosphor_libraries
 
 list_cond_append(ENABLE_PYTHON fosphor_libraries ${PYTHON_LIBRARY})
 list_cond_append(ENABLE_GLFW fosphor_libraries ${GLFW3_LIBRARIES})
-list_cond_append(ENABLE_QT   fosphor_libraries ${QT_LIBRARIES})
+list_cond_append(ENABLE_QT   fosphor_libraries ${Qt5_LIBRARIES})
 
 add_library(gnuradio-fosphor SHARED ${fosphor_sources})
 target_link_libraries(gnuradio-fosphor ${fosphor_libraries})

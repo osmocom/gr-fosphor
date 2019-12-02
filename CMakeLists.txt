@@ -112,10 +112,15 @@ endif()
 # Optional
 find_package(GLFW3)
 
-find_package(Qt4 4.2.0 COMPONENTS QtCore QtGui QtOpenGL)
-if (QT_FOUND)
-    include(GrSetupQt4)
-endif (QT_FOUND)
+set(Qt5_REQUIRED_COMPONENTS Core Gui OpenGL)
+find_package(Qt5 5.9.0 COMPONENTS ${Qt5_REQUIRED_COMPONENTS})
+if (Qt5_FOUND)
+       foreach(module ${Qt5_REQUIRED_COMPONENTS})
+               list(APPEND Qt5_INCLUDE_DIRS ${Qt5${module}_INCLUDE_DIRS})
+               list(APPEND Qt5_LIBRARY_DIRS ${Qt5${module}_LIBRARY_DIRS})
+               list(APPEND Qt5_LIBRARIES ${Qt5${module}_LIBRARIES})
+       endforeach(module)
+endif (Qt5_FOUND)
 
 ########################################################################
 # Find gnuradio build dependencies
@@ -149,7 +154,7 @@ GR_REGISTER_COMPONENT("GLFW" ENABLE_GLFW
 )
 
 GR_REGISTER_COMPONENT("QT" ENABLE_QT
-    QT_FOUND
+    Qt5_FOUND
 )
 
 GR_REGISTER_COMPONENT("WX" ENABLE_WX

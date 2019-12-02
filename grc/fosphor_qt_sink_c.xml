@@ -3,7 +3,7 @@
   <name>QT fosphor sink</name>
   <key>fosphor_qt_sink_c</key>
   <category>Instrumentation/QT</category>
-  <import>from PyQt4 import Qt</import>
+  <import>from PyQt5 import Qt</import>
   <import>import sip</import>
   <import>from gnuradio import fosphor</import>
   <import>from gnuradio.fft import window</import>
