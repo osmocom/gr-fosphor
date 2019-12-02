@@ -40,6 +40,19 @@ QGLSurface::QGLSurface(QWidget *parent, qt_sink_c_impl *block)
 	this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }
 
+
+void
+QGLSurface::hideEvent(QHideEvent *he)
+{
+	this->d_block->cb_visibility(this->isVisible());
+}
+
+void
+QGLSurface::showEvent(QShowEvent *he)
+{
+	this->d_block->cb_visibility(this->isVisible());
+}
+
 void
 QGLSurface::paintEvent(QPaintEvent *pe)
 {

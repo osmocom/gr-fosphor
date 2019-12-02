@@ -38,6 +38,8 @@ namespace gr {
       QThread *d_gui_thread;
 
      protected:
+      void hideEvent(QHideEvent *he);
+      void showEvent(QShowEvent *he);
       void paintEvent(QPaintEvent *pe);
       void resizeEvent(QResizeEvent *re);
       void keyPressEvent(QKeyEvent *ke);
