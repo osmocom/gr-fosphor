@@ -45,7 +45,7 @@ qt_sink_c::make(QWidget *parent)
 }
 
 qt_sink_c_impl::qt_sink_c_impl(QWidget *parent)
-  : base_sink_c("glfw_sink_c")
+  : base_sink_c("qt_sink_c")
 {
 	/* QT stuff */
 	if(qApp != NULL) {
