@@ -72,7 +72,7 @@ namespace gr {
       };
 
       uint32_t d_settings_changed;
-      thread::mutex d_settings_mutex;
+      gr::thread::mutex d_settings_mutex;
 
       void     settings_mark_changed(uint32_t setting);
       uint32_t settings_get_and_reset_changed(void);
