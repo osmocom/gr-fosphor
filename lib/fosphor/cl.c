@@ -864,6 +864,12 @@ fosphor_cl_release(struct fosphor *self)
 	if (!cl)
 		return;
 
+	/* Release the GL objects */
+	if ((cl->state == CL_PENDING) && (self->flags & FLG_FOSPHOR_USE_CLGL_SHARING))
+	{
+		cl_lock_unlock(cl, 0, NULL);
+	}
+
 	/* Release all allocated OpenCL resources */
 	cl_do_release(cl);
 
