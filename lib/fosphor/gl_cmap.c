@@ -217,6 +217,9 @@ fosphor_gl_cmap_release(struct fosphor_gl_cmap_ctx *cmap_ctx)
 	gl_cmap_release_shader(&cmap_ctx->shaders[GL_CMAP_SHADER_SIMPLE]);
 	gl_cmap_release_shader(&cmap_ctx->shaders[GL_CMAP_SHADER_BICUBIC]);
 	gl_cmap_release_shader(&cmap_ctx->shaders[GL_CMAP_SHADER_FALLBACK]);
+
+	/* Release container */
+	free(cmap_ctx);
 }
 
 
