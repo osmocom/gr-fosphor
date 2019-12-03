@@ -58,6 +58,7 @@ struct fosphor_cl_features
 #define FLG_CL_NVIDIA_SM11	(1<<1)
 #define FLG_CL_OPENCL_11	(1<<2)
 #define FLG_CL_LOCAL_ATOMIC_EXT	(1<<3)
+#define FLG_CL_IMAGE		(1<<4)
 
 	cl_device_type type;
 	char vendor[128];
@@ -130,6 +131,7 @@ cl_device_query(cl_device_id dev_id, struct fosphor_cl_features *feat)
 	char txt[2048];
 	cl_int err;
 	int has_nv_attr;
+	cl_bool has_image;
 
 	memset(feat, 0x00, sizeof(struct fosphor_cl_features));
 
@@ -147,6 +149,13 @@ cl_device_query(cl_device_id dev_id, struct fosphor_cl_features *feat)
 	err = clGetDeviceInfo(dev_id, CL_DEVICE_LOCAL_MEM_SIZE, sizeof(cl_ulong), &feat->local_mem, NULL);
 	if (err != CL_SUCCESS)
 		return -1;
+
+	/* Image support */
+	err = clGetDeviceInfo(dev_id, CL_DEVICE_IMAGE_SUPPORT, sizeof(cl_bool), &has_image, NULL);
+	if (err != CL_SUCCESS)
+		return -1;
+
+	feat->flags |= (has_image == CL_TRUE) ? FLG_CL_IMAGE : 0;
 
 	/* CL/GL extension */
 	err = clGetDeviceInfo(dev_id, CL_DEVICE_EXTENSIONS, sizeof(txt)-1, txt, NULL);
@@ -228,6 +237,9 @@ cl_device_score(cl_device_id dev_id, struct fosphor_cl_features *feat)
 
 	/* Check compatibility */
 	if (!(feat->flags & (FLG_CL_NVIDIA_SM11 | FLG_CL_OPENCL_11 | FLG_CL_LOCAL_ATOMIC_EXT)))
+		return -1;
+
+	if (!(feat->flags & FLG_CL_IMAGE))
 		return -1;
 
 	/* Prefer device with CL/GL sharing */
