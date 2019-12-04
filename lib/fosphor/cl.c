@@ -61,6 +61,7 @@ struct fosphor_cl_features
 #define FLG_CL_IMAGE		(1<<4)
 
 	cl_device_type type;
+	char name[128];
 	char vendor[128];
 	unsigned long local_mem;
 	int flags;
@@ -142,6 +143,11 @@ cl_device_query(cl_device_id dev_id, struct fosphor_cl_features *feat)
 
 	/* Vendor */
 	err = clGetDeviceInfo(dev_id, CL_DEVICE_VENDOR, sizeof(feat->vendor)-1, &feat->vendor, NULL);
+	if (err != CL_SUCCESS)
+		return -1;
+
+	/* Name */
+	err = clGetDeviceInfo(dev_id, CL_DEVICE_NAME, sizeof(feat->name)-1, &feat->name, NULL);
 	if (err != CL_SUCCESS)
 		return -1;
 
@@ -278,6 +284,15 @@ cl_find_device(cl_platform_id *pl_id_p, cl_device_id *dev_id_p,
 	cl_uint pl_count, dev_count, i, j;
 	cl_int err;
 	int score = -1;
+	char *env_sel;
+	int id_sel[2];
+
+	/* Check for manual selection */
+	env_sel = getenv("FOSPHOR_CL_DEV");
+	if (!env_sel || (sscanf(env_sel, "%d:%d", &id_sel[0], &id_sel[1]) != 2)) {
+		id_sel[0] = id_sel[1] = -1;
+	}
+	fprintf(stderr, "%d %d\n", id_sel[0], id_sel[1]);
 
 	/* Scan each platforms */
 	err = clGetPlatformIDs(MAX_PLATFORMS, pl_list, &pl_count);
@@ -299,7 +314,9 @@ cl_find_device(cl_platform_id *pl_id_p, cl_device_id *dev_id_p,
 		{
 			struct fosphor_cl_features feat_cur;
 			int s = cl_device_score(dev_list[j], &feat_cur);
-			if (s > score) {
+			fprintf(stderr, "[+] Available device: %d:%d <%s> %s\n",
+				i, j, feat_cur.vendor, feat_cur.name);
+			if ((id_sel[0] == -1) ? (s > score) : ((id_sel[0] == i) && (id_sel[1] == j))) {
 				pl_id  = pl_list[i];
 				dev_id = dev_list[j];
 				memcpy(feat, &feat_cur, sizeof(struct fosphor_cl_features));
@@ -797,7 +814,6 @@ int
 fosphor_cl_init(struct fosphor *self)
 {
 	struct fosphor_cl_state *cl;
-	char dev_name[128];
 	cl_int err;
 
 	/* Allocate structure */
@@ -818,10 +834,7 @@ fosphor_cl_init(struct fosphor *self)
 	}
 
 	/* Report selected device */
-	err = clGetDeviceInfo(cl->dev_id, CL_DEVICE_NAME, sizeof(dev_name)-1, dev_name, NULL);
-	CL_ERR_CHECK(err, "Unable to fetch device name");
-
-	fprintf(stderr, "[+] Selected device: %s\n", dev_name);
+	fprintf(stderr, "[+] Selected device: %s\n", cl->feat.name);
 
 	/* Setup compatibility layer for this platform */
 	cl_compat_init();
