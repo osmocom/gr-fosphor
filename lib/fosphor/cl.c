@@ -292,7 +292,6 @@ cl_find_device(cl_platform_id *pl_id_p, cl_device_id *dev_id_p,
 	if (!env_sel || (sscanf(env_sel, "%d:%d", &id_sel[0], &id_sel[1]) != 2)) {
 		id_sel[0] = id_sel[1] = -1;
 	}
-	fprintf(stderr, "%d %d\n", id_sel[0], id_sel[1]);
 
 	/* Scan each platforms */
 	err = clGetPlatformIDs(MAX_PLATFORMS, pl_list, &pl_count);
