@@ -291,13 +291,8 @@ base_sink_c_impl::settings_apply(uint32_t settings)
 		this->d_render_main->channels[0].center  = (float)this->d_zoom_center;
 		this->d_render_main->channels[0].width   = (float)this->d_zoom_width;
 
-		f = (float)(this->d_zoom_center - this->d_zoom_width / 2.0);
-		this->d_render_zoom->freq_start =
-			f > 0.0f ? (f < 1.0f ? f : 1.0f) : 0.0f;
-
-		f = (float)(this->d_zoom_center + this->d_zoom_width / 2.0);
-		this->d_render_zoom->freq_stop =
-			f > 0.0f ? (f < 1.0f ? f : 1.0f) : 0.0f;
+		this->d_render_zoom->freq_center = (float)this->d_zoom_center;
+		this->d_render_zoom->freq_span   = (float)this->d_zoom_width;
 
 		fosphor_render_refresh(this->d_render_main);
 		fosphor_render_refresh(this->d_render_zoom);
