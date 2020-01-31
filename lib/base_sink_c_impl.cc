@@ -49,7 +49,8 @@ base_sink_c::base_sink_c(const char *name)
                    gr::io_signature::make(1, 1, sizeof(gr_complex)),
                    gr::io_signature::make(0, 0, 0))
 {
-	/* Nothing to do but super call */
+	/* Register message ports */
+	message_port_register_out(pmt::mp("freq"));
 }
 
 
@@ -381,6 +382,29 @@ base_sink_c_impl::execute_ui_action(enum ui_action_t action)
 		SETTING_POWER_RANGE |
 		SETTING_RENDER_OPTIONS
 	);
+}
+
+void
+base_sink_c_impl::execute_mouse_action(enum mouse_action_t action, int x, int y)
+{
+	if (action != CLICK)
+		return;
+
+	/* Identify position */
+	int in_main = fosphor_render_pos_inside(this->d_render_main, x, y);
+	int in_zoom = this->d_zoom_enabled ? fosphor_render_pos_inside(this->d_render_zoom, x, y) : 0;
+
+	/* Send frequency */
+	if (in_main & 1)
+	{
+		double freq = fosphor_pos2freq(this->d_fosphor, this->d_render_main, x);
+		message_port_pub(pmt::mp("freq"), pmt::cons(pmt::mp("freq"), pmt::from_double(freq)));
+	}
+	else if (in_zoom & 1)
+	{
+		double freq = fosphor_pos2freq(this->d_fosphor, this->d_render_zoom, x);
+		message_port_pub(pmt::mp("freq"), pmt::cons(pmt::mp("freq"), pmt::from_double(freq)));
+	}
 }
 
 void

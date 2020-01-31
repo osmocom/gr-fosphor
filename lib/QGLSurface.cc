@@ -120,6 +120,20 @@ QGLSurface::keyPressEvent(QKeyEvent *ke)
 	}
 }
 
+void
+QGLSurface::mousePressEvent(QMouseEvent *me)
+{
+	int x, y;
+
+	if (me->type() != QEvent::MouseButtonDblClick)
+		return;
+
+	x = me->x();
+	y = this->size().height() - me->y() - 1;
+
+	this->d_block->execute_mouse_action(qt_sink_c_impl::CLICK, x, y);
+}
+
 
 void
 QGLSurface::grabContext()

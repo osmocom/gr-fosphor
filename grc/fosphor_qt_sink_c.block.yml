@@ -26,6 +26,11 @@ inputs:
 -   domain: stream
     dtype: complex
 
+outputs:
+-   domain: message
+    id: freq
+    optional: true
+
 templates:
     imports: |-
         from PyQt5 import Qt

@@ -56,7 +56,12 @@ namespace gr {
         FREEZE_TOGGLE,
       };
 
+      enum mouse_action_t {
+        CLICK,
+      };
+
       virtual void execute_ui_action(enum ui_action_t action) = 0;
+      virtual void execute_mouse_action(enum mouse_action_t action, int x, int y) = 0;
 
       virtual void set_frequency_range(const double center,
                                        const double span) = 0;

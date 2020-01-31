@@ -121,6 +121,7 @@ namespace gr {
 
       /* gr::fosphor::base_sink_c implementation */
       void execute_ui_action(enum ui_action_t action);
+      void execute_mouse_action(enum mouse_action_t action, int x, int y);
 
       void set_frequency_range(const double center,
                                const double span);

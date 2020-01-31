@@ -43,6 +43,7 @@ namespace gr {
       void paintEvent(QPaintEvent *pe);
       void resizeEvent(QResizeEvent *re);
       void keyPressEvent(QKeyEvent *ke);
+      void mousePressEvent(QMouseEvent *me);
 
      private slots:
       void giveContext(QThread *thread);

@@ -44,9 +44,11 @@ namespace gr {
       void glfw_render(void);
       void glfw_cb_reshape(int w, int h);
       void glfw_cb_key(int key, int scancode, int action, int mods);
+      void glfw_cb_mouse(int btn, int action, int mods);
 
       static void _glfw_cb_reshape(GLFWwindow *wnd, int w, int h);
       static void _glfw_cb_key(GLFWwindow *wnd, int key, int scancode, int action, int mods);
+      static void _glfw_cb_mouse(GLFWwindow *wnd, int btn, int action, int mods);
 
      protected:
       /* Delegated implementation of GL context management */

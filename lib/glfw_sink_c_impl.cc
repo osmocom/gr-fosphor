@@ -116,6 +116,26 @@ glfw_sink_c_impl::glfw_cb_key(int key, int scancode, int action, int mods)
 }
 
 void
+glfw_sink_c_impl::glfw_cb_mouse(int btn, int action, int mods)
+{
+	int x, y, w, h;
+	double xd, yd;
+
+	if (action != GLFW_PRESS)
+		return;
+
+	/* Get cursor position */
+	glfwGetFramebufferSize(this->d_window, &w, &h);
+	glfwGetCursorPos(this->d_window, &xd, &yd);
+
+	x = floor(xd);
+	y = h - floor(yd) - 1;
+
+	/* Report upstream */
+	this->execute_mouse_action(glfw_sink_c_impl::CLICK, x, y);
+}
+
+void
 glfw_sink_c_impl::_glfw_cb_reshape(GLFWwindow *wnd, int w, int h)
 {
 	glfw_sink_c_impl *sink = (glfw_sink_c_impl *) glfwGetWindowUserPointer(wnd);
@@ -127,6 +147,13 @@ glfw_sink_c_impl::_glfw_cb_key(GLFWwindow *wnd, int key, int scancode, int actio
 {
 	glfw_sink_c_impl *sink = (glfw_sink_c_impl *) glfwGetWindowUserPointer(wnd);
 	sink->glfw_cb_key(key, scancode, action, mods);
+}
+
+void
+glfw_sink_c_impl::_glfw_cb_mouse(GLFWwindow *wnd, int btn, int action, int mods)
+{
+	glfw_sink_c_impl *sink = (glfw_sink_c_impl *) glfwGetWindowUserPointer(wnd);
+	sink->glfw_cb_mouse(btn, action, mods);
 }
 
 
@@ -151,6 +178,7 @@ glfw_sink_c_impl::glctx_init()
 	/* Setup callbacks */
 	glfwSetFramebufferSizeCallback(wnd, _glfw_cb_reshape);
 	glfwSetKeyCallback(wnd, _glfw_cb_key);
+	glfwSetMouseButtonCallback(wnd, _glfw_cb_mouse);
 
 	/* Force first reshape */
 	this->glfw_cb_reshape(-1, -1);
