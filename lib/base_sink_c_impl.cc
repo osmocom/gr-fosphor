@@ -62,7 +62,7 @@ const int base_sink_c_impl::k_db_per_div[] = {1, 2, 5, 10, 20};
 base_sink_c_impl::base_sink_c_impl()
   : d_db_ref(0), d_db_per_div_idx(3),
     d_zoom_enabled(false), d_zoom_center(0.5), d_zoom_width(0.2),
-    d_ratio(0.35f), d_frozen(false), d_active(false), d_visible(true),
+    d_ratio(0.35f), d_frozen(false), d_active(false), d_visible(false),
     d_frequency(), d_fft_window(gr::fft::window::WIN_BLACKMAN_hARRIS)
 {
 	/* Init FIFO */

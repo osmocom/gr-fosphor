@@ -51,6 +51,7 @@ glfw_sink_c_impl::glfw_cb_reshape(int w, int h)
 		glfwGetFramebufferSize(this->d_window, &w, &h);
 
 	this->cb_reshape(w, h);
+	this->cb_visibility(true);
 }
 
 void
