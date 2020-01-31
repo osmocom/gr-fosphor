@@ -195,8 +195,6 @@ glfw_render(GLFWwindow *wnd)
 static void
 _update_fosphor(void)
 {
-	float f;
-
 	/* Configure the screen zones */
 	if (g_as->zoom_enable)
 	{
@@ -231,11 +229,8 @@ _update_fosphor(void)
 	g_as->render_main.channels[0].center  = (float)g_as->zoom_center;
 	g_as->render_main.channels[0].width   = (float)g_as->zoom_width;
 
-	f = (float)(g_as->zoom_center - g_as->zoom_width / 2.0);
-	g_as->render_zoom.freq_start = f > 0.0f ? (f < 1.0f ? f : 1.0f)  : 0.0f;
-
-	f = (float)(g_as->zoom_center + g_as->zoom_width / 2.0);
-	g_as->render_zoom.freq_stop  = f > 0.0f ? (f < 1.0f ? f : 1.0f)  : 0.0f;
+	g_as->render_zoom.freq_center = g_as->zoom_center;
+	g_as->render_zoom.freq_span   = g_as->zoom_width;
 
 	/* Update render options */
 	fosphor_render_refresh(&g_as->render_main);

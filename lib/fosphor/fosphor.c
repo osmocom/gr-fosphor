@@ -191,8 +191,8 @@ fosphor_render_defaults(struct fosphor_render *render)
 
 	render->histo_wf_ratio = 0.5f;
 	render->freq_n_div     = 10;
-	render->freq_start     = 0.0f;
-	render->freq_stop      = 1.0f;
+	render->freq_center    = 0.5f;
+	render->freq_span      = 1.0f;
 	render->wf_span        = 1.0f;
 }
 

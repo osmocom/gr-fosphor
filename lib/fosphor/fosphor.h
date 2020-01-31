@@ -82,9 +82,9 @@ struct fosphor_render
 	int   options;		/*!< \brief Options (See FRO_??? constants) */
 	float histo_wf_ratio;	/*!< \brief Ratio histogram/waterfall ]0,1[ */
 	int   freq_n_div;	/*!< \brief Number of frequency divisions */
-	float freq_start;	/*!< \brief Frequency zoom start [0,1[ */
-	float freq_stop;	/*!< \brief Frequency zoom stop  ]0,1] */
-	float wf_span;		/*!< \brief Waterfall time zoom  ]0,1] */
+	float freq_center;	/*!< \brief Frequency zoom center ]0,1[ */
+	float freq_span;	/*!< \brief Frequency zoom span   ]0,1] */
+	float wf_span;		/*!< \brief Waterfall time zoom   ]0,1] */
 
 		/*! \brief Displayed channels */
 	struct fosphor_channel channels[FOSPHOR_MAX_CHANNELS];

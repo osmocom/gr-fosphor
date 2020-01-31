@@ -368,31 +368,30 @@ fosphor_gl_draw(struct fosphor *self, struct fosphor_render *render)
 	struct fosphor_gl_state *gl = self->gl;
 	struct freq_axis freq_axis;
 	float x[2], y[2], u[2], v[2];
-	float tw, bw;
+	float tw;
 	int i;
 
 	/* Utils */
-	tw = 1.0f / (float)FOSPHOR_FFT_LEN;	/* Texel width */
-	bw = 1.0f / (float)(FOSPHOR_FFT_LEN-1);	/* Bin width (displayed) */
+	tw = 1.0f / (float)(FOSPHOR_FFT_LEN);	/* Texel width */
 
 	/* Texture mapping notes:
 	 *
 	 *  - The texture have the "DC" bin at texel 0, however we want it to
 	 *    be displayed centered and to do so, texture coordinates are used.
-	 *  - One of the bin is not displayed (the one at u=0.5f) because
-	 *    it is neither positive freq, nor negative ones, but both. To
-	 *    compensate for this, the (1.0f - tw) factor is used.
+	 *  - The center of the extrema bin (which is neither positive or
+	 *    negative) is mapped to the border of the texture.
 	 *
 	 * Vertex mapping notes:
 	 *
 	 *  - We want the vertex to appear at the center of the displayed bins
 	 *  - The vertex 'X' coordinates are filled in by the display kernel as
 	 *    ((bin #) ^ (N >> 1)) / (N >> 1) - 1
-	 *  - So the DC bin is 0.0f and the undisplayed bin is -1. The others
-	 *    are spread between [ -1+2*tw  to  1-2*tw ]
+	 *  - So the DC bin is 0.0 and the undisplayed bin is -1.0. The others
+	 *    are spread between [ -1.0 + (tw/2.0)  to  1.0 - (tw/2.0) ]
 	 *  - For display, that range is first remapped to [0 to 1], then to
-	 *    [ bw/2 to 1-bw/2 ] (where bw is normalized displayed bin width)
-	 *    so that each point maps to the center of the bin on the textures.
+	 *    [ tw to 1-tw ] (we skip 1 tw on each side. One half tw because of
+	 *    the half not displayed extrema bin, and another half to center
+	 *    inside the first displayed bin on each side)
 	 *  - Finally the zoom is applied and then the transform to map on the
 	 *    requested screen area
 	 */
@@ -406,8 +405,8 @@ fosphor_gl_draw(struct fosphor *self, struct fosphor_render *render)
 		y[0] = render->_y_wf[0];
 		y[1] = render->_y_wf[1];
 
-		u[0] = 0.5f + tw + ((1.0f - tw) * render->freq_start);
-		u[1] = 0.5f + tw + ((1.0f - tw) * render->freq_stop);
+		u[0] = 0.5f + (tw / 2.0f) + render->freq_center - (render->freq_span / 2.0f);
+		u[1] = 0.5f + (tw / 2.0f) + render->freq_center + (render->freq_span / 2.0f);
 
 		v[1] = (float)render->_wf_pos / 1024.0f;
 		v[0] = v[1] - render->wf_span;
@@ -440,8 +439,8 @@ fosphor_gl_draw(struct fosphor *self, struct fosphor_render *render)
 		y[0] = render->_y_histo[0];
 		y[1] = render->_y_histo[1];
 
-		u[0] = 0.5f + tw + ((1.0f - tw) * render->freq_start);
-		u[1] = 0.5f + tw + ((1.0f - tw) * render->freq_stop);
+		u[0] = 0.5f + (tw / 2.0f) + render->freq_center - (render->freq_span / 2.0f);
+		u[1] = 0.5f + (tw / 2.0f) + render->freq_center + (render->freq_span / 2.0f);
 
 		v[0] = 0.0f;
 		v[1] = 1.0f;
@@ -487,8 +486,14 @@ fosphor_gl_draw(struct fosphor *self, struct fosphor_render *render)
 		int idx[2], len;
 
 		/* Select end-points */
-		idx[0] = 1 + (int)ceilf (render->freq_start * (float)(FOSPHOR_FFT_LEN - 1) - 0.5f);
-		idx[1] = 1 + (int)floorf(render->freq_stop  * (float)(FOSPHOR_FFT_LEN - 1) - 0.5f);
+		idx[0] = ceilf ((float)(FOSPHOR_FFT_LEN) * (render->freq_center - (render->freq_span / 2.0f)));
+		idx[1] = floorf((float)(FOSPHOR_FFT_LEN) * (render->freq_center + (render->freq_span / 2.0f)));
+
+		if (idx[0] < 1)
+			idx[0] = 1;
+		if (idx[1] >= FOSPHOR_FFT_LEN)
+			idx[1] = FOSPHOR_FFT_LEN - 1;
+
 		len = idx[1] - idx[0] + 1;
 
 		/* Setup */
@@ -512,12 +517,12 @@ fosphor_gl_draw(struct fosphor *self, struct fosphor_render *render)
 		glTranslatef(0.0f, self->power.offset, 0.0f);
 
 			/* Spectrum range selection */
-		glScalef(1.0f / (render->freq_stop - render->freq_start), 1.0f, 1.0f);
-		glTranslatef(-render->freq_start, 0.0f, 0.0f);
+		glScalef(1.0f / render->freq_span, 1.0f, 1.0f);
+		glTranslatef(- render->freq_center + render->freq_span / 2.0f, 0.0f, 0.0f);
 
 			/* Map the center of each N-1 bins */
-		glTranslatef(0.5f * bw, 0.0f, 0.0f);
-		glScalef(1.0f - bw, 1.0f, 1.0f);
+		glTranslatef(tw, 0.0f, 0.0f);
+		glScalef(1.0f - 2.0 * tw, 1.0f, 1.0f);
 
 			/* Spectrum x scaling to [0.0 -> 1.0] range */
 		glTranslatef(0.5f, 0.0f, 0.0f);
@@ -559,21 +564,14 @@ fosphor_gl_draw(struct fosphor *self, struct fosphor_render *render)
 	}
 
 	/* Setup frequency axis */
-	if (render->freq_start != 0.0f || render->freq_stop != 1.0f)
+	if (render->freq_center != 0.5f || render->freq_span != 1.0f)
 	{
-		/* The freq_{start,stop} have some imprecisions due to the floating
-		 * point nature. To avoid this crapping the display of the axis, we
-		 * try to 'round' them */
-
-		double freq_start = round(1e7 * render->freq_start) / 1e7;
-		double freq_stop  = round(1e7 * render->freq_stop)  / 1e7;
-
-		double rel_center = ((freq_stop + freq_start) / 2.0) - 0.5;
-		double rel_span   =  (freq_stop - freq_start);
+		double view_center = self->frequency.center + self->frequency.span * (double)(render->freq_center - 0.5f);
+		double view_span   = self->frequency.span * (double)render->freq_span;
 
 		freq_axis_build(&freq_axis,
-				self->frequency.center + rel_center * self->frequency.span,
-				self->frequency.span * rel_span,
+				view_center,
+				view_span,
 				render->freq_n_div
 		);
 	}
