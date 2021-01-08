@@ -4,3 +4,6 @@
 # This file is part of gr-fosphor
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
+
+# import pybind11 generated symbols into the iqbalance namespace
+from .fosphor_python import *

@@ -138,6 +138,19 @@ find_package(Doxygen)
 find_package(PythonLibs 3)
 
 ########################################################################
+# PyBind11 Related
+########################################################################
+
+find_package(pybind11 REQUIRED)
+
+if (pybind11_FOUND)
+    execute_process(
+        COMMAND "${PYTHON_EXECUTABLE}" -c
+        "try:\n import numpy\n import os\n inc_path = numpy.get_include()\n if os.path.exists(os.path.join(inc_path, 'numpy', 'arrayobject.h')):\n  print(inc_path, end='')\nexcept:\n pass"
+        OUTPUT_VARIABLE PYTHON_NUMPY_INCLUDE_DIR)
+endif (pybind11_FOUND)
+
+########################################################################
 # Setup doxygen option
 ########################################################################
 if(DOXYGEN_FOUND)
@@ -153,7 +166,7 @@ endif(DOXYGEN_FOUND)
 include(GrComponent)
 
 GR_REGISTER_COMPONENT("Python" ENABLE_PYTHON
-    PYTHONLIBS_FOUND
+    PYTHONLIBS_FOUND pybind11_FOUND
 )
 
 GR_REGISTER_COMPONENT("GLFW" ENABLE_GLFW
