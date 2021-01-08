@@ -125,7 +125,6 @@ endif (Qt5_FOUND)
 
 find_package(Doxygen)
 find_package(PythonLibs 3)
-find_package(SWIG)
 
 ########################################################################
 # Setup doxygen option
@@ -143,7 +142,7 @@ endif(DOXYGEN_FOUND)
 include(GrComponent)
 
 GR_REGISTER_COMPONENT("Python" ENABLE_PYTHON
-    PYTHONLIBS_FOUND SWIG_FOUND
+    PYTHONLIBS_FOUND
 )
 
 GR_REGISTER_COMPONENT("GLFW" ENABLE_GLFW
@@ -179,7 +178,6 @@ add_subdirectory(include/gnuradio/fosphor)
 add_subdirectory(lib)
 
 if(ENABLE_PYTHON)
-    add_subdirectory(swig)
     add_subdirectory(python)
     add_subdirectory(grc)
     add_subdirectory(apps)

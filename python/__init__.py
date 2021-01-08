@@ -4,6 +4,3 @@
 # This file is part of gr-fosphor
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
-
-# import swig generated symbols into the fosphor namespace
-from .fosphor_swig import *

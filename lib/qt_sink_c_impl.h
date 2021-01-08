@@ -43,7 +43,7 @@ namespace gr {
       void exec_();
       QWidget* qwidget();
 
-#if defined(PY_VERSION) || defined(SWIGPYTHON)
+#if defined(PY_VERSION)
       PyObject* pyqwidget();
 #else
       void* pyqwidget();

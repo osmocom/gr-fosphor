@@ -42,7 +42,7 @@ namespace gr {
       virtual void exec_() = 0;
       virtual QWidget* qwidget() = 0;
 
-#if defined(PY_VERSION) || defined(SWIGPYTHON)
+#if defined(PY_VERSION)
       virtual PyObject* pyqwidget() = 0;
 #else
       virtual void* pyqwidget() = 0;
