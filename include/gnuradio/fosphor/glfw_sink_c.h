@@ -24,7 +24,7 @@ namespace gr {
     class GR_FOSPHOR_API glfw_sink_c : virtual public base_sink_c
     {
      public:
-      typedef boost::shared_ptr<glfw_sink_c> sptr;
+      typedef std::shared_ptr<glfw_sink_c> sptr;
 
       /*!
        * \brief Return a shared_ptr to a new instance of fosphor::glfw_sink_c.
