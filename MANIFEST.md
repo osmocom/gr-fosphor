@@ -12,6 +12,7 @@ author:
 copyright_owner:
     - Sylvain Munaut <tnt@246tNt.com>
 license: GPLv3
+gr_supported_version: 3.9
 repo: git://git.osmocom.org/gr-fosphor
 website: http://sdr.osmocom.org/trac/wiki/fosphor
 icon: http://people.osmocom.org/~tnt/stuff/fosphor-icon.png
