@@ -19,8 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __FOSPHOR_CL_H__
-#define __FOSPHOR_CL_H__
+#pragma once
 
 /*! \defgroup cl
  *  @{
@@ -45,5 +44,3 @@ void fosphor_cl_set_histogram_range(struct fosphor *self,
                                     float scale, float offset);
 
 /*! @} */
-
-#endif /* __FOSPHOR_CL_H__ */

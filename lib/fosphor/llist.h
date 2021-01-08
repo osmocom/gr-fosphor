@@ -21,8 +21,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __FOSPHOR_LLIST_H__
-#define __FOSPHOR_LLIST_H__
+#pragma once
 
 /*! \defgroup llist
  *  @{
@@ -92,5 +91,3 @@ static inline void llist_del(struct llist_head *entry)
 	     pos = llist_entry(pos->member.next, type, member))
 
 /*! @} */
-
-#endif /* __FOSPHOR_LLIST_H__ */

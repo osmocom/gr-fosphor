@@ -19,8 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __FOSPHOR_RESOURCE_H__
-#define __FOSPHOR_RESOURCE_H__
+#pragma once
 
 /*! \defgroup resource
  *  @{
@@ -34,5 +33,3 @@ const void *resource_get(const char *name, int *len);
 void        resource_put(const void *r);
 
 /*! @} */
-
-#endif /* __FOSPHOR_RESOURCE_H__ */

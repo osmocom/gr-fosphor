@@ -19,8 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __RESOURCE_INTERNAL_H__
-#define __RESOURCE_INTERNAL_H__
+#pragma once
 
 /*! \addtogroup resource
  *  @{
@@ -57,5 +56,3 @@ struct resource_cache
 };
 
 /*! @} */
-
-#endif /* __RESOURCE_INTERNAL_H__ */

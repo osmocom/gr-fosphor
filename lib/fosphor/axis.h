@@ -19,8 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __FOSPHOR_AXIS_H__
-#define __FOSPHOR_AXIS_H__
+#pragma once
 
 /*! \defgroup axis
  *  @{
@@ -46,5 +45,3 @@ void freq_axis_build(struct freq_axis *fx, double center, double span, int n_div
 void freq_axis_render(struct freq_axis *fx, char *str, int step);
 
 /*! @} */
-
-#endif /* __FOSPHOR_AXIS_H__ */

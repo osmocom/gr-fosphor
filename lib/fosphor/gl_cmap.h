@@ -19,8 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __FOSPHOR_GL_CMAP_H__
-#define __FOSPHOR_GL_CMAP_H__
+#pragma once
 
 /*! \defgroup gl/cmap
  *  @{
@@ -61,5 +60,3 @@ int fosphor_gl_cmap_generate(GLuint *cmap_id, gl_cmap_gen_func_t gfn, void *gfn_
 
 
 /*! @} */
-
-#endif /* __FOSPHOR_GL_CMAP_H__ */

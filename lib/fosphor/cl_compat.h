@@ -19,8 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __FOSPHOR_CL_COMPAT_H__
-#define __FOSPHOR_CL_COMPAT_H__
+#pragma once
 
 /*! \ingroup cl
  * @{
@@ -103,5 +102,3 @@ void cl_compat_check_platform(cl_platform_id pl_id);
 
 
 /*! @} */
-
-#endif /* __FOSPHOR_CL_COMPAT_H__ */

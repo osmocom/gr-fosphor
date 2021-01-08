@@ -19,8 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __FOSPHOR_GL_FONT_H__
-#define __FOSPHOR_GL_FONT_H__
+#pragma once
 
 /*! \defgroup gl/font
  *  @{
@@ -73,5 +72,3 @@ void glf_end(void);
 
 
 /*! @} */
-
-#endif /* __FOSPHOR_GL_FONT_H__ */

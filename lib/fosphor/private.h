@@ -19,8 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __FOSPHOR_PRIVATE_H__
-#define __FOSPHOR_PRIVATE_H__
+#pragma once
 
 /*! \defgroup private
  *  @{
@@ -69,5 +68,3 @@ struct fosphor
 
 
 /*! @} */
-
-#endif /* __FOSPHOR_PRIVATE_H__ */

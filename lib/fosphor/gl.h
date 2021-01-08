@@ -19,8 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __FOSPHOR_GL_H__
-#define __FOSPHOR_GL_H__
+#pragma once
 
 /*! \defgroup gl
  *  @{
@@ -52,5 +51,3 @@ void fosphor_gl_refresh(struct fosphor *self);
 void fosphor_gl_draw(struct fosphor *self, struct fosphor_render *render);
 
 /*! @} */
-
-#endif /* __FOSPHOR_GL_H__ */

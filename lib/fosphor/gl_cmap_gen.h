@@ -19,8 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __FOSPHOR_GL_CMAP_GEN_H__
-#define __FOSPHOR_GL_CMAP_GEN_H__
+#pragma once
 
 /*! \addtogroup gl/cmap
  *  @{
@@ -36,5 +35,3 @@ int fosphor_gl_cmap_histogram(uint32_t *rgba, int N, void *arg);
 int fosphor_gl_cmap_waterfall(uint32_t *rgba, int N, void *arg);
 
 /*! @} */
-
-#endif /* __FOSPHOR_GL_CMAP_GEN_H__ */

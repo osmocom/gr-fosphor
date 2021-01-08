@@ -19,8 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __FOSPHOR_FOSPHOR_H__
-#define __FOSPHOR_FOSPHOR_H__
+#pragma once
 
 /*! \defgroup fosphor
  *  @{
@@ -119,5 +118,3 @@ int    fosphor_render_pos_inside(struct fosphor_render *render, int x, int y);
 
 
 /*! @} */
-
-#endif /* __FOSPHOR_FOSPHOR_H__ */
