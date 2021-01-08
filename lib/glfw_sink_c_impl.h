@@ -18,9 +18,7 @@
  * Boston, MA 02110-1301, USA.
  */
 
-
-#ifndef INCLUDED_GR_FOSPHOR_GLFW_SINK_C_IMPL_H
-#define INCLUDED_GR_FOSPHOR_GLFW_SINK_C_IMPL_H
+#pragma once
 
 #include <gnuradio/fosphor/glfw_sink_c.h>
 
@@ -64,6 +62,3 @@ namespace gr {
 
   } // namespace fosphor
 } // namespace gr
-
-#endif /* INCLUDED_GR_FOSPHOR_GLFW_SINK_C_IMPL_H */
-

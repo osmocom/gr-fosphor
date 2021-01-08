@@ -18,8 +18,7 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef INCLUDED_GR_FOSPHOR_QGLSURFACE_H
-#define INCLUDED_GR_FOSPHOR_QGLSURFACE_H
+#pragma once
 
 #include <QGLWidget>
 
@@ -57,5 +56,3 @@ namespace gr {
 
   } // namespace fosphor
 } // namespace gr
-
-#endif /* INCLUDED_GR_FOSPHOR_QGLSURFACE_H */
