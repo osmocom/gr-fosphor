@@ -408,7 +408,7 @@ cl_queue_clear_buffers(struct fosphor *self)
 {
 	struct fosphor_cl_state *cl = self->cl;
 	float noise_floor, color[4] = {0.0f, 0.0f, 0.0f, 0.0f};
-	size_t img_origin[3] = {0.0f, 0.0f, 0.0f}, img_region[3];
+	size_t img_origin[3] = {0, 0, 0}, img_region[3];
 	cl_int err;
 
 	/* Configure noise floor to the bottom of the scale */
