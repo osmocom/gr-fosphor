@@ -29,7 +29,7 @@
 
 
 static double
-_si_scaling(double val, int max_num, char *prefix, int *exp)
+_si_scaling(double val, int max_num, char *prefix, unsigned int *exp)
 {
 	const char prefixes[5] = { ' ', 'k', 'M', 'G', 'T' };
 	int exponent = log10f(fabs(val));
@@ -84,7 +84,7 @@ freq_axis_build(struct freq_axis *fx, double center, double span, int n_div)
 	{
 		double min_freq, max_freq, big_freq;
 		char prefix[2] = {0, 0};
-		int exp, x, y, z;
+		unsigned int exp, x, y, z;
 
 		max_freq = fx->center + (span / 2.0);
 		min_freq = fx->center - (span / 2.0);
@@ -117,7 +117,7 @@ freq_axis_build(struct freq_axis *fx, double center, double span, int n_div)
 	{
 		double max_dev = fx->step * 5;
 		char prefix[2] = {0, 0};
-		int exp, x, y;
+		unsigned int exp, x, y;
 
 		_si_scaling(max_dev, 3, prefix, &exp);
 
